@@ -50,13 +50,6 @@ public class User extends BaseEntity {
     @Builder.Default
     private List<Role> roles = new ArrayList<>();
 
-//  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-//  @JoinTable(
-//          name = "user_roles",
-//          joinColumns = @JoinColumn(name = "user_id"),
-//          inverseJoinColumns = @JoinColumn(name = "role_id"))
-//  @Builder.Default
-//  private List<Role> rolesX = new ArrayList<>();
 
 
     public void addRole(Role role) {

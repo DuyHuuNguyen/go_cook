@@ -20,8 +20,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import jakarta.servlet.DispatcherType;
+import org.springframework.security.config.Customizer;
+
 @Slf4j
 @Configuration
 @EnableMethodSecurity
@@ -38,31 +41,6 @@ public class SecurityConfig implements WebMvcConfigurer {
   public static final String VALIDATE_LOGIN = "validate-login";
 
   private final String[] WHITE_LISTS = {
-      "/",
-      "/login",
-      "/register",
-      "/logout",
-      "/forgot-password",
-      "/reset-password",
-      "/verify-email",
-      "/chefs",
-      "/chef-detail",
-      "/chef-an-nhien",
-      "/menus",
-      "/menu-detail",
-      "/menu-vegetarian",
-      "/offers",
-      "/help",
-      "/request",
-      "/pages",
-      "/quotes",
-      "/review",
-      "/matching",
-      "/become-chef",
-      "/chat",
-      "/app/**",
-      "/assets/**",
-      "/favicon.ico",
       "/swagger-ui/**",
       "/v3/api-docs/**",
       "/api/v1/users/sign-up",
@@ -77,6 +55,7 @@ public class SecurityConfig implements WebMvcConfigurer {
       "/actuator/**",
       "/api/v1/users/demo"
   };
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -103,8 +82,9 @@ public class SecurityConfig implements WebMvcConfigurer {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
+    http.formLogin(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
             .sessionManagement(
                     session ->

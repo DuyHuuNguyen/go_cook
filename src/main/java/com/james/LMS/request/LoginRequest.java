@@ -15,8 +15,8 @@ import lombok.ToString;
 public class LoginRequest {
   @Email(message = "Email invalid")
   @NotBlank
-  @Schema(defaultValue = "23130075@st.hcmuaf.edu.vn")
+  @Schema(defaultValue = "systemadmin@gmail.com")
   private String email;
-
+  @Schema(defaultValue = "systemadmin")
   @NotBlank private String password;
 }

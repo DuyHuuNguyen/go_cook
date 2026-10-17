@@ -1,6 +1,7 @@
 package com.james.LMS.facade.impl;
 
 import com.james.LMS.config.SecurityUserDetails;
+import com.james.LMS.dto.ChefProfileDTO;
 import com.james.LMS.dto.MessageMailDTO;
 import com.james.LMS.entity.Role;
 import com.james.LMS.entity.User;
@@ -10,10 +11,10 @@ import com.james.LMS.facade.UserFacade;
 import com.james.LMS.request.*;
 import com.james.LMS.response.*;
 import com.james.LMS.service.*;
-import com.james.LMS.util.DateUtil;
 import com.james.LMS.util.MailUtil;
 import com.james.LMS.util.OTPGeneratorUtil;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class UserFacadeImpl implements UserFacade {
   private final RoleService roleService;
   private final MailProducerService mailProducerService;
   private final CloudinaryService cloudinaryService;
+  private final ChefProfileService chefProfileService;
 
   @Override
   @Transactional
@@ -57,7 +59,7 @@ public class UserFacadeImpl implements UserFacade {
 
     Role userRole =
         this.roleService
-            .findByRoleName(RoleEnum.USER)
+            .findByRoleName(RoleEnum.ROLE_USER)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROLE_NOT_FOUND));
     user.addRole(userRole);
 
@@ -248,22 +250,18 @@ public class UserFacadeImpl implements UserFacade {
   public BaseResponse<UserDetailResponse> findProfile() {
     SecurityUserDetails principal =
         (SecurityUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    User user =
-        userService
-            .findByEmail(principal.getUsername())
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
-
+    Optional<ChefProfileDTO> chefProfileOpt = this.chefProfileService.findChefProfileByUserId(principal.getId());
     UserDetailResponse userDetailResponse =
         UserDetailResponse.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-//            .emailVerified(user.isEmailVerified())
-            .avatarUrl(user.getAvatarUrl())
-            .createdAt(DateUtil.convertToLocalDate(user.getCreatedAt()))
+            .id(principal.getId())
+            .username(principal.getUsername())
+            .email(principal.getEmail())
+            .avatarUrl(principal.getAvatarUrl())
+            .isChef(principal.isChef())
+                .chefProfile(chefProfileOpt.get())
             .roles(
                 principal.getAuthorities().stream()
-                    .map(authority -> authority.getAuthority())
+                    .map(authority -> authority.getAuthority().toString())
                     .toList())
             .build();
     return BaseResponse.build(userDetailResponse, true);
@@ -284,7 +282,6 @@ public class UserFacadeImpl implements UserFacade {
             .email(user.getEmail())
 //            .emailVerified(user.isEmailVerified())
             .avatarUrl(user.getAvatarUrl())
-            .createdAt(DateUtil.convertToLocalDate(user.getCreatedAt()))
             .build();
     return BaseResponse.build(userDetailResponse, true);
   }
