@@ -40,6 +40,8 @@ public class SecurityConfig implements WebMvcConfigurer {
   public static final String COOKIE_REFRESH_TOKEN_NAME = "refresh-token";
   public static final String VALIDATE_LOGIN = "validate-login";
 
+  public static final String CLEAR_COOKIE_VALUE= "";
+
   private final String[] WHITE_LISTS = {
       "/swagger-ui/**",
       "/v3/api-docs/**",

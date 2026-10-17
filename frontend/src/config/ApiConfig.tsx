@@ -45,10 +45,12 @@ export const ENDPOINTS = {
 
         REFRESH_TOKEN: {
             V1: endpoint(SERVICE.USER, VERSION.V1, "/users/refresh-token"),
+            V2: endpoint(SERVICE.USER, VERSION.V2, "/users/refresh-token"),
         },
 
         LOGOUT: {
             V1: endpoint(SERVICE.USER, VERSION.V1, "/users/logout"),
+            V2: endpoint(SERVICE.USER, VERSION.V2, "/users/logout"),
         },
 
         PROFILE: {

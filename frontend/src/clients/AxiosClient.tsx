@@ -1,8 +1,9 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 import {authStore} from "../stores/authStore";
+import {ENDPOINTS} from "../config/ApiConfig.tsx";
 
 const BACKEND_URL = 'http://localhost:8083' // bug
-const REFRESH_PATH = '/api/v1/users/refresh-token'
+// const REFRESH_PATH = '/api/v1/users/refresh-token'
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean
@@ -25,7 +26,7 @@ let refreshPromise: Promise<void> | null = null
 
 async function refreshAccessToken(): Promise<void> {
   if (!refreshPromise) {
-    refreshPromise = refreshClient.post(REFRESH_PATH).then(() => undefined)
+    refreshPromise = refreshClient.post(ENDPOINTS.USER.REFRESH_TOKEN.V2).then(() => undefined)
   }
 
   try {
@@ -49,7 +50,7 @@ axiosClient.interceptors.response.use(
     if (isForbidden)
         authStore.setAuthStatus("forbidden");
 
-    if (!request || !isUnauthorized || request._retry || request.url === REFRESH_PATH) {
+    if (!request || !isUnauthorized || request._retry || request.url === ENDPOINTS.USER.REFRESH_TOKEN.V2) {
       return Promise.reject(error)
     }
 

@@ -71,8 +71,8 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
       if (!isValidToken) throw new InvalidTokenException(ErrorCode.JWT_INVALID);
 
       String email = jwtService.getEmailFromJwtToken(token);
-      if (!validateTokenFromCache(email, token, path))
-        throw new InvalidTokenException(ErrorCode.JWT_INVALID);
+//      if (!validateTokenFromCache(email, token, path))
+//        throw new InvalidTokenException(ErrorCode.JWT_INVALID);
 
       SecurityUserDetails securityUserDetails = this.buildUserDetailsByEmail(email);
 

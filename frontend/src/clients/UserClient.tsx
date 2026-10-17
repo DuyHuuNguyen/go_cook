@@ -32,7 +32,7 @@ export async function signup(username: string, email: string, password: string) 
 
 export async function logout() {
     const response = await axiosClient.post(
-        `${ENDPOINTS.USER.LOGOUT.V1}`,
+        `${ENDPOINTS.USER.LOGOUT.V2}`,
         {}
     );
     return response.data;

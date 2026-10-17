@@ -125,6 +125,9 @@ public class UserFacadeImpl implements UserFacade {
     if (isInvalidRefreshToken) throw new PermissionDeniedException(ErrorCode.JWT_INVALID);
 
     String accessToken = this.jwtService.generateAccessToken(email);
+    String rotationRefreshToken = this.jwtService.generateRefreshToken(email);
+
+    this.cacheService.store(refreshTokenKey, rotationRefreshToken);
 
     RefreshTokenResponse refreshTokenResponse =
         RefreshTokenResponse.builder().accessToken(accessToken).build();
@@ -136,12 +139,10 @@ public class UserFacadeImpl implements UserFacade {
     SecurityUserDetails principal =
         (SecurityUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    String accessTokenCacheKey =
-        String.format(TokenType.ACCESS_TOKEN.getCacheKeyTemplate(), principal.getUsername());
+
     String refreshTokenCacheKey =
         String.format(TokenType.REFRESH_TOKEN.getCacheKeyTemplate(), principal.getUsername());
 
-    cacheService.delete(accessTokenCacheKey);
     cacheService.delete(refreshTokenCacheKey);
 
     SecurityContextHolder.clearContext();
