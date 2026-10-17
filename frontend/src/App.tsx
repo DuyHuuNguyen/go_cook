@@ -1,8 +1,16 @@
-import { AppRouter } from './routers/AppRouter';
-import { SellerDemoProvider } from './contexts/SellerDemoContext';
-import { useAuth } from './hooks/auth/useAuth';
+import { RouterProvider } from 'react-router'
+import { router } from './routers/Router'
+import { AppProvider } from './contexts/AppContext'
+import {ProfileProvider} from "./contexts/ProfileContext";
 
-export default function App() {
-  const { profile } = useAuth();
-  return <SellerDemoProvider key={profile?.id ?? 'guest'}><AppRouter /></SellerDemoProvider>;
+function App() {
+  return (
+    <AppProvider>
+        <ProfileProvider>
+            <RouterProvider router={router} />
+        </ProfileProvider>
+    </AppProvider>
+  )
 }
+
+export default App

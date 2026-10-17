@@ -6,11 +6,13 @@ import com.james.LMS.service.CacheService;
 import com.james.LMS.service.JwtService;
 import com.james.LMS.service.RoleService;
 import com.james.LMS.service.UserService;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import jakarta.servlet.DispatcherType;
+
 @Slf4j
 @Configuration
 @EnableMethodSecurity
@@ -37,46 +39,24 @@ public class SecurityConfig implements WebMvcConfigurer {
   public static final String COOKIE_REFRESH_TOKEN_NAME = "refresh-token";
   public static final String VALIDATE_LOGIN = "validate-login";
 
+  public static final String CLEAR_COOKIE_VALUE = "";
+
   private final String[] WHITE_LISTS = {
-      "/",
-      "/login",
-      "/register",
-      "/logout",
-      "/forgot-password",
-      "/reset-password",
-      "/verify-email",
-      "/chefs",
-      "/chef-detail",
-      "/chef-an-nhien",
-      "/menus",
-      "/menu-detail",
-      "/menu-vegetarian",
-      "/offers",
-      "/help",
-      "/request",
-      "/pages",
-      "/quotes",
-      "/review",
-      "/matching",
-      "/become-chef",
-      "/chat",
-      "/app/**",
-      "/assets/**",
-      "/favicon.ico",
-      "/swagger-ui/**",
-      "/v3/api-docs/**",
-      "/api/v1/users/sign-up",
-      "/api/v1/users/verify-email",
-      "/api/v1/users/resend-verification",
-      "/api/v1/users/request-email-verification",
-      "/api/v1/users/refresh-token",
-      "/api/v1/users/forgot-password",
-      "/api/v1/users/verify-otp",
-      "/api/v1/users/reset-password",
-      "/api/v2/users/login",
-      "/actuator/**",
-      "/api/v1/users/demo"
+    "/swagger-ui/**",
+    "/v3/api-docs/**",
+    "/api/v1/users/sign-up",
+    "/api/v1/users/verify-email",
+    "/api/v1/users/resend-verification",
+    "/api/v1/users/request-email-verification",
+    "/api/v1/users/refresh-token",
+    "/api/v1/users/forgot-password",
+    "/api/v1/users/verify-otp",
+    "/api/v1/users/reset-password",
+    "/api/v2/users/login",
+    "/actuator/**",
+    "/api/v1/users/demo"
   };
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -103,29 +83,26 @@ public class SecurityConfig implements WebMvcConfigurer {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .logout(AbstractHttpConfigurer::disable)
-            .sessionManagement(
-                    session ->
-                            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(
-                    request ->
-                            request
-                                    .dispatcherTypeMatchers(
-                                            DispatcherType.FORWARD,
-                                            DispatcherType.ERROR)
-                                    .permitAll()
-                                    .requestMatchers(WHITE_LISTS)
-                                    .permitAll()
-                                    .anyRequest()
-                                    .authenticated());
+    http.formLogin(AbstractHttpConfigurer::disable)
+        .cors(Customizer.withDefaults())
+        .csrf(AbstractHttpConfigurer::disable)
+        .logout(AbstractHttpConfigurer::disable)
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            request ->
+                request
+                    .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR)
+                    .permitAll()
+                    .requestMatchers(WHITE_LISTS)
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated());
 
     http.authenticationProvider(this.userDetailsAuthenticationProviderInterceptor());
 
     http.addFilterBefore(
-            authTokenProviderInterceptor(),
-            UsernamePasswordAuthenticationFilter.class);
+        authTokenProviderInterceptor(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

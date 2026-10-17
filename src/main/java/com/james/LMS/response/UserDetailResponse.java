@@ -1,6 +1,6 @@
 package com.james.LMS.response;
 
-import java.time.LocalDate;
+import com.james.LMS.dto.ChefProfileDTO;
 import java.util.List;
 import lombok.*;
 
@@ -15,10 +15,7 @@ public class UserDetailResponse {
   private String email;
   private Boolean emailVerified;
   private String avatarUrl;
-  private Boolean isInstructor;
-  private String instructorName;
-  private String instructorAbout;
-  private LocalDate createdAt;
-  private Long channelId;
+  private Boolean isChef;
+  private ChefProfileDTO chefProfile;
   private List<String> roles;
 }

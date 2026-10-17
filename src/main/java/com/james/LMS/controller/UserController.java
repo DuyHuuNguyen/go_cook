@@ -44,12 +44,10 @@ public class UserController {
     return this.userFacade.signUp(upsertUserRequest);
   }
 
-
   @PostMapping("/verify-email")
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"User APIs"})
-  public BaseResponse<Void> verifyEmail(
-      @Valid @RequestBody VerifyEmailRequest verifyEmailRequest) {
+  public BaseResponse<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest verifyEmailRequest) {
     return this.userFacade.verifyEmail(verifyEmailRequest);
   }
 

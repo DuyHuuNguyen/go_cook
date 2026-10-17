@@ -70,3 +70,10 @@ cloudinary:
   cloudinary-name: ${USER_SERVICE_CLOUDINARY_NAME:}
   api-key: ${USER_SERVICE_CLOUDINARY_API_KEY:}
   api-secret: ${USER_SERVICE_CLOUDINARY_API_SECRET:}
+
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+cors:
+  allowed-origins: "http://localhost:5173,http://localhost:8083"

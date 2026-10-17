@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100" width="360" height="100" role="img" aria-label="GO Cook - Đầu bếp tại gia">
+  <!-- Icon -->
+  <rect x="4" y="8" width="84" height="84" rx="22" fill="#4a7a2a"/>
+  <g fill="#ffffff">
+    <circle cx="34" cy="42" r="10"/>
+    <circle cx="46" cy="36" r="12"/>
+    <circle cx="58" cy="42" r="10"/>
+    <rect x="32" y="42" width="28" height="21"/>
+    <rect x="32" y="66" width="28" height="8" rx="3"/>
+  </g>
+  <circle cx="46" cy="52" r="4.5" fill="#c98a3a"/>
+
+  <!-- Wordmark -->
+  <text x="104" y="58" font-family="system-ui, 'Segoe UI', Roboto, sans-serif" font-size="46" font-weight="800" letter-spacing="-1">
+    <tspan fill="#2f5217">GO</tspan><tspan fill="#4a7a2a" dx="8">Cook</tspan>
+  </text>
+  <text x="106" y="82" font-family="system-ui, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" letter-spacing="2.6" fill="#a8631a">ĐẦU BẾP TẠI GIA</text>
+</svg>

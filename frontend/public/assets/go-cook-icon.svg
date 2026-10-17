@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 92 100" width="92" height="100" role="img" aria-label="GO Cook">
+  <rect x="4" y="8" width="84" height="84" rx="22" fill="#4a7a2a"/>
+  <g fill="#ffffff">
+    <circle cx="34" cy="42" r="10"/>
+    <circle cx="46" cy="36" r="12"/>
+    <circle cx="58" cy="42" r="10"/>
+    <rect x="32" y="42" width="28" height="21"/>
+    <rect x="32" y="66" width="28" height="8" rx="3"/>
+  </g>
+  <circle cx="46" cy="52" r="4.5" fill="#c98a3a"/>
+</svg>
