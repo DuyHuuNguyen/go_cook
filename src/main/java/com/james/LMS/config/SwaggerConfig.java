@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@OpenAPIDefinition(servers = {@Server(url = "/user-service"), @Server(url = "/")})
+@OpenAPIDefinition(servers = {@Server(url = "/")})
 public class SwaggerConfig {
   @Bean
   public GroupedOpenApi openApi() {

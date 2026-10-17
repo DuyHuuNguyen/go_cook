@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,11 +37,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserFacadeV2Impl implements UserFacadeV2 {
-  private final UserService userService;
   private final JwtService jwtService;
   private final CacheService cacheService;
-  private final PasswordEncoder passwordEncoder;
-  private final RoleService roleService;
+  private final AuthenticationManager authenticationManager;
 
   private static final int COOKIE_ACCESS_TOKEN_TTL = 60 * 60;
   private static final int COOKIE_REFRESH_TOKEN_TTL = 60 * 60 * 24 * 14;
@@ -55,36 +54,12 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
 
   @Override
   public BaseResponse<Void> login(LoginRequest loginRequest, HttpServletResponse response) {
-    log.info("Login v2");
-
-    // Keep e-mail handling identical to sign-up. This also avoids failures caused by
-    // accidental leading/trailing spaces or upper-case characters in the e-mail.
-    String email = loginRequest.getEmail().trim().toLowerCase(Locale.ROOT);
-
-    var user =
-        userService
-            .findByEmail(email)
-            .orElseThrow(
-                () -> new BadCredentialsException(ErrorCode.INVALID_CREDENTIALS.getMessage()));
-
-    if (!user.isActive()) {
-      throw new BadCredentialsException(ErrorCode.INVALID_CREDENTIALS.getMessage());
-    }
-
-//    if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-//      throw new BadCredentialsException(ErrorCode.INVALID_CREDENTIALS.getMessage());
-//    }
-
-    List<Role> roles = roleService.findAllByUserId(user.getId());
-    List<GrantedAuthority> authorities =
-        roles.stream()
-            .map(role -> new SimpleGrantedAuthority(role.getRoleName().getContent()))
-            .collect(Collectors.toList());
-
-    SecurityUserDetails principal = SecurityUserDetails.build(user, authorities);
-
-    UsernamePasswordAuthenticationToken authentication =
-        new UsernamePasswordAuthenticationToken(principal, null, authorities);
+    String email = loginRequest.getEmail();
+    String password = loginRequest.getPassword();
+    var authentication =
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            email, password));
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     String accessToken = jwtService.generateAccessToken(email);
@@ -116,16 +91,24 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
             .maxAge(COOKIE_REFRESH_TOKEN_TTL)
             .build();
 
-    String rememberInfo = URLEncoder.encode(principal.getRememberInfo(), StandardCharsets.UTF_8);
+    var principal =
+            (SecurityUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    String rememberInfo = URLEncoder.encode(
+            principal.getRememberInfo(),
+            StandardCharsets.UTF_8
+    );
+
+    log.info(rememberInfo);
 
     ResponseCookie rememberMeCookie =
-        ResponseCookie.from(REMEMBER_ME_KEY, rememberInfo)
-            .httpOnly(false)
-            .secure(cookieSecure)
-            .sameSite(cookieSameSite)
-            .path("/")
-            .maxAge(COOKIE_REMEMBER_ME_TTL)
-            .build();
+            ResponseCookie.from(REMEMBER_ME_KEY, rememberInfo)
+                    .httpOnly(false)
+                    .secure(true)
+                    .sameSite(cookieSameSite)
+                    .path("/")
+                    .maxAge(COOKIE_REMEMBER_ME_TTL)
+                    .build();
 
     ResponseCookie validateLoginCookie =
         ResponseCookie.from(SecurityConfig.VALIDATE_LOGIN, "true")
