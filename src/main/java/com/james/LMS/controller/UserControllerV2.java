@@ -5,7 +5,6 @@ import com.james.LMS.facade.UserFacadeV2;
 import com.james.LMS.request.LoginRequest;
 import com.james.LMS.request.RefreshTokenRequest;
 import com.james.LMS.response.BaseResponse;
-import com.james.LMS.response.RefreshTokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,12 +33,11 @@ public class UserControllerV2 {
     return this.userFacade.login(loginRequest, response);
   }
 
-
   @PostMapping("/refresh-token")
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"User v2 APIs update to test deploy production"})
   public BaseResponse<Void> refreshToken(
-          @RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
+      @RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
     return this.userFacade.refreshToken(refreshTokenRequest, response);
   }
 

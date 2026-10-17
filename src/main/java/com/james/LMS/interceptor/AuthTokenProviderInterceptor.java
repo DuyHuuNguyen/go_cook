@@ -33,7 +33,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
 
-  private static final String RESET_PASSWORD_URL = "/api/v1/users/reset-password";  private final UserService userService;
+  private static final String RESET_PASSWORD_URL = "/api/v1/users/reset-password";
+  private final UserService userService;
   private final CacheService cacheService;
   private final JwtService jwtService;
   private final RoleService roleService;
@@ -41,17 +42,17 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
   public static final String AUTHORIZATION = "Authorization";
   private static final int START_OF_TOKEN = 7;
 
-//    public static final List<String> SWAGGER_URLS = List.of("/swagger-ui/", "/v3/api-docs");
-//    public static final List<String> PUBLIC_ENDPOINTS =
-//        List.of(
-//            "/api/v1/users/demo",
-//            "/actuator/health",
-//            "/actuator/beans",
-//            "/api/v1/users/login",
-//            "/api/v1/users/sign-up",
-//            "/api/v1/users/forgot-password",
-//            "/api/v1/users/refresh-token",
-//            "/api/v1/users/verify-otp");
+  //    public static final List<String> SWAGGER_URLS = List.of("/swagger-ui/", "/v3/api-docs");
+  //    public static final List<String> PUBLIC_ENDPOINTS =
+  //        List.of(
+  //            "/api/v1/users/demo",
+  //            "/actuator/health",
+  //            "/actuator/beans",
+  //            "/api/v1/users/login",
+  //            "/api/v1/users/sign-up",
+  //            "/api/v1/users/forgot-password",
+  //            "/api/v1/users/refresh-token",
+  //            "/api/v1/users/verify-otp");
 
   @Override
   protected void doFilterInternal(
@@ -71,8 +72,8 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
       if (!isValidToken) throw new InvalidTokenException(ErrorCode.JWT_INVALID);
 
       String email = jwtService.getEmailFromJwtToken(token);
-//      if (!validateTokenFromCache(email, token, path))
-//        throw new InvalidTokenException(ErrorCode.JWT_INVALID);
+      //      if (!validateTokenFromCache(email, token, path))
+      //        throw new InvalidTokenException(ErrorCode.JWT_INVALID);
 
       SecurityUserDetails securityUserDetails = this.buildUserDetailsByEmail(email);
 

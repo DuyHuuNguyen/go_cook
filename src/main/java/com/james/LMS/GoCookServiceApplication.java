@@ -15,7 +15,7 @@ public class GoCookServiceApplication {
   private final PasswordEncoder passwordEncoder;
 
   @PostConstruct
-  void showPassword(){
+  void showPassword() {
     String passwordOfSystemAdmin = "systemadmin";
     String passEncoded = this.passwordEncoder.encode(passwordOfSystemAdmin);
     log.info("## pass systemadmin {}", passEncoded);

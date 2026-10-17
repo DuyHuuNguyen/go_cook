@@ -6,8 +6,8 @@ import com.james.LMS.response.ExceptionResponse;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -78,7 +78,6 @@ public class RestHandlerException {
         HttpStatus.BAD_REQUEST);
   }
 
-
   @ExceptionHandler(BadCredentialsException.class)
   public ResponseEntity<BaseResponse<ExceptionResponse>> handleBadCredentials(
       BadCredentialsException exception) {
@@ -101,6 +100,7 @@ public class RestHandlerException {
 
     return new ResponseEntity<>(BaseResponse.build(errors, false), HttpStatus.BAD_REQUEST);
   }
+
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<BaseResponse<ExceptionResponse>> handleIllegalArgument(
       IllegalArgumentException exception) {
@@ -109,5 +109,4 @@ public class RestHandlerException {
             new ExceptionResponse("ADMIN_VALIDATION", exception.getMessage()), false),
         HttpStatus.BAD_REQUEST);
   }
-
 }

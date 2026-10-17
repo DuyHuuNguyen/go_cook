@@ -14,8 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @RequiredArgsConstructor
 public class SecurityUserDetails implements UserDetails {
   @Getter @Setter public Long id;
-  @Getter
-  private String email;
+  @Getter private String email;
   @JsonIgnore private String password;
   private String username;
   @Getter private String avatarUrl;
@@ -59,7 +58,8 @@ public class SecurityUserDetails implements UserDetails {
 
   public String getRememberInfo() {
     StringBuilder rememberSb = new StringBuilder();
-    rememberSb.append(RoleEnum.ROLE_USER)
+    rememberSb
+        .append(RoleEnum.ROLE_USER)
         .append("_")
         .append(this.email)
         .append("_")
@@ -69,7 +69,9 @@ public class SecurityUserDetails implements UserDetails {
     return rememberSb.toString();
   }
 
-  public boolean isChef(){
-    return this.authorities.stream().map(GrantedAuthority::getAuthority).anyMatch(role -> role.equals(RoleEnum.ROLE_CHEF.getContent()));
+  public boolean isChef() {
+    return this.authorities.stream()
+        .map(GrantedAuthority::getAuthority)
+        .anyMatch(role -> role.equals(RoleEnum.ROLE_CHEF.getContent()));
   }
 }

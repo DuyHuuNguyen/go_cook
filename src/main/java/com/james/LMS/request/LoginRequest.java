@@ -17,6 +17,8 @@ public class LoginRequest {
   @NotBlank
   @Schema(defaultValue = "systemadmin@gmail.com")
   private String email;
+
   @Schema(defaultValue = "systemadmin")
-  @NotBlank private String password;
+  @NotBlank
+  private String password;
 }

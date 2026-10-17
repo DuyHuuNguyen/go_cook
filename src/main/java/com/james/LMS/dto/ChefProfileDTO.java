@@ -8,6 +8,6 @@ import lombok.*;
 @ToString
 @Builder
 public class ChefProfileDTO {
-    private String bio;
-    private Integer experienceYears;
+  private String bio;
+  private Integer experienceYears;
 }

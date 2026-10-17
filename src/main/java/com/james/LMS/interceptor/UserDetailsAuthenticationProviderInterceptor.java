@@ -44,7 +44,8 @@ public class UserDetailsAuthenticationProviderInterceptor
         !this.passwordEncoder.matches(
             authentication.getCredentials().toString(), user.getPassword());
 
-    if (isNotMatchedPassword) throw new PermissionDeniedException(ErrorCode.NOT_MATCHED_PASSWORD_OR_EMAIL);
+    if (isNotMatchedPassword)
+      throw new PermissionDeniedException(ErrorCode.NOT_MATCHED_PASSWORD_OR_EMAIL);
 
     List<Role> roles = this.roleService.findAllByUserId(user.getId());
     List<GrantedAuthority> authorityList =

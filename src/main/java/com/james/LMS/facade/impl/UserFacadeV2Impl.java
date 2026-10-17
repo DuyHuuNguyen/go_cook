@@ -9,7 +9,6 @@ import com.james.LMS.facade.UserFacadeV2;
 import com.james.LMS.request.LoginRequest;
 import com.james.LMS.request.RefreshTokenRequest;
 import com.james.LMS.response.BaseResponse;
-import com.james.LMS.response.RefreshTokenResponse;
 import com.james.LMS.service.CacheService;
 import com.james.LMS.service.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,20 +59,21 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
     cacheService.store(cacheKey(TokenType.ACCESS_TOKEN, email), accessToken, 1, TimeUnit.HOURS);
     cacheService.store(cacheKey(TokenType.REFRESH_TOKEN, email), refreshToken, 14, TimeUnit.DAYS);
 
-    ResponseCookie accessTokenCookie = buildAccessTokenCookie(accessToken,COOKIE_ACCESS_TOKEN_TTL);
-    ResponseCookie refreshTokenCookie = buildRefreshTokenCookie(refreshToken,COOKIE_REFRESH_TOKEN_TTL);
+    ResponseCookie accessTokenCookie = buildAccessTokenCookie(accessToken, COOKIE_ACCESS_TOKEN_TTL);
+    ResponseCookie refreshTokenCookie =
+        buildRefreshTokenCookie(refreshToken, COOKIE_REFRESH_TOKEN_TTL);
     ResponseCookie validateLoginCookie = buildValidateLoginCookie();
     ResponseCookie rememberMeCookie = buildRememberMeCookie();
 
     addCookies(
-            response, accessTokenCookie, refreshTokenCookie, validateLoginCookie, rememberMeCookie);
+        response, accessTokenCookie, refreshTokenCookie, validateLoginCookie, rememberMeCookie);
 
     return BaseResponse.ok();
   }
 
   @Override
   public BaseResponse<Void> refreshToken(
-          RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
+      RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
     String email = jwtService.getEmailFromJwtToken(refreshTokenRequest.getRefreshToken());
 
     String accessToken = jwtService.generateAccessToken(email);
@@ -86,7 +86,10 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
 
     cacheService.store(refreshTokenKey, refreshToken, 14, TimeUnit.DAYS);
 
-    addCookies(response, buildAccessTokenCookie(accessToken,COOKIE_ACCESS_TOKEN_TTL), buildRefreshTokenCookie(refreshToken,COOKIE_REFRESH_TOKEN_TTL));
+    addCookies(
+        response,
+        buildAccessTokenCookie(accessToken, COOKIE_ACCESS_TOKEN_TTL),
+        buildRefreshTokenCookie(refreshToken, COOKIE_REFRESH_TOKEN_TTL));
 
     return BaseResponse.ok();
   }
@@ -98,50 +101,43 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
     cacheService.delete(cacheKey(TokenType.REFRESH_TOKEN, principal.getUsername()));
 
     addCookies(
-            response,
-            buildAccessTokenCookie(SecurityConfig.CLEAR_COOKIE_VALUE,0),
-            buildRefreshTokenCookie(SecurityConfig.CLEAR_COOKIE_VALUE,0));
+        response,
+        buildAccessTokenCookie(SecurityConfig.CLEAR_COOKIE_VALUE, 0),
+        buildRefreshTokenCookie(SecurityConfig.CLEAR_COOKIE_VALUE, 0));
 
     return BaseResponse.ok();
   }
 
   private Authentication authenticate(String email, String password) {
     return authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(email, password));
+        new UsernamePasswordAuthenticationToken(email, password));
   }
 
   private SecurityUserDetails getCurrentPrincipal() {
     return (SecurityUserDetails)
-            SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
   }
 
   private String cacheKey(TokenType tokenType, String email) {
     return String.format(tokenType.getCacheKeyTemplate(), email);
   }
 
-
   private ResponseCookie buildAccessTokenCookie(String value, int maxAge) {
-    return buildCookie(
-            SecurityConfig.COOKIE_SECURITY_NAME, value, true, cookieSecure, maxAge);
+    return buildCookie(SecurityConfig.COOKIE_SECURITY_NAME, value, true, cookieSecure, maxAge);
   }
 
   private ResponseCookie buildRefreshTokenCookie(String value, int maxAge) {
-    return buildCookie(
-            SecurityConfig.COOKIE_REFRESH_TOKEN_NAME,
-            value,
-            true,
-            cookieSecure,
-            maxAge);
+    return buildCookie(SecurityConfig.COOKIE_REFRESH_TOKEN_NAME, value, true, cookieSecure, maxAge);
   }
 
   private ResponseCookie buildValidateLoginCookie() {
     return buildCookie(
-            SecurityConfig.VALIDATE_LOGIN, "true", false, cookieSecure, COOKIE_REFRESH_TOKEN_TTL);
+        SecurityConfig.VALIDATE_LOGIN, "true", false, cookieSecure, COOKIE_REFRESH_TOKEN_TTL);
   }
 
   private ResponseCookie buildRememberMeCookie() {
     String rememberInfo =
-            URLEncoder.encode(getCurrentPrincipal().getRememberInfo(), StandardCharsets.UTF_8);
+        URLEncoder.encode(getCurrentPrincipal().getRememberInfo(), StandardCharsets.UTF_8);
 
     log.info(rememberInfo);
 
@@ -149,14 +145,14 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
   }
 
   private ResponseCookie buildCookie(
-          String name, String value, boolean httpOnly, boolean secure, int maxAgeSeconds) {
+      String name, String value, boolean httpOnly, boolean secure, int maxAgeSeconds) {
     return ResponseCookie.from(name, value)
-            .httpOnly(httpOnly)
-            .secure(secure)
-            .sameSite(cookieSameSite)
-            .path("/")
-            .maxAge(maxAgeSeconds)
-            .build();
+        .httpOnly(httpOnly)
+        .secure(secure)
+        .sameSite(cookieSameSite)
+        .path("/")
+        .maxAge(maxAgeSeconds)
+        .build();
   }
 
   private void addCookies(HttpServletResponse response, ResponseCookie... cookies) {

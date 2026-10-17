@@ -21,7 +21,8 @@ public enum ErrorCode {
   INVALID_CREDENTIALS("1012", "Email or password is incorrect"),
   EMAIL_NOT_VERIFIED("1013", "Email has not been verified"),
   EMAIL_ALREADY_VERIFIED("1014", "Email has already been verified"),
-  SPAM_EMAIL_VERIFICATION("1015", "Please wait before requesting another verification code"), NOT_MATCHED_PASSWORD_OR_EMAIL("1016", "Email or password dont match");
+  SPAM_EMAIL_VERIFICATION("1015", "Please wait before requesting another verification code"),
+  NOT_MATCHED_PASSWORD_OR_EMAIL("1016", "Email or password dont match");
 
   private final String code;
   private final String message;

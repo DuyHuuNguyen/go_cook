@@ -54,7 +54,7 @@ public class UserFacadeImpl implements UserFacade {
             .username(upsertUserRequest.getUsername().trim())
             .email(email)
             .password(passwordEncoded)
-//            .emailVerified(false)
+            //            .emailVerified(false)
             .build();
 
     Role userRole =
@@ -80,7 +80,7 @@ public class UserFacadeImpl implements UserFacade {
             .findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-//    if (user.isEmailVerified()) return BaseResponse.ok();
+    //    if (user.isEmailVerified()) return BaseResponse.ok();
 
     String otpKey = String.format(EmailVerificationKey.OTP_KEY.getContent(), email);
     Object cachedOtp = cacheService.retrieve(otpKey);
@@ -90,7 +90,7 @@ public class UserFacadeImpl implements UserFacade {
       throw new PermissionDeniedException(ErrorCode.NOT_MATCHED_OTP);
     }
 
-//    user.verifyEmail();
+    //    user.verifyEmail();
     userService.save(user);
 
     cacheService.delete(otpKey);
@@ -108,9 +108,9 @@ public class UserFacadeImpl implements UserFacade {
             .findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-//    if (user.isEmailVerified()) {
-//      throw new PermissionDeniedException(ErrorCode.EMAIL_ALREADY_VERIFIED);
-//    }
+    //    if (user.isEmailVerified()) {
+    //      throw new PermissionDeniedException(ErrorCode.EMAIL_ALREADY_VERIFIED);
+    //    }
 
     sendEmailVerificationCode(user, true);
     return BaseResponse.ok();
@@ -138,7 +138,6 @@ public class UserFacadeImpl implements UserFacade {
   public BaseResponse<Void> logout() {
     SecurityUserDetails principal =
         (SecurityUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
 
     String refreshTokenCacheKey =
         String.format(TokenType.REFRESH_TOKEN.getCacheKeyTemplate(), principal.getUsername());
@@ -198,8 +197,7 @@ public class UserFacadeImpl implements UserFacade {
 
     // Password recovery is allowed even when e-mail has not been verified yet.
     // The reset OTP itself proves that the user can receive mail at this address.
-    String timeOutRetryKey =
-        String.format(ResetPasswordKey.TIMEOUT_RETRY_KEY.getContent(), email);
+    String timeOutRetryKey = String.format(ResetPasswordKey.TIMEOUT_RETRY_KEY.getContent(), email);
     if (cacheService.hasKey(timeOutRetryKey)) {
       throw new SpamForgotPasswordException(ErrorCode.SPAM_FORGOT_PASSWORD);
     }
@@ -211,8 +209,7 @@ public class UserFacadeImpl implements UserFacade {
     String otpKey = String.format(ResetPasswordKey.OTP_KEY.getContent(), email);
 
     cacheService.store(otpKey, otp, OTP_TTL_MINUTES, TimeUnit.MINUTES);
-    cacheService.store(
-        timeOutRetryKey, email, OTP_RESEND_COOLDOWN_SECONDS, TimeUnit.SECONDS);
+    cacheService.store(timeOutRetryKey, email, OTP_RESEND_COOLDOWN_SECONDS, TimeUnit.SECONDS);
     mailProducerService.send(messageMailDTO);
 
     return BaseResponse.build(ForgotPasswordResponse.builder().build(), true);
@@ -251,7 +248,8 @@ public class UserFacadeImpl implements UserFacade {
   public BaseResponse<UserDetailResponse> findProfile() {
     SecurityUserDetails principal =
         (SecurityUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Optional<ChefProfileDTO> chefProfileOpt = this.chefProfileService.findChefProfileByUserId(principal.getId());
+    Optional<ChefProfileDTO> chefProfileOpt =
+        this.chefProfileService.findChefProfileByUserId(principal.getId());
     UserDetailResponse userDetailResponse =
         UserDetailResponse.builder()
             .id(principal.getId())
@@ -259,7 +257,7 @@ public class UserFacadeImpl implements UserFacade {
             .email(principal.getEmail())
             .avatarUrl(principal.getAvatarUrl())
             .isChef(principal.isChef())
-                .chefProfile(chefProfileOpt.get())
+            .chefProfile(chefProfileOpt.get())
             .roles(
                 principal.getAuthorities().stream()
                     .map(authority -> authority.getAuthority().toString())
@@ -281,7 +279,7 @@ public class UserFacadeImpl implements UserFacade {
             .id(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
-//            .emailVerified(user.isEmailVerified())
+            //            .emailVerified(user.isEmailVerified())
             .avatarUrl(user.getAvatarUrl())
             .build();
     return BaseResponse.build(userDetailResponse, true);
@@ -328,8 +326,7 @@ public class UserFacadeImpl implements UserFacade {
     String otpKey = String.format(EmailVerificationKey.OTP_KEY.getContent(), email);
 
     cacheService.store(otpKey, otp, OTP_TTL_MINUTES, TimeUnit.MINUTES);
-    cacheService.store(
-        retryKey, email, OTP_RESEND_COOLDOWN_SECONDS, TimeUnit.SECONDS);
+    cacheService.store(retryKey, email, OTP_RESEND_COOLDOWN_SECONDS, TimeUnit.SECONDS);
     mailProducerService.send(MailUtil.buildMessageMailDTOForEmailVerification(email, otp));
   }
 

@@ -14,25 +14,25 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ChefSchedule extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "chef_id", nullable = false)
-    private User chef;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "chef_id", nullable = false)
+  private User chef;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "booking_id", nullable = false)
-    private Booking booking;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "booking_id", nullable = false)
+  private Booking booking;
 
-    @Column(name = "start_at", nullable = false)
-    private Instant startAt;
+  @Column(name = "start_at", nullable = false)
+  private Instant startAt;
 
-    @Column(name = "end_at", nullable = false)
-    private Instant endAt;
+  @Column(name = "end_at", nullable = false)
+  private Instant endAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
-    @Builder.Default
-    private ChefScheduleStatus status = ChefScheduleStatus.HELD;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false, length = 30)
+  @Builder.Default
+  private ChefScheduleStatus status = ChefScheduleStatus.HELD;
 
-    @Column(name = "hold_expires_at")
-    private Instant holdExpiresAt;
+  @Column(name = "hold_expires_at")
+  private Instant holdExpiresAt;
 }

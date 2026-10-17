@@ -1,10 +1,7 @@
 package com.james.LMS.response;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import com.james.LMS.dto.ChefProfileDTO;
-import com.james.LMS.entity.ChefProfile;
+import java.util.List;
 import lombok.*;
 
 @Builder
