@@ -2,8 +2,7 @@ import axios, { type InternalAxiosRequestConfig } from 'axios'
 import {authStore} from "../stores/authStore";
 import {ENDPOINTS} from "../config/ApiConfig.tsx";
 
-const BACKEND_URL = 'http://localhost:8083' // bug
-// const REFRESH_PATH = '/api/v1/users/refresh-token'
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean

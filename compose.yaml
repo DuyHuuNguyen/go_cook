@@ -10,7 +10,6 @@ services:
       - "5432:5432"
     volumes:
       - gocook_postgres_data:/var/lib/postgresql/data
-      - ./schema_db/go_cook_base.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
       interval: 5s

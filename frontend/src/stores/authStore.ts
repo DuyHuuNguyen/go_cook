@@ -17,6 +17,10 @@ export const authStore = {
         return status === "unauthorized";
     },
 
+    isAuthorized() {
+        return status === "authorized";
+    },
+
     isForbidden() {
         return status === "forbidden";
     },
