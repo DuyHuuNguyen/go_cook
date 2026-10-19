@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBF6FC"/><stop offset="1" stop-color="#F2E8F5"/></linearGradient></defs>
+<rect width="1200" height="800" fill="url(#bg)"/>
+<circle cx="1190" cy="-65" r="360" fill="#D6A26E" opacity=".1"/>
+<circle cx="-20" cy="840" r="220" fill="#AAC28D" opacity=".12"/>
+<rect x="78" y="77" width="183" height="51" rx="25" fill="#67456F"/>
+<text x="169" y="110" text-anchor="middle" fill="#FFFFFF" font-size="27" font-weight="700" font-family="Arial, Noto Sans, sans-serif">GOCOOK</text>
+<text x="80" y="226" font-family="Arial, Noto Sans, sans-serif" letter-spacing="2" font-size="26" font-weight="700" fill="#D6A26E">MÓN VÙNG MIỀN</text>
+<text x="80" y="310" font-family="Arial, Noto Sans, sans-serif" font-size="62" font-weight="800" fill="#67456F">Mâm vị Bắc thân</text>
+<text x="80" y="384" font-family="Arial, Noto Sans, sans-serif" font-size="62" font-weight="800" fill="#67456F">quen</text>
+<text x="80" y="490" font-size="34" font-weight="600" font-family="Arial, Noto Sans, sans-serif" fill="#67456F">459.000 đ · 3–5 người</text>
+<text x="80" y="740" font-size="22" fill="#67456F" opacity=".65" font-family="Arial, Noto Sans, sans-serif">THỰC ĐƠN MINH HỌA · MENU 027</text>
+<circle cx="1032" cy="611" r="5" fill="#D6A26E" opacity="0.25"/>
+<circle cx="841" cy="412" r="3" fill="#D6A26E" opacity="0.25"/>
+<circle cx="737" cy="186" r="4" fill="#D6A26E" opacity="0.25"/>
+<circle cx="976" cy="461" r="4" fill="#D6A26E" opacity="0.25"/>
+<circle cx="890" cy="532" r="3" fill="#D6A26E" opacity="0.25"/>
+<circle cx="826" cy="365" r="4" fill="#D6A26E" opacity="0.25"/>
+<circle cx="736" cy="200" r="5" fill="#D6A26E" opacity="0.25"/>
+<circle cx="917" cy="547" r="5" fill="#D6A26E" opacity="0.25"/>
+<circle cx="726" cy="570" r="4" fill="#D6A26E" opacity="0.25"/>
+<circle cx="706" cy="609" r="4" fill="#D6A26E" opacity="0.25"/>
+<circle cx="770" cy="465" r="5" fill="#D6A26E" opacity="0.25"/>
+<circle cx="1032" cy="352" r="5" fill="#D6A26E" opacity="0.25"/>
+<ellipse cx="922" cy="445" rx="225" ry="210" fill="#5F4634" opacity="0.07"/>
+<circle cx="905" cy="407" r="197" fill="#FAFBF5" stroke="#E0D9CA" stroke-width="21"/>
+<circle cx="905" cy="407" r="162" fill="#F0D9A5"/>
+<ellipse cx="1021" cy="407" rx="12" ry="5" transform="rotate(0 1021 407)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="906" cy="485" rx="12" ry="5" transform="rotate(61 906 485)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="876" cy="408" rx="12" ry="5" transform="rotate(122 876 408)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="904" cy="384" rx="12" ry="5" transform="rotate(13 904 384)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="966" cy="403" rx="12" ry="5" transform="rotate(74 966 403)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="914" cy="514" rx="12" ry="5" transform="rotate(135 914 514)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="856" cy="412" rx="12" ry="5" transform="rotate(26 856 412)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="890" cy="280" rx="12" ry="5" transform="rotate(87 890 280)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="1010" cy="393" rx="12" ry="5" transform="rotate(148 1010 393)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="922" cy="518" rx="12" ry="5" transform="rotate(39 922 518)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="890" cy="409" rx="12" ry="5" transform="rotate(100 890 409)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="884" cy="299" rx="12" ry="5" transform="rotate(161 884 299)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="1001" cy="387" rx="12" ry="5" transform="rotate(52 1001 387)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="922" cy="483" rx="12" ry="5" transform="rotate(113 922 483)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="884" cy="412" rx="12" ry="5" transform="rotate(4 884 412)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="897" cy="376" rx="12" ry="5" transform="rotate(65 897 376)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="972" cy="388" rx="12" ry="5" transform="rotate(126 972 388)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="934" cy="504" rx="12" ry="5" transform="rotate(17 934 504)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="876" cy="416" rx="12" ry="5" transform="rotate(78 876 416)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="891" cy="365" rx="12" ry="5" transform="rotate(139 891 365)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="981" cy="380" rx="12" ry="5" transform="rotate(30 981 380)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="911" cy="423" rx="12" ry="5" transform="rotate(91 911 423)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="874" cy="419" rx="12" ry="5" transform="rotate(152 874 419)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="868" cy="320" rx="12" ry="5" transform="rotate(43 868 320)" fill="#FFF8E5" opacity=".94"/>
+<ellipse cx="984" cy="414" rx="24" ry="12" fill="#AAC28D" transform="rotate(8 984 414)"/>
+<ellipse cx="992" cy="335" rx="24" ry="12" fill="#AAC28D" transform="rotate(-64 992 335)"/>
+<ellipse cx="864" cy="515" rx="24" ry="12" fill="#AAC28D" transform="rotate(39 864 515)"/>
+<ellipse cx="841" cy="492" rx="24" ry="12" fill="#AAC28D" transform="rotate(-40 841 492)"/>
+<ellipse cx="921" cy="327" rx="24" ry="12" fill="#AAC28D" transform="rotate(43 921 327)"/>
+<ellipse cx="863" cy="459" rx="24" ry="12" fill="#AAC28D" transform="rotate(52 863 459)"/>
+<ellipse cx="905" cy="493" rx="24" ry="12" fill="#AAC28D" transform="rotate(45 905 493)"/>
+<circle cx="947" cy="343" r="13" fill="#D6A26E" opacity=".92"/>
+<circle cx="891" cy="515" r="8" fill="#D6A26E" opacity=".92"/>
+<circle cx="905" cy="407" r="9" fill="#D6A26E" opacity=".92"/>
+<circle cx="882" cy="385" r="16" fill="#D6A26E" opacity=".92"/>
+<circle cx="983" cy="496" r="9" fill="#D6A26E" opacity=".92"/>
+<circle cx="881" cy="436" r="15" fill="#D6A26E" opacity=".92"/>
+<circle cx="1083" cy="614" r="73" fill="#F9F9F1" stroke="#E0D9CA" stroke-width="11"/>
+<circle cx="1083" cy="614" r="53" fill="#67456F" opacity=".92"/>
+<circle cx="1066" cy="595" r="7" fill="#FFE3B0"/><circle cx="1108" cy="630" r="8" fill="#FFE3B0"/>
+<circle cx="700" cy="200" r="62" fill="#FAFBF5" stroke="#E0D9CA" stroke-width="11"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(0 700 200)"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(45 700 200)"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(90 700 200)"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(135 700 200)"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(180 700 200)"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(225 700 200)"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(270 700 200)"/>
+<ellipse cx="700" cy="200" rx="14" ry="38" fill="#AAC28D" transform="rotate(315 700 200)"/>
+<circle cx="700" cy="200" r="9" fill="#FCECC9"/>
+</svg>

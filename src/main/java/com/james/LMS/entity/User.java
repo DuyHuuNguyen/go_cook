@@ -1,5 +1,7 @@
 package com.james.LMS.entity;
 
+import com.james.LMS.entity.location.Province;
+import com.james.LMS.entity.location.Ward;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +31,13 @@ public class User extends BaseEntity {
   @Column(name = "avatar_url")
   private String avatarUrl;
 
-  @Column(name = "province_code", length = 20)
-  private String provinceCode;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "province_code")
+  private Province province;
 
-  @Column(name = "ward_code", length = 20)
-  private String wardCode;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "ward_code")
+  private Ward ward;
 
   @Column(name = "address_detail", length = 500)
   private String addressDetail;

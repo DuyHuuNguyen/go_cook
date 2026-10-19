@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -48,5 +47,5 @@ public class Menu extends BaseEntity {
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "menu")
   @Builder.Default
-  private List<MenuDish>  menuDishes = new ArrayList<>();
+  private List<MenuDish> menuDishes = new ArrayList<>();
 }
