@@ -2,6 +2,9 @@ package com.james.LMS.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -38,4 +41,12 @@ public class Menu extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "seller_id", nullable = false)
   private User seller;
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "menu")
+  @Builder.Default
+  private List<MenuAsset> menuAssets = new ArrayList<>();
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "menu")
+  @Builder.Default
+  private List<MenuDish>  menuDishes = new ArrayList<>();
 }
