@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<rect width="1200" height="800" fill="#FBF6FC"/>
+<rect x="45" y="45" width="1110" height="710" rx="50" fill="#F2E8F5"/>
+<circle cx="1000" cy="185" r="180" fill="#AAC28D" opacity=".2"/>
+<text x="105" y="144" font-family="Arial, Noto Sans, sans-serif" font-size="33" font-weight="800" fill="#D6A26E">GOCOOK · MENU 033</text>
+<text x="105" y="222" font-family="Arial, Noto Sans, sans-serif" font-size="49" font-weight="800" fill="#67456F">Các món trong menu</text>
+<line x1="105" y1="248" x2="750" y2="248" stroke="#D6A26E" stroke-width="3" opacity=".65"/>
+<text x="107" y="325" font-family="Arial, Noto Sans, sans-serif" font-size="27" font-weight="600" fill="#67456F"><tspan fill="#D6A26E">●</tspan>  Cơm tấm sườn nướng</text>
+<text x="107" y="387" font-family="Arial, Noto Sans, sans-serif" font-size="27" font-weight="600" fill="#67456F"><tspan fill="#D6A26E">●</tspan>  Hủ tiếu Nam Vang</text>
+<text x="107" y="449" font-family="Arial, Noto Sans, sans-serif" font-size="27" font-weight="600" fill="#67456F"><tspan fill="#D6A26E">●</tspan>  Bánh mì thịt</text>
+<text x="107" y="511" font-family="Arial, Noto Sans, sans-serif" font-size="27" font-weight="600" fill="#67456F"><tspan fill="#D6A26E">●</tspan>  Xôi gà</text>
+<rect x="822" y="520" width="282" height="130" rx="22" fill="#67456F"/>
+<text x="963" y="574" text-anchor="middle" fill="white" font-size="22" font-family="Arial, Noto Sans, sans-serif">GIÁ MẪU CẢ GÓI</text>
+<text x="963" y="620" text-anchor="middle" fill="white" font-size="32" font-weight="700" font-family="Arial, Noto Sans, sans-serif">299,000 đ</text>
+<text x="106" y="700" font-family="Arial, Noto Sans, sans-serif" font-size="25" fill="#67456F">2–4 khách · ảnh minh họa frontend</text>
+</svg>
