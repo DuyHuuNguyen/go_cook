@@ -5,9 +5,11 @@ import com.james.LMS.entity.ChefProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface ChefProfileRepository extends JpaRepository<ChefProfile,Long> {
     @Query("""
         SELECT new com.james.LMS.dto.ChefProfileDTO(
