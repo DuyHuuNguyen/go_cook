@@ -37,8 +37,10 @@ public class UserControllerV2 {
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"User v2 APIs update to test deploy production"})
   public BaseResponse<Void> refreshToken(
-      @RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
-    return this.userFacade.refreshToken(refreshTokenRequest, response);
+      @CookieValue(name = SecurityConfig.COOKIE_REFRESH_TOKEN_NAME, required = false)
+          String refreshToken,
+      HttpServletResponse response) {
+    return this.userFacade.refreshToken(new RefreshTokenRequest(refreshToken), response);
   }
 
   @PostMapping("/logout")
