@@ -53,6 +53,7 @@ public class UserFacadeImpl implements UserFacade {
         User.builder()
             .username(upsertUserRequest.getUsername().trim())
             .email(email)
+            .phone(upsertUserRequest.getPhone())
             .password(passwordEncoded)
             //            .emailVerified(false)
             .build();
@@ -121,13 +122,19 @@ public class UserFacadeImpl implements UserFacade {
     String email = this.jwtService.getEmailFromJwtToken(refreshTokenRequest.getRefreshToken());
     String refreshTokenKey = String.format(TokenType.REFRESH_TOKEN.getCacheKeyTemplate(), email);
 
-    boolean isInvalidRefreshToken = !this.cacheService.hasKey(refreshTokenKey);
+    boolean isInvalidRefreshToken =
+        !refreshTokenRequest.getRefreshToken().equals(this.cacheService.retrieve(refreshTokenKey));
     if (isInvalidRefreshToken) throw new PermissionDeniedException(ErrorCode.JWT_INVALID);
 
     String accessToken = this.jwtService.generateAccessToken(email);
     String rotationRefreshToken = this.jwtService.generateRefreshToken(email);
 
-    this.cacheService.store(refreshTokenKey, rotationRefreshToken);
+    this.cacheService.store(refreshTokenKey, rotationRefreshToken, 14, TimeUnit.DAYS);
+    this.cacheService.store(
+        String.format(TokenType.ACCESS_TOKEN.getCacheKeyTemplate(), email),
+        accessToken,
+        1,
+        TimeUnit.HOURS);
 
     RefreshTokenResponse refreshTokenResponse =
         RefreshTokenResponse.builder().accessToken(accessToken).build();
@@ -143,6 +150,8 @@ public class UserFacadeImpl implements UserFacade {
         String.format(TokenType.REFRESH_TOKEN.getCacheKeyTemplate(), principal.getUsername());
 
     cacheService.delete(refreshTokenCacheKey);
+    cacheService.delete(
+        String.format(TokenType.ACCESS_TOKEN.getCacheKeyTemplate(), principal.getUsername()));
 
     SecurityContextHolder.clearContext();
     return BaseResponse.ok();
@@ -253,11 +262,11 @@ public class UserFacadeImpl implements UserFacade {
     UserDetailResponse userDetailResponse =
         UserDetailResponse.builder()
             .id(principal.getId())
-            .username(principal.getUsername())
+            .username(principal.getDisplayName())
             .email(principal.getEmail())
             .avatarUrl(principal.getAvatarUrl())
             .isChef(principal.isChef())
-            .chefProfile(chefProfileOpt.get())
+            .chefProfile(chefProfileOpt.orElse(null))
             .roles(
                 principal.getAuthorities().stream()
                     .map(authority -> authority.getAuthority().toString())

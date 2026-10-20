@@ -5,6 +5,7 @@ import com.james.LMS.exception.InvalidTokenException;
 import com.james.LMS.service.JwtService;
 import io.jsonwebtoken.*;
 import java.util.Date;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class JwtServiceImpl implements JwtService {
   @Override
   public String generateAccessToken(String email) {
     return Jwts.builder()
+        .setId(UUID.randomUUID().toString())
         .setSubject(email)
         .setIssuedAt(new Date())
         .setExpiration(
@@ -38,6 +40,7 @@ public class JwtServiceImpl implements JwtService {
   @Override
   public String generateRefreshToken(String email) {
     return Jwts.builder()
+        .setId(UUID.randomUUID().toString())
         .setSubject(email)
         .setIssuedAt(new Date())
         .setExpiration(
@@ -49,6 +52,7 @@ public class JwtServiceImpl implements JwtService {
   @Override
   public String generateResetPasswordToken(String email) {
     return Jwts.builder()
+        .setId(UUID.randomUUID().toString())
         .setSubject(email)
         .setIssuedAt(new Date())
         .setExpiration(

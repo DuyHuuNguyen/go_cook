@@ -4,7 +4,7 @@ import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.config.SecurityUserDetails;
 import com.james.LMS.enums.ErrorCode;
 import com.james.LMS.enums.TokenType;
-import com.james.LMS.exception.PermissionDeniedException;
+import com.james.LMS.exception.InvalidTokenException;
 import com.james.LMS.facade.UserFacadeV2;
 import com.james.LMS.request.LoginRequest;
 import com.james.LMS.request.RefreshTokenRequest;
@@ -14,6 +14,7 @@ import com.james.LMS.service.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
 
   @Override
   public BaseResponse<Void> login(LoginRequest loginRequest, HttpServletResponse response) {
-    String email = loginRequest.getEmail();
+    String email = loginRequest.getEmail().trim().toLowerCase(Locale.ROOT);
 
     Authentication authentication = authenticate(email, loginRequest.getPassword());
     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -76,14 +77,14 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
       RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
     String email = jwtService.getEmailFromJwtToken(refreshTokenRequest.getRefreshToken());
 
-    String accessToken = jwtService.generateAccessToken(email);
-    String refreshToken = jwtService.generateRefreshToken(email);
-
     String refreshTokenKey = cacheKey(TokenType.REFRESH_TOKEN, email);
-    if (!cacheService.hasKey(refreshTokenKey)) {
-      throw new PermissionDeniedException(ErrorCode.JWT_INVALID);
+    if (!refreshTokenRequest.getRefreshToken().equals(cacheService.retrieve(refreshTokenKey))) {
+      throw new InvalidTokenException(ErrorCode.JWT_INVALID);
     }
 
+    String accessToken = jwtService.generateAccessToken(email);
+    String refreshToken = jwtService.generateRefreshToken(email);
+    cacheService.store(cacheKey(TokenType.ACCESS_TOKEN, email), accessToken, 1, TimeUnit.HOURS);
     cacheService.store(refreshTokenKey, refreshToken, 14, TimeUnit.DAYS);
 
     addCookies(
@@ -99,11 +100,15 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
     SecurityUserDetails principal = getCurrentPrincipal();
 
     cacheService.delete(cacheKey(TokenType.REFRESH_TOKEN, principal.getUsername()));
+    cacheService.delete(cacheKey(TokenType.ACCESS_TOKEN, principal.getUsername()));
 
     addCookies(
         response,
         buildAccessTokenCookie(SecurityConfig.CLEAR_COOKIE_VALUE, 0),
-        buildRefreshTokenCookie(SecurityConfig.CLEAR_COOKIE_VALUE, 0));
+        buildRefreshTokenCookie(SecurityConfig.CLEAR_COOKIE_VALUE, 0),
+        buildCookie(SecurityConfig.VALIDATE_LOGIN, "", false, cookieSecure, 0),
+        buildCookie(REMEMBER_ME_KEY, "", false, cookieSecure, 0));
+    SecurityContextHolder.clearContext();
 
     return BaseResponse.ok();
   }
@@ -139,9 +144,7 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
     String rememberInfo =
         URLEncoder.encode(getCurrentPrincipal().getRememberInfo(), StandardCharsets.UTF_8);
 
-    log.info(rememberInfo);
-
-    return buildCookie(REMEMBER_ME_KEY, rememberInfo, false, true, COOKIE_REMEMBER_ME_TTL);
+    return buildCookie(REMEMBER_ME_KEY, rememberInfo, false, cookieSecure, COOKIE_REMEMBER_ME_TTL);
   }
 
   private ResponseCookie buildCookie(

@@ -42,6 +42,8 @@ public class SecurityConfig implements WebMvcConfigurer {
   public static final String CLEAR_COOKIE_VALUE = "";
 
   private final String[] WHITE_LISTS = {
+    "/app",
+    "/app/**",
     "/swagger-ui/**",
     "/v3/api-docs/**",
     "/api/v1/users/sign-up",
@@ -53,6 +55,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     "/api/v1/users/verify-otp",
     "/api/v1/users/reset-password",
     "/api/v2/users/login",
+    "/api/v2/users/refresh-token",
     "/actuator/**",
     "/api/v1/users/demo"
   };

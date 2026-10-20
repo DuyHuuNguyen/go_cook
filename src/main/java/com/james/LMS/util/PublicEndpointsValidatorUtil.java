@@ -7,6 +7,7 @@ public class PublicEndpointsValidatorUtil {
   private static final List<String> PUBLIC_ENDPOINTS =
       List.of(
           "/",
+          "/app",
           "/login",
           "/register",
           "/logout",
@@ -40,10 +41,11 @@ public class PublicEndpointsValidatorUtil {
           "/api/v1/users/refresh-token",
           "/api/v1/users/verify-otp",
           "/api/v1/users/reset-password",
-          "/api/v2/users/login");
+          "/api/v2/users/login",
+          "/api/v2/users/refresh-token");
 
   private static final List<String> PUBLIC_PREFIXES =
-      List.of("/css/", "/assets/", "/js/", "/swagger-ui/", "/v3/api-docs/", "/actuator/");
+      List.of("/app/", "/css/", "/assets/", "/js/", "/swagger-ui/", "/v3/api-docs/", "/actuator/");
 
   public static boolean isSwaggerUrl(String path) {
     return path.startsWith("/swagger-ui/") || path.startsWith("/v3/api-docs/");

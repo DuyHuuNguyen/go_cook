@@ -56,6 +56,10 @@ public class SecurityUserDetails implements UserDetails {
     return this.email;
   }
 
+  public String getDisplayName() {
+    return this.username;
+  }
+
   public String getRememberInfo() {
     StringBuilder rememberSb = new StringBuilder();
     rememberSb
