@@ -72,8 +72,8 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
       if (!isValidToken) throw new InvalidTokenException(ErrorCode.JWT_INVALID);
 
       String email = jwtService.getEmailFromJwtToken(token);
-      //      if (!validateTokenFromCache(email, token, path))
-      //        throw new InvalidTokenException(ErrorCode.JWT_INVALID);
+      if (!validateTokenFromCache(email, token, path))
+        throw new InvalidTokenException(ErrorCode.JWT_INVALID);
 
       SecurityUserDetails securityUserDetails = this.buildUserDetailsByEmail(email);
 
@@ -86,7 +86,7 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
       SecurityContextHolder.getContext().setAuthentication(authentication);
       filterChain.doFilter(request, response);
 
-    } catch (InvalidTokenException invalidTokenException) {
+    } catch (InvalidTokenException | EntityNotFoundException invalidTokenException) {
       log.info("request unauthorized");
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
@@ -113,8 +113,7 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
 
     var accessTokenCacheKey = String.format(TokenType.ACCESS_TOKEN.getCacheKeyTemplate(), email);
 
-    return cacheService.hasKey(accessTokenCacheKey)
-        && cacheService.retrieve(accessTokenCacheKey).equals(token);
+    return token.equals(cacheService.retrieve(accessTokenCacheKey));
   }
 
   @Deprecated
