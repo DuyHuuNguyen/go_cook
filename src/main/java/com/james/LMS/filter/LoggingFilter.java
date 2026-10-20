@@ -1,6 +1,5 @@
 package com.james.LMS.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.james.LMS.config.SecurityUserDetails;
 import com.james.LMS.util.PublicEndpointsValidatorUtil;
 import jakarta.servlet.FilterChain;
@@ -9,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.MediaType;
@@ -21,9 +19,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class LoggingFilter extends OncePerRequestFilter {
-  private final ObjectMapper objectMapper;
 
   @Override
   protected void doFilterInternal(
@@ -52,7 +48,8 @@ public class LoggingFilter extends OncePerRequestFilter {
         MDC.put("email", email);
       }
 
-      String requestBody = extractRequestBody(wrappedRequest);
+      boolean authEndpoint = path.matches("/api/v[12]/users/.*");
+      String requestBody = authEndpoint ? "<redacted>" : extractRequestBody(wrappedRequest);
 
       log.info(
           "Incoming Request: method={}, path={}, request={}",
@@ -63,7 +60,7 @@ public class LoggingFilter extends OncePerRequestFilter {
       filterChain.doFilter(wrappedRequest, wrappedResponse);
 
       long duration = System.currentTimeMillis() - start;
-      String responseBody = extractResponseBody(wrappedResponse);
+      String responseBody = authEndpoint ? "<redacted>" : extractResponseBody(wrappedResponse);
 
       log.info(
           "Outgoing Response: status={}, duration={}ms, response={}",

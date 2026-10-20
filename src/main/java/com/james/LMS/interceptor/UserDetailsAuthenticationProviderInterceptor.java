@@ -2,14 +2,12 @@ package com.james.LMS.interceptor;
 
 import com.james.LMS.config.SecurityUserDetails;
 import com.james.LMS.entity.Role;
-import com.james.LMS.enums.ErrorCode;
-import com.james.LMS.exception.EntityNotFoundException;
-import com.james.LMS.exception.PermissionDeniedException;
 import com.james.LMS.service.RoleService;
 import com.james.LMS.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
@@ -38,14 +36,13 @@ public class UserDetailsAuthenticationProviderInterceptor
     var user =
         this.userService
             .findByEmail(username)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new BadCredentialsException("Email or password is incorrect"));
 
     var isNotMatchedPassword =
         !this.passwordEncoder.matches(
             authentication.getCredentials().toString(), user.getPassword());
 
-    if (isNotMatchedPassword)
-      throw new PermissionDeniedException(ErrorCode.NOT_MATCHED_PASSWORD_OR_EMAIL);
+    if (isNotMatchedPassword) throw new BadCredentialsException("Email or password is incorrect");
 
     List<Role> roles = this.roleService.findAllByUserId(user.getId());
     List<GrantedAuthority> authorityList =

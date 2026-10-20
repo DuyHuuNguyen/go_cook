@@ -57,6 +57,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     "/api/v1/users/verify-otp",
     "/api/v1/users/reset-password",
     "/api/v2/users/login",
+    "/api/v2/users/refresh-token",
     "/actuator/**",
     "/api/v1/users/demo",
     "/api/v1/home"

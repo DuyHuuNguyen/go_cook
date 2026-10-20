@@ -9,9 +9,11 @@ import { SellerRevenuePage } from "../pages/seller/SellerRevenuePage";
 import { SellerSchedulePage } from "../pages/seller/SellerSchedulePage";
 import { BecomeChefPage } from "../pages/seller/BecomeChefPage";
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
+import Signup from "../pages/Signup";
+import { useProfile } from "../contexts/ProfileContext";
 import MenuCatalog from "../pages/MenuCatalog";
 import CustomMenu from "../pages/CustomMenu";
 import { Profile } from "../pages/Profile";
@@ -44,6 +46,7 @@ export const router = createBrowserRouter(
         { path: "/menus", element: <MenuCatalog /> },
         { path: "/create-menu", element: <CustomMenu /> },
         { path: "/login", element: <Login /> },
+        { path: "/signup", element: <Signup /> },
         {
           element: <ProtectedRoute />,
           children: [{ path: "/profile", element: <Profile /> }],
@@ -56,11 +59,18 @@ export const router = createBrowserRouter(
 );
 
 function ProtectedRoute() {
-  const [isAuthorized, setIsAuthorized] = useState(!authStore.isUnAuthorized());
-  useEffect(
-    () =>
-      authStore.subscribe(() => setIsAuthorized(!authStore.isUnAuthorized())),
-    [],
+  const { loading, error, fetchProfile } = useProfile();
+  const isAuthorized = useSyncExternalStore(
+    authStore.subscribe,
+    authStore.isAuthorized,
   );
+  if (loading) return <p role="status">Đang kiểm tra phiên đăng nhập…</p>;
+  if (authStore.isUnknown())
+    return (
+      <div role="alert">
+        {error || "Chưa thể xác minh phiên đăng nhập. Vui lòng thử lại."}
+        <button onClick={() => void fetchProfile()}>Thử lại</button>
+      </div>
+    );
   return isAuthorized ? <Outlet /> : <Navigate to="/login" replace />;
 }
