@@ -69,10 +69,10 @@ function NavbarChildren() {
             <Nav.Link as={Link} to="/courses">
               Khám phá đầu bếp
             </Nav.Link>
-            <Nav.Link as={Link} to="/forum">
+            <Nav.Link as={Link} to="/menus">
               Thực đơn
             </Nav.Link>
-            <Nav.Link as={Link} to="/forum">
+            <Nav.Link as={Link} to="/create-menu">
               Tạo yêu cầu
             </Nav.Link>
             {(!profileData || !profileData.isChef) && (
