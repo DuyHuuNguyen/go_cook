@@ -1,6 +1,7 @@
 package com.james.LMS.response;
 
 import com.james.LMS.dto.ChefProfileDTO;
+import com.james.LMS.entity.ChefProfile;
 import java.util.List;
 import lombok.*;
 
@@ -15,7 +16,16 @@ public class UserDetailResponse {
   private String email;
   private Boolean emailVerified;
   private String avatarUrl;
-  private Boolean isChef;
+  @Builder.Default private Boolean isChef = false;
   private ChefProfileDTO chefProfile;
   private List<String> roles;
+
+  public void addChefInfo(ChefProfile chefProfile) {
+    this.chefProfile =
+        ChefProfileDTO.builder()
+            .bio(chefProfile.getBio())
+            .experienceYears(chefProfile.getExperienceYears())
+            .build();
+    this.isChef = true;
+  }
 }

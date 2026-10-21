@@ -22,7 +22,10 @@ public enum ErrorCode {
   EMAIL_NOT_VERIFIED("1013", "Email has not been verified"),
   EMAIL_ALREADY_VERIFIED("1014", "Email has already been verified"),
   SPAM_EMAIL_VERIFICATION("1015", "Please wait before requesting another verification code"),
-  NOT_MATCHED_PASSWORD_OR_EMAIL("1016", "Email or password dont match");
+  NOT_MATCHED_PASSWORD_OR_EMAIL("1016", "Email or password dont match"),
+  USER_WAS_CHEF("1017", "User was the chef of the system"),
+  PROVINCE_NOT_FOUND("1018","Province not found" ),
+  WARD_NOT_FOUND("1019","Ward not found"), LOCATION_INVALID("1020","Location is invalid" );
 
   private final String code;
   private final String message;

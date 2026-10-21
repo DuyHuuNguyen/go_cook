@@ -22,6 +22,14 @@ const endpoint = (
 
 export const ENDPOINTS = {
     HOME: { GET: { V1: endpoint(SERVICE.USER, VERSION.V1, "/home") } },
+    LOCATION :{
+        PROVINCE:{
+            V1:  endpoint(SERVICE.USER, VERSION.V1, "/locations/provinces"),
+        },
+        WARD:{
+            V1:  endpoint(SERVICE.USER, VERSION.V1, "/locations/wards"),
+        }
+    },
     USER: {
         LOGIN: {
             V1: endpoint(SERVICE.USER, VERSION.V1, "/users/login"),
@@ -82,6 +90,11 @@ export const ENDPOINTS = {
                 V1: endpoint(SERVICE.USER, VERSION.V1, "/users/instructor"),
             },
         },
+        CHEF:{
+            CREATE: {
+                V2: endpoint(SERVICE.USER, VERSION.V3, "/users/become-chef"),
+            }
+        }
     },
 
     CURRICULUM: {

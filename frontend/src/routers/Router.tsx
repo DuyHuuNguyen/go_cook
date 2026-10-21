@@ -20,6 +20,7 @@ import { Profile } from "../pages/Profile";
 import MainLayout from "../layouts/MainLayout";
 import NotFound from "../components/common/NotFound";
 import { authStore } from "../stores/authStore";
+import PublicChefInfo from "../pages/PublicChefInfo.tsx";
 
 export const router = createBrowserRouter(
   [
@@ -43,6 +44,7 @@ export const router = createBrowserRouter(
         },
         // Home and Login must work for visitors without an account.
         { index: true, element: <Home /> },
+        { path: "/chef-pub-info/:chefId", element: <PublicChefInfo /> },
         { path: "/menus", element: <MenuCatalog /> },
         { path: "/create-menu", element: <CustomMenu /> },
         { path: "/login", element: <Login /> },

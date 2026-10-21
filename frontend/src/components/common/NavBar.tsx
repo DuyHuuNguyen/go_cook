@@ -91,6 +91,12 @@ function NavbarChildren() {
                 <NavDropdown.Item as={Link} to="/profile">
                   Tài khoản của tôi
                 </NavDropdown.Item>
+                {profileData?.isChef &&
+                    <NavDropdown.Item as={Link} to="/chef-pub-info">
+                      gian bếp
+                    </NavDropdown.Item>
+
+                }
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleLogout}>
                   Đăng xuất
