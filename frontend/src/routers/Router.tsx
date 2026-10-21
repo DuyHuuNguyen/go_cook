@@ -11,6 +11,8 @@ import { BecomeChefPage } from "../pages/seller/BecomeChefPage";
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { useSyncExternalStore } from "react";
 import Home from "../pages/Home";
+import MenuCatalog from "../pages/MenuCatalog";
+import CustomMenu from "../pages/CustomMenu";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import { useProfile } from "../contexts/ProfileContext";
@@ -46,6 +48,8 @@ export const router = createBrowserRouter(
           element: <ProtectedRoute />,
           children: [
             { index: true, element: <Home /> },
+            { path: "/menus", element: <MenuCatalog /> },
+            { path: "/create-menu", element: <CustomMenu /> },
             { path: "/profile", element: <Profile /> },
           ],
         },
