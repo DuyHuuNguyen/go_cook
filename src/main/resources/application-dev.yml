@@ -6,9 +6,9 @@ spring:
 
   datasource:
 #     Create new the Database to pass Refactor All Entities
-    url: ${URL_DB:jdbc:postgresql://localhost:5432/db_go_cook}
-    username: ${USER_NAME_DB:postgres}
-    password: ${PASSWORD_DB:123456}
+    url: ${URL_DB:jdbc:postgresql://localhost:5432/app_db}
+    username: ${USER_NAME_DB:app_user}
+    password: ${PASSWORD_DB:app_password}
     driver-class-name: org.postgresql.Driver
 
   liquibase:

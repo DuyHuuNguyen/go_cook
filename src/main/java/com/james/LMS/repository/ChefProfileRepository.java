@@ -6,11 +6,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 import java.util.Optional;
 
 @Repository
 public interface ChefProfileRepository extends JpaRepository<ChefProfile,Long> {
+    @Query("""
+        select cp from ChefProfile cp join fetch cp.user u
+        where cp.isActive = true and u.isActive = true
+        order by cp.updatedAt desc, cp.id desc
+        """)
+    List<ChefProfile> findPublicChefs(Pageable pageable);
+
     @Query("""
         SELECT new com.james.LMS.dto.ChefProfileDTO(
             cp.bio,
