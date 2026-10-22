@@ -21,6 +21,21 @@ const endpoint = (
 }
 
 export const ENDPOINTS = {
+    ADMIN: {
+        DASHBOARD: "/api/v1/admin/dashboard",
+        REPORTS: "/api/v1/admin/reports",
+        SETTINGS: "/api/v1/admin/settings",
+        ROLES: "/api/v1/admin/roles",
+        USERS: "/api/v1/admin/users",
+        CHEFS: "/api/v1/admin/chefs",
+        MENUS: "/api/v1/admin/menus",
+        DISHES: "/api/v1/admin/dishes",
+        CATEGORIES: "/api/v1/admin/categories",
+        BOOKINGS: "/api/v1/admin/bookings",
+        REQUESTS: "/api/v1/admin/menu-requests",
+        PAYMENTS: "/api/v1/admin/payments",
+        FEEDBACK: "/api/v1/admin/feedback",
+    },
     HOME: {
         GET: {
             V1: endpoint(SERVICE.USER, VERSION.V1, "/home")

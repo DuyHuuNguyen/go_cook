@@ -1,0 +1,72 @@
+.gca-datatables .gca-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: visible;
+    overflow-y: visible;
+}
+
+.gca-datatables .dt-layout-table,
+.gca-datatables .dt-layout-table .dt-layout-cell {
+    min-width: 0;
+    overflow-x: visible;
+}
+
+.gca-datatables table.gca-table {
+    width: 100% !important;
+    min-width: 0;
+    table-layout: fixed;
+    white-space: normal;
+}
+
+.gca-datatables table.gca-table th,
+.gca-datatables table.gca-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+    padding: 11px 12px;
+    font-size: 13px;
+}
+
+.gca-datatables .dt-length,
+.gca-datatables .dt-length label {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+}
+
+.gca-datatables .dt-length select {
+    appearance: auto !important;
+    -webkit-appearance: menulist !important;
+    width: 84px !important;
+    min-width: 84px !important;
+    height: 37px;
+    margin: 0 3px;
+    padding: 6px 12px !important;
+    border: 1px solid #cbd5cf;
+    border-radius: 3px;
+    background-color: #fff;
+    background-image: none !important;
+    color: #253126;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    text-align: left;
+    box-shadow: none;
+}
+
+.gca-datatables .dt-search input {
+    width: 210px;
+    max-width: 100%;
+}
+
+@media (max-width: 700px) {
+    .gca-datatables .dt-layout-row {
+        flex-wrap: wrap;
+    }
+
+    .gca-datatables table.gca-table td,
+    .gca-datatables table.gca-table th {
+        padding: 9px 6px;
+        font-size: 12px;
+    }
+}
