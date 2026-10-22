@@ -1,14 +1,16 @@
 package com.james.LMS.controller;
 
 import com.james.LMS.facade.MenuFacade;
+import com.james.LMS.request.MenuSearchRequest;
 import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.MenuResponse;
 import com.james.LMS.response.PaginationResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -20,10 +22,11 @@ public class MenuController {
   @GetMapping
   @Operation(
       summary = "List visible menus with their dishes and images",
-      description = "One-based page; size 1-100 (default 12). Ordered by menu ID descending.",
+      description =
+          "Search by menu or dish, filter by category, price and diners, then sort by latest, price or name. Page is one-based.",
       tags = {"Menu APIs"})
   public BaseResponse<PaginationResponse<MenuResponse>> findMenus(
-      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "12") int size) {
-    return menuFacade.findMenus(page -1, size);
+      @Valid @ParameterObject MenuSearchRequest request) {
+    return menuFacade.findMenus(request);
   }
 }

@@ -27,7 +27,7 @@ public class PaginationResponse<T> {
   public static <T> PaginationResponse<T> from(Page<T> page) {
     return PaginationResponse.<T>builder()
         .data(page.getContent())
-        .currentPage(page.getNumber())
+        .currentPage(page.getNumber() + 1)
         .totalElements(page.getTotalElements())
         .totalPages(page.getTotalPages())
         .pageSize(page.getSize())

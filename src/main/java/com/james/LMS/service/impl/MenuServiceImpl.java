@@ -4,6 +4,8 @@ import com.james.LMS.entity.MenuAsset;
 import com.james.LMS.repository.MenuAssetRepository;
 import com.james.LMS.repository.MenuDishRepository;
 import com.james.LMS.repository.MenuRepository;
+import com.james.LMS.repository.specification.MenuSpecifications;
+import com.james.LMS.request.MenuSearchRequest;
 import com.james.LMS.response.MenuResponse;
 import com.james.LMS.service.MenuService;
 import java.util.List;
@@ -25,13 +27,13 @@ public class MenuServiceImpl implements MenuService {
   private final MenuAssetRepository menuAssetRepository;
 
   @Override
-  public Page<MenuResponse> findMenus(int page, int size) {
-    if (page < 0 || size < 1 || size > 100) {
-      throw new IllegalArgumentException("page must be >= 0 and size must be between 1 and 100");
-    }
+  public Page<MenuResponse> findMenus(MenuSearchRequest request) {
+    validateRequest(request);
     // Page only the aggregate roots: fetching a collection here would break SQL pagination.
     var menus =
-        menuRepository.findListedMenus(PageRequest.of(page, size, Sort.by("id").descending()));
+        menuRepository.findAll(
+            MenuSpecifications.listedMenus(request),
+            PageRequest.of(request.getPage() - 1, request.getSize(), buildSort(request)));
     if (menus.isEmpty()) {
       return new PageImpl<>(List.of(), menus.getPageable(), menus.getTotalElements());
     }
@@ -62,6 +64,7 @@ public class MenuServiceImpl implements MenuService {
                 menu.getMinGuests(),
                 menu.getMaxGuests(),
                 menu.getStatus(),
+                menu.getCreatedAt(),
                 new MenuResponse.CategorySummary(
                     menu.getCategory().getId(), menu.getCategory().getName()),
                 new MenuResponse.SellerSummary(
@@ -70,5 +73,26 @@ public class MenuServiceImpl implements MenuService {
                     menu.getSeller().getAvatarUrl()),
                 dishes.getOrDefault(menu.getId(), List.of()),
                 images.getOrDefault(menu.getId(), List.of())));
+  }
+
+  private Sort buildSort(MenuSearchRequest request) {
+    Sort primary =
+        switch (request.getSort()) {
+          case PRICE_ASC -> Sort.by(Sort.Direction.ASC, "tempPrice");
+          case PRICE_DESC -> Sort.by(Sort.Direction.DESC, "tempPrice");
+          case NAME_ASC -> Sort.by(new Sort.Order(Sort.Direction.ASC, "name").ignoreCase());
+          case NAME_DESC -> Sort.by(new Sort.Order(Sort.Direction.DESC, "name").ignoreCase());
+          case LATEST -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+    return primary.and(Sort.by(Sort.Direction.DESC, "id"));
+  }
+
+  private void validateRequest(MenuSearchRequest request) {
+    if (request.getPage() < 1 || request.getSize() < 1 || request.getSize() > 100) {
+      throw new IllegalArgumentException("page must be >= 1 and size must be between 1 and 100");
+    }
+    if (!request.isPriceRangeValid()) {
+      throw new IllegalArgumentException("minPrice must be less than or equal to maxPrice");
+    }
   }
 }

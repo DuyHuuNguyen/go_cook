@@ -11,6 +11,7 @@ public record MenuResponse(
     Integer minGuests,
     Integer maxGuests,
     String status,
+    Long createdAt,
     CategorySummary category,
     SellerSummary seller,
     List<DishSummary> dishes,
