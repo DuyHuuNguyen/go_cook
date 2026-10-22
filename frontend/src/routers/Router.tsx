@@ -21,6 +21,7 @@ import MainLayout from "../layouts/MainLayout";
 import NotFound from "../components/common/NotFound";
 import { authStore } from "../stores/authStore";
 import PublicChefInfo from "../pages/PublicChefInfo.tsx";
+import DemoPage from "../pages/DemoPage.tsx";
 
 export const router = createBrowserRouter(
   [
@@ -28,6 +29,7 @@ export const router = createBrowserRouter(
       element: <MainLayout />,
       children: [
         { path: "/become-chef", element: <BecomeChefPage /> },
+        { path:"/demo", element : <DemoPage/>},
         {
           path: "/seller",
           element: <SellerDemoLayout />,

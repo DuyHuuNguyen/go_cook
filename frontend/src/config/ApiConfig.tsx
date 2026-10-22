@@ -94,6 +94,21 @@ export const ENDPOINTS = {
             CREATE: {
                 V2: endpoint(SERVICE.USER, VERSION.V2, "/users/become-chef"),
             }
+        },
+        DISH:{
+            GET:{
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/dishes"),
+            }
+        },
+        MENU:{
+            POST:{
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/menus"),
+            }
+        },
+        CATEGORY: {
+            GET: {
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/categories"),
+            }
         }
     },
 

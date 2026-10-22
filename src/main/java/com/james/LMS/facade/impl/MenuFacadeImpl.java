@@ -52,16 +52,11 @@ public class MenuFacadeImpl implements MenuFacade {
             .seller(chef)
             .build();
 
-    CategorySelectionContext findingOrCreatingCategory =
-        CategorySelectionContext.builder()
-            .isCreateNewCategory(request.getIsCreateNewCategory())
-            .categoryId(request.getCategoryId())
-            .newCategoryName(request.getNewCategory())
-            .menu(menu)
-            .build();
 
-    this.findOrCreateCategory(findingOrCreatingCategory);
+   Category category =  this.categoryService
+            .findById(request.getCategoryId()).orElseThrow(()-> new EntityNotFoundException(ErrorCode.CATEGORY_NOT_FOUND));
 
+    menu.addCategory(category);
     List<Dish> dishes = this.dishService.findByIds(request.getDishIds(), principal.getId());
 
     dishes.forEach(menu::addDish);
@@ -89,18 +84,5 @@ public class MenuFacadeImpl implements MenuFacade {
 
     menuAssetService.save(MenuAsset.builder().url(url).menu(menu).build());
     return BaseResponse.ok();
-  }
-
-
-  private void findOrCreateCategory(CategorySelectionContext findingOrCreatingCategory) {
-    Category category =
-        findingOrCreatingCategory.isCreateNewCategory()
-            ? this.categoryService
-                .findById(findingOrCreatingCategory.categoryId())
-                .orElse(
-                    Category.builder().name(findingOrCreatingCategory.newCategoryName()).build())
-            : Category.builder().name(findingOrCreatingCategory.newCategoryName()).build();
-
-    findingOrCreatingCategory.menu().addCategory(category);
   }
 }

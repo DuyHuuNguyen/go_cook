@@ -27,7 +27,8 @@ public enum ErrorCode {
   PROVINCE_NOT_FOUND("1018", "Province not found"),
   WARD_NOT_FOUND("1019", "Ward not found"),
   LOCATION_INVALID("1020", "Location is invalid"),
-  MENU_NOT_FOUND("1021","Menu not found" );
+  MENU_NOT_FOUND("1021","Menu not found" ),
+  CATEGORY_NOT_FOUND("1022", "Category not found");
 
   private final String code;
   private final String message;

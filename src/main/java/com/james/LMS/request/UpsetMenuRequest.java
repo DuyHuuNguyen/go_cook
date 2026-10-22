@@ -21,7 +21,5 @@ public class UpsetMenuRequest {
   private String description;
   private String status;
   private Long categoryId;
-  private Boolean isCreateNewCategory;
-  private String newCategory;
   private List<Long> dishIds;
 }
