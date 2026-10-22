@@ -1,3 +1,12 @@
 package com.james.LMS.service;
 
-public interface MenuService {}
+import com.james.LMS.entity.Menu;
+
+import java.util.Optional;
+
+public interface MenuService {
+  void save(Menu menu);
+
+  Optional<Menu> findByIdAndChefId(Long id,Long chefId);
+
+}

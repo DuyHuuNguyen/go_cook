@@ -2,6 +2,7 @@ package com.james.LMS.controller;
 
 import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.facade.UserFacadeV2;
+import com.james.LMS.request.BecomeChefRequest;
 import com.james.LMS.request.LoginRequest;
 import com.james.LMS.request.RefreshTokenRequest;
 import com.james.LMS.response.BaseResponse;
@@ -27,7 +28,7 @@ public class UserControllerV2 {
   @ResponseStatus(HttpStatus.OK)
   @Operation(
       summary = "Login to system by email and password",
-      tags = {"User v2 APIs update to test deploy production"})
+      tags = {"User v2 APIs"})
   public BaseResponse<Void> login(
       @Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
     return this.userFacade.login(loginRequest, response);
@@ -35,7 +36,7 @@ public class UserControllerV2 {
 
   @PostMapping("/refresh-token")
   @ResponseStatus(HttpStatus.OK)
-  @Operation(tags = {"User v2 APIs update to test deploy production"})
+  @Operation(tags = {"User v2 APIs"})
   public BaseResponse<Void> refreshToken(
       @CookieValue(name = SecurityConfig.COOKIE_REFRESH_TOKEN_NAME, required = false)
           String refreshToken,
@@ -45,10 +46,19 @@ public class UserControllerV2 {
 
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.OK)
-  @Operation(tags = {"User v2 APIs update to test deploy production"})
+  @Operation(tags = {"User v2 APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
   public BaseResponse<Void> logout(HttpServletResponse response) {
     return this.userFacade.logout(response);
+  }
+
+  @PostMapping("/become-chef")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(tags = {"User v2 APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  public BaseResponse<Void> becomeChef(@Valid @RequestBody BecomeChefRequest request) {
+    return this.userFacade.becomeChef(request);
   }
 }

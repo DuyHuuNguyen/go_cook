@@ -33,7 +33,10 @@ public class Menu extends BaseEntity {
   @Column(name = "status", length = 100)
   private String status;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      optional = false,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;
 
@@ -45,7 +48,26 @@ public class Menu extends BaseEntity {
   @Builder.Default
   private List<MenuAsset> menuAssets = new ArrayList<>();
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "menu")
+  @OneToMany(
+      fetch = FetchType.LAZY,
+      mappedBy = "menu",
+      cascade = {CascadeType.PERSIST})
   @Builder.Default
   private List<MenuDish> menuDishes = new ArrayList<>();
+
+  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+  @JoinTable(
+      name = "menu_dishes",
+      joinColumns = @JoinColumn(name = "menu_id"),
+      inverseJoinColumns = @JoinColumn(name = "dish_id"))
+  @Builder.Default
+  private List<Dish> dishes = new ArrayList<>();
+
+  public void addCategory(Category category) {
+    this.category = category;
+  }
+
+  public void addDish(Dish dish) {
+    dishes.add(dish);
+  }
 }

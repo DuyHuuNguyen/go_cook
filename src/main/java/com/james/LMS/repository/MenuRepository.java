@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
@@ -19,4 +20,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
       order by m.updatedAt desc, m.id desc
       """)
   List<Menu> findPublicMenus(Pageable pageable);
+
+  Optional<Menu> findByIdAndSeller_idAndIsActiveTrue(Long id, Long sellerId);
 }

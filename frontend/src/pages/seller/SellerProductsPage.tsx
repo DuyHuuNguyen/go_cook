@@ -4,6 +4,7 @@ import { SellerWorkspace } from "../../components/seller/SellerWorkspace";
 import { useSellerDemo } from "../../contexts/SellerDemoContext";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { categories, menuLabels, money } from "./sellerMockData";
+import Dishes from "../../components/seller/Dishes.tsx";
 
 export function SellerProductsPage() {
   useDocumentTitle("Thực đơn của tôi | GO Cook");
@@ -25,6 +26,7 @@ export function SellerProductsPage() {
       title="Thực đơn của tôi"
       description="Những món ngon mang dấu ấn riêng của căn bếp bạn."
     >
+      <Dishes/>
       <div className="chef-demo-banner">
         <strong>Dữ liệu mẫu · {menus.length} thực đơn</strong>
         <span>Thay đổi được giữ khi chuyển trang và đặt lại khi tải lại.</span>

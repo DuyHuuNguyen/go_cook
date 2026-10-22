@@ -1,5 +1,6 @@
 package com.james.LMS.facade;
 
+import com.james.LMS.request.BecomeChefRequest;
 import com.james.LMS.request.LoginRequest;
 import com.james.LMS.request.RefreshTokenRequest;
 import com.james.LMS.response.BaseResponse;
@@ -13,4 +14,6 @@ public interface UserFacadeV2 {
       RefreshTokenRequest refreshTokenRequest, HttpServletResponse response);
 
   BaseResponse<Void> logout(HttpServletResponse response);
+
+  BaseResponse<Void> becomeChef(BecomeChefRequest request);
 }

@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import BecomeChefForm from "../../components/seller/BecomeChefForm.tsx";
 
 /**
  * Route: /become-chef
@@ -46,93 +47,7 @@ export function BecomeChefPage() {
               </ul>
             </section>
           </div>
-          <form className={"card summary stack"}>
-            <p className="notice">
-              Bản demo UI: hồ sơ chưa được gửi hoặc lưu vào hệ thống.
-            </p>
-            <h3>{"Đăng ký trở thành đối tác"}</h3>
-            <label className={"field"} htmlFor={"chef-name"}>
-              {"Họ và tên"}
-              <input
-                id={"chef-name"}
-                name={"chef-name"}
-                type={"text"}
-                defaultValue={""}
-                placeholder={"Họ và tên của bạn"}
-              />
-            </label>
-            <label className={"field"} htmlFor={"chef-phone"}>
-              {"Số điện thoại"}
-              <input
-                id={"chef-phone"}
-                name={"chef-phone"}
-                type={"tel"}
-                defaultValue={""}
-                placeholder={"Số điện thoại liên hệ"}
-              />
-            </label>
-            <label className={"field"} htmlFor={"chef-email"}>
-              {"Email"}
-              <input
-                id={"chef-email"}
-                name={"chef-email"}
-                type={"email"}
-                defaultValue={""}
-                placeholder={"Email của bạn"}
-              />
-            </label>
-            <label className={"field"} htmlFor={"chef-area"}>
-              {"Khu vực phục vụ"}
-              <select id={"chef-area"} name={"chef-area"}>
-                <option>{"TP. Hồ Chí Minh"}</option>
-                <option>{"Hà Nội"}</option>
-              </select>
-            </label>
-            <label className={"field"} htmlFor={"chef-years"}>
-              {"Kinh nghiệm nấu ăn (năm)"}
-              <input
-                id={"chef-years"}
-                name={"chef-years"}
-                type={"number"}
-                defaultValue={""}
-                placeholder={""}
-                min={"0"}
-              />
-            </label>
-            <label className={"field"} htmlFor={"chef-specialty"}>
-              {"Sở trường của bạn"}
-              <textarea
-                id={"chef-specialty"}
-                name={"chef-specialty"}
-                placeholder={
-                  "Giới thiệu phong cách nấu ăn và các món sở trường"
-                }
-              ></textarea>
-            </label>
-            <label className={"field"} htmlFor={"chef-documents"}>
-              {"Hồ sơ / chứng nhận"}
-              <input
-                id={"chef-documents"}
-                name={"chef-documents"}
-                type={"file"}
-                defaultValue={""}
-                placeholder={""}
-                accept={".pdf,image/*"}
-              />
-            </label>
-            <button
-              className={"btn"}
-              type={"button"}
-              data-action={"register-seller"}
-              disabled
-              title={"Chức năng sẽ được tích hợp ở giai đoạn tiếp theo"}
-            >
-              {"Gửi hồ sơ đăng ký"}
-            </button>
-            <Link className={"text-link"} to="/seller">
-              {"Xem kênh người bán mẫu"}
-            </Link>
-          </form>
+          <BecomeChefForm/>
         </div>
       </div>
     </div>
