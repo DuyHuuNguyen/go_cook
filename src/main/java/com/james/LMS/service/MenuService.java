@@ -1,3 +1,8 @@
 package com.james.LMS.service;
 
-public interface MenuService {}
+import com.james.LMS.response.MenuResponse;
+import org.springframework.data.domain.Page;
+
+public interface MenuService {
+  Page<MenuResponse> findMenus(int page, int size);
+}

@@ -26,6 +26,11 @@ export const ENDPOINTS = {
             V1: endpoint(SERVICE.USER, VERSION.V1, "/home")
         }
     },
+    MENU: {
+        LIST: {
+            V1: endpoint(SERVICE.USER, VERSION.V1, "/menus")
+        }
+    },
     USER: {
         LOGIN: {
             V1: endpoint(SERVICE.USER, VERSION.V1, "/users/login"),
