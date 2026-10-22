@@ -5,14 +5,13 @@ import {
   NavDropdown,
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router";
-import { useEffect } from "react";
-import { ArrowRight } from "react-bootstrap-icons";
-import { UserProvider, useUser } from "../../contexts/UserContext";
-import { useProfile } from "../../contexts/ProfileContext";
-import { useApp } from "../../contexts/AppContext";
-import { authStore } from "../../stores/authStore";
+import { UserProvider, useUser } from "../../contexts/UserContext.tsx";
 import logo from "../../assets/go-cook-logo.svg";
-import "../../styles/siteChrome.css";
+import { useProfile } from "../../contexts/ProfileContext.tsx";
+import { useEffect } from "react";
+import { useApp } from "../../contexts/AppContext.tsx";
+
+import { authStore } from "../../stores/authStore";
 
 function NavbarChildren() {
   const navigate = useNavigate();
@@ -21,7 +20,6 @@ function NavbarChildren() {
   const { notify } = useApp();
 
   useEffect(() => {
-    // Check the existing cookie once. An anonymous visitor is still allowed to view Home.
     void fetchProfile();
     return authStore.subscribe(() => {
       if (authStore.isAuthorized()) void fetchProfile();
@@ -29,79 +27,127 @@ function NavbarChildren() {
     });
   }, [fetchProfile, setProfileData]);
 
-  async function handleLogout() {
+  const username = profileData?.username || "User";
+  const firstLetter = username.charAt(0).toUpperCase();
+  const hasAvatar = Boolean(profileData?.avatarUrl);
+
+  const handleLogout = async () => {
     try {
       await logout();
+      notify("Log out successfully", {
+        title: "Log out",
+        variant: "success",
+      });
       setProfileData(null);
-      notify("Đã đăng xuất", { title: "GoCook", variant: "success" });
-      navigate("/");
-    } catch (error) {
-      notify(error instanceof Error ? error.message : "Không thể đăng xuất", {
-        title: "GoCook",
+      navigate("/login");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      notify(message, {
+        title: "Log out",
         variant: "danger",
       });
     }
-  }
-
-  const username = profileData?.username || "Tài khoản";
+  };
 
   return (
-    <BsNavbar expand="lg" className="gc-navbar" sticky="top" collapseOnSelect>
+    <BsNavbar expand="lg" bg="light" variant="light" className="border-bottom">
       <Container>
-        <BsNavbar.Brand as={Link} to="/" className="gc-navbar-brand">
-          <img src={logo} alt="GoCook - Trang chủ" />
+        <BsNavbar.Brand as={Link} to="/">
+          <link
+            rel="icon"
+            type="image/svg+xml"
+            href="../../assets/go-cook-icon.svg"
+          />
         </BsNavbar.Brand>
-        <BsNavbar.Toggle aria-controls="gc-main-navbar" />
-        <BsNavbar.Collapse id="gc-main-navbar">
-          <Nav className="gc-nav-links mx-auto">
+
+        <BsNavbar.Toggle aria-controls="main-navbar" />
+        <BsNavbar.Collapse id="main-navbar">
+          <Nav className="me-auto fs-5">
             <Nav.Link as={Link} to="/">
-              Trang chủ
+              <img src={logo} alt="GO Cook" height={48} />
+            </Nav.Link>
+            <Nav.Link as={Link} to="/courses">
+              Khám phá đầu bếp
             </Nav.Link>
             <Nav.Link as={Link} to="/menus">
               Thực đơn
             </Nav.Link>
             <Nav.Link as={Link} to="/create-menu">
-              Tạo thực đơn
+              Tạo yêu cầu
             </Nav.Link>
-            <Nav.Link as={Link} to="/#dau-bep">
-              Đầu bếp
-            </Nav.Link>
-            <Nav.Link as={Link} to="/#cach-hoat-dong">
-              Cách hoạt động
-            </Nav.Link>
-          </Nav>
-          <Nav className="gc-nav-actions">
-            {profileData ? (
-              <NavDropdown
-                id="gc-account-dropdown"
-                align="end"
-                title={
-                  <span className="gc-profile-trigger">
-                    {profileData.avatarUrl ? (
-                      <img src={profileData.avatarUrl} alt="" />
-                    ) : (
-                      <span className="gc-user-initial">
-                        {username.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <span>{username}</span>
-                  </span>
-                }
-              >
-                <NavDropdown.Item as={Link} to="/profile">
-                  Tài khoản của tôi
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleLogout}>
-                  Đăng xuất
-                </NavDropdown.Item>
-              </NavDropdown>
-            ) : (
-              <Nav.Link as={Link} to="/login" className="gc-nav-login">
-                Đăng nhập <ArrowRight size={15} />
+            {(!profileData || !profileData.isChef) && (
+              <Nav.Link as={Link} to="/become-chef">
+                Trở thành đầu bếp
               </Nav.Link>
             )}
           </Nav>
+
+          {profileData && (
+            <Nav className="fs-5">
+              <NavDropdown
+                title={
+                  hasAvatar ? (
+                    <img
+                      src={profileData.avatarUrl}
+                      alt={username}
+                      className="rounded-circle"
+                      style={{
+                        width: "38px",
+                        height: "38px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="d-inline-flex align-items-center justify-content-center rounded-circle bg-second-light text-secondary"
+                      style={{
+                        width: "38px",
+                        height: "38px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {firstLetter}
+                    </div>
+                  )
+                }
+                id="user-dropdown"
+                align="end"
+              >
+                <NavDropdown.Item as={Link} to="/profile">
+                  <span>Tài khoản</span>
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/my-learning-space">
+                  Bookings
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/wishlist">
+                  Tạo yêu cầu
+                </NavDropdown.Item>
+                <NavDropdown.Divider />
+                {profileData?.isChef && (
+                  <NavDropdown.Item as={Link} to="/seller">
+                    gian bếp
+                  </NavDropdown.Item>
+                )}
+
+                <NavDropdown.Divider />
+                <NavDropdown.Item onClick={handleLogout}>
+                  Log out
+                </NavDropdown.Item>
+              </NavDropdown>
+            </Nav>
+          )}
+          {!profileData && (
+            <Nav>
+              <Nav.Link as={Link} to="/login">
+                Đăng nhập
+              </Nav.Link>
+              <Nav.Link as={Link} to="/signup">
+                Đăng ký
+              </Nav.Link>
+            </Nav>
+          )}
         </BsNavbar.Collapse>
       </Container>
     </BsNavbar>

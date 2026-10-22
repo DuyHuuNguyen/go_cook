@@ -7,6 +7,7 @@ public class PublicEndpointsValidatorUtil {
   private static final List<String> PUBLIC_ENDPOINTS =
       List.of(
           "/",
+          "/app",
           "/login",
           "/app",
           "/register",
