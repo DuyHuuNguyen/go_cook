@@ -58,7 +58,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     "/api/v2/users/refresh-token",
     "/actuator/**",
     "/api/v1/users/demo",
-    "/api/v1/home"
+    "/api/v1/home",
+    "/api/v1/menus"
   };
 
   @Bean

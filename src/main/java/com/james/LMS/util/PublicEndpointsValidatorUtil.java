@@ -19,6 +19,7 @@ public class PublicEndpointsValidatorUtil {
           "/chef-detail",
           "/chef-an-nhien",
           "/menus",
+          "/api/v1/menus",
           "/menu-detail",
           "/menu-vegetarian",
           "/offers",

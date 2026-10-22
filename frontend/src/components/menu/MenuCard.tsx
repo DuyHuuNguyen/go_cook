@@ -1,13 +1,19 @@
+import { useNavigate } from 'react-router';
 import { People, ArrowRight, Eye } from 'react-bootstrap-icons';
 import type { CatalogMenu } from '../home/catalogData';
 import { displayPrice } from '../home/catalogData';
 
 interface MenuCardProps {
     menu: CatalogMenu;
-    onSelect: (menu: CatalogMenu) => void;
 }
 
-export default function MenuCard({ menu, onSelect }: MenuCardProps) {
+export default function MenuCard({ menu }: MenuCardProps) {
+    const navigate = useNavigate();
+
+    function goToDetail() {
+        navigate(`/menus/${menu.id}`);
+    }
+
     return (
         <article className="gcp-menu-card">
             <div className="gcp-card-cover">
@@ -39,10 +45,10 @@ export default function MenuCard({ menu, onSelect }: MenuCardProps) {
                     <strong>{displayPrice(menu.referencePrice)}</strong>
                 </div>
                 <div className="gcp-card-actions">
-                    <button className="gcp-btn gcp-btn-light" type="button" onClick={() => onSelect(menu)}>
+                    <button className="gcp-btn gcp-btn-light" type="button" onClick={goToDetail}>
                         <Eye size={15} /> Xem chi tiết
                     </button>
-                    <button className="gcp-btn gcp-btn-primary" type="button" onClick={() => onSelect(menu)}>
+                    <button className="gcp-btn gcp-btn-primary" type="button" onClick={goToDetail}>
                         Chọn thực đơn <ArrowRight size={15} />
                     </button>
                 </div>

@@ -3,7 +3,6 @@ import { Container } from 'react-bootstrap';
 import { Link, useSearchParams } from 'react-router';
 import { ArrowRight, CheckCircle, Clock, Funnel, People, Search, ShieldCheck } from 'react-bootstrap-icons';
 import MenuCard from '../components/menu/MenuCard';
-import MenuDetailModal from '../components/menu/MenuDetailModal';
 import { useCatalog } from '../hooks/useCatalog';
 import { normalizeSearch, type CatalogMenu } from '../components/home/catalogData';
 import '../styles/menuPages.css';
@@ -11,8 +10,8 @@ import '../styles/menuPages.css';
 const priceRanges = [
     { value: 'all', label: 'Tất cả' },
     { value: 'under500', label: 'Dưới 500k' },
-    { value: '500to1000', label: '500k – 1 triệu' },
-    { value: '1000to2000', label: '1 triệu – 2 triệu' },
+    { value: '500to1000', label: '500k - 1 triệu' },
+    { value: '1000to2000', label: '1 triệu - 2 triệu' },
     { value: 'over2000', label: 'Trên 2 triệu' },
 ];
 
@@ -26,17 +25,6 @@ export default function MenuCatalog() {
     const [sort, setSort] = useState('default');
     const [guests, setGuests] = useState(Number(params.get('guests')) || 0);
     const [page, setPage] = useState(1);
-    const [selectedMenu, setSelectedMenu] = useState<CatalogMenu | null>(null);
-
-    useEffect(() => {
-        const selectedId = Number(params.get('selected'));
-        if (!selectedId || catalog.loading) return;
-        const found = catalog.menus.find((menu) => menu.id === selectedId);
-        if (found) setSelectedMenu(found);
-        const next = new URLSearchParams(params);
-        next.delete('selected');
-        setParams(next, { replace: true });
-    }, [catalog.loading, catalog.menus, params, setParams]);
 
     const categories = useMemo(
         () => [...new Set(catalog.menus.map((menu) => menu.categoryName).filter(Boolean))],
@@ -172,7 +160,7 @@ export default function MenuCatalog() {
                     ) : (
                         <>
                             <div className="gcp-card-grid">
-                                {displayedMenus.map((menu) => <MenuCard menu={menu} onSelect={setSelectedMenu} key={menu.id} />)}
+                                {displayedMenus.map((menu) => <MenuCard menu={menu} key={menu.id} />)}
                             </div>
                             <div className="gcp-pagination">
                                 <span>Đang hiển thị {displayedMenus.length} / {filteredMenus.length} thực đơn</span>
@@ -204,7 +192,6 @@ export default function MenuCatalog() {
                     </div>
                 </Container>
             </section>
-            <MenuDetailModal menu={selectedMenu} onClose={() => setSelectedMenu(null)} />
         </div>
     );
 }

@@ -12,6 +12,7 @@ import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { useSyncExternalStore } from "react";
 import Home from "../pages/Home";
 import MenuCatalog from "../pages/MenuCatalog";
+import MenuDetailPage from "../pages/MenuDetailPage";
 import CustomMenu from "../pages/CustomMenu";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
@@ -52,6 +53,7 @@ export const router = createBrowserRouter(
           children: [
             { index: true, element: <Home /> },
             { path: "/menus", element: <MenuCatalog /> },
+            { path: "/menus/:id", element: <MenuDetailPage /> },
             { path: "/create-menu", element: <CustomMenu /> },
             { path: "/profile", element: <Profile /> },
           ],

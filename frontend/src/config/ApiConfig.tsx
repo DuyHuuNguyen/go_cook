@@ -26,7 +26,11 @@ export const ENDPOINTS = {
             V1: endpoint(SERVICE.USER, VERSION.V1, "/home")
         }
     },
-
+    MENU: {
+        LIST: {
+            V1: endpoint(SERVICE.USER, VERSION.V1, "/menus")
+        }
+    },
     LOCATION :{
         PROVINCE:{
             V1:  endpoint(SERVICE.USER, VERSION.V1, "/locations/provinces"),

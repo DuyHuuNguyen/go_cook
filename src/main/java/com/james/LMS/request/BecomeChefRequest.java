@@ -16,10 +16,7 @@ import lombok.ToString;
 public class BecomeChefRequest {
 
   @NotBlank(message = "Phone must not be blank")
-  @Pattern(
-          regexp = "^[0-9]{10,11}$",
-          message = "Phone must contain 10 to 11 digits"
-  )
+  @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone must contain 10 to 11 digits")
   private String phone;
 
   @NotBlank(message = "Province code must not be blank")
