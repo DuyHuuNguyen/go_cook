@@ -1,4 +1,15 @@
 package com.james.LMS.response;
 
-public class KeySetPaginationResponse {
+import java.util.List;
+import lombok.*;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Getter
+@Builder
+public class KeySetPaginationResponse<T> {
+  private List<T> data;
+  private Long lastId;
+  private Boolean hasNext;
 }

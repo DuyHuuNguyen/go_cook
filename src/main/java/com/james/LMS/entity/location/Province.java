@@ -1,6 +1,5 @@
 package com.james.LMS.entity.location;
 
-import com.james.LMS.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,5 +43,4 @@ public class Province {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "administrative_unit_id")
   private AdministrativeUnit administrativeUnit;
-  
 }

@@ -1,4 +1,7 @@
 package com.james.LMS.service;
 
-public class MenuAssetService {
+import com.james.LMS.entity.MenuAsset;
+
+public interface MenuAssetService {
+    void save(MenuAsset menuAsset);
 }

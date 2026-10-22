@@ -58,8 +58,7 @@ public class UserControllerV2 {
   @Operation(tags = {"User v2 APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
-  public BaseResponse<Void> becomeChef(@Valid @RequestBody BecomeChefRequest request){
+  public BaseResponse<Void> becomeChef(@Valid @RequestBody BecomeChefRequest request) {
     return this.userFacade.becomeChef(request);
   }
-
 }

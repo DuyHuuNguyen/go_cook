@@ -152,15 +152,18 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
 
     user.addRole(chefRole);
 
-    Province province = this.provinceService.findByCode(request.getProvinceCode())
+    Province province =
+        this.provinceService
+            .findByCode(request.getProvinceCode())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PROVINCE_NOT_FOUND));
 
-
-    Ward ward = this.wardService.findByCode(request.getWardCode())
+    Ward ward =
+        this.wardService
+            .findByCode(request.getWardCode())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.WARD_NOT_FOUND));
 
     boolean isValidLocation = ward.getProvince().getCode().equals(province.getCode());
-    log.debug("Location valid  {}",isValidLocation);
+    log.debug("Location valid  {}", isValidLocation);
 
     if (!isValidLocation) throw new PermissionDeniedException(ErrorCode.LOCATION_INVALID);
 

@@ -92,7 +92,7 @@ export const ENDPOINTS = {
         },
         CHEF:{
             CREATE: {
-                V2: endpoint(SERVICE.USER, VERSION.V3, "/users/become-chef"),
+                V2: endpoint(SERVICE.USER, VERSION.V2, "/users/become-chef"),
             }
         }
     },

@@ -8,6 +8,6 @@ import lombok.*;
 @ToString
 @Builder
 public class WardResponse {
-    private String fullName;
-    private String code;
+  private String fullName;
+  private String code;
 }

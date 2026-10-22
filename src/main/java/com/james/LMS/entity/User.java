@@ -31,18 +31,24 @@ public class User extends BaseEntity {
   @Column(name = "avatar_url")
   private String avatarUrl;
 
-  @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.MERGE, CascadeType.PERSIST})
   @JoinColumn(name = "province_code")
   private Province province;
 
-  @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.MERGE, CascadeType.PERSIST})
   @JoinColumn(name = "ward_code")
   private Ward ward;
 
   @Column(name = "address_detail", length = 500)
   private String addressDetail;
 
-  @OneToOne(mappedBy = "user",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+  @OneToOne(
+      mappedBy = "user",
+      cascade = {CascadeType.MERGE, CascadeType.PERSIST})
   private ChefProfile chefProfile;
 
   @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
@@ -52,6 +58,11 @@ public class User extends BaseEntity {
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   @Builder.Default
   private List<Role> roles = new ArrayList<>();
+
+  @OneToMany(
+      mappedBy = "chef",
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  private List<Dish> dishes = new ArrayList<>();
 
   public void addRole(Role role) {
     this.roles.add(role);
@@ -75,10 +86,10 @@ public class User extends BaseEntity {
   }
 
   public void addProvince(Province province) {
-    this.province =province;
+    this.province = province;
   }
 
-  public void addWard(Ward ward){
+  public void addWard(Ward ward) {
     this.ward = ward;
   }
 }

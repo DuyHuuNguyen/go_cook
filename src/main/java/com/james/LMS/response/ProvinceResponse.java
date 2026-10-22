@@ -8,6 +8,6 @@ import lombok.*;
 @Getter
 @Builder
 public class ProvinceResponse {
-    private String code;
-    private String fullName;
+  private String code;
+  private String fullName;
 }

@@ -10,7 +10,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class WardCriteria extends BaseCriteria{
-    @Size(max = 20, message = "ward name must not exceed 20 characters")
-    private String wardName;
+public class WardCriteria extends BaseCriteria {
+  @Size(max = 20, message = "ward name must not exceed 20 characters")
+  private String wardName;
 }
