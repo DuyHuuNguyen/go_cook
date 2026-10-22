@@ -1,5 +1,6 @@
 package com.james.LMS.service.impl;
 
+import com.james.LMS.entity.Menu;
 import com.james.LMS.entity.MenuAsset;
 import com.james.LMS.repository.MenuAssetRepository;
 import com.james.LMS.repository.MenuDishRepository;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -95,4 +98,14 @@ public class MenuServiceImpl implements MenuService {
       throw new IllegalArgumentException("minPrice must be less than or equal to maxPrice");
     }
   }
+
+    @Override
+    public void save(Menu menu) {
+        this.menuRepository.save(menu);
+    }
+
+    @Override
+    public Optional<Menu> findByIdAndChefId(Long id, Long chefId) {
+        return this.menuRepository.findByIdAndSeller_idAndIsActiveTrue(id,  chefId);
+    }
 }

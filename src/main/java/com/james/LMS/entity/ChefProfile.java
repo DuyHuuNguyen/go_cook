@@ -21,4 +21,8 @@ public class ChefProfile extends BaseEntity {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
+
+  public void addUser(User user) {
+    this.user = user;
+  }
 }

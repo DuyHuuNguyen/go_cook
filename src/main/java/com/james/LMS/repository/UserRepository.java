@@ -22,4 +22,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   @Query(value = "select u " + "from User u " + "where u.id = :id")
   Optional<User> findUserAndInstructorById(@Param("id") Long id);
+
+
+  @Query("""
+    SELECT DISTINCT u
+    FROM User u
+    LEFT JOIN FETCH u.roles
+    WHERE u.id = :id
+    """)
+  Optional<User> findUserAndFetchRolesById(@Param("id") Long id);
 }

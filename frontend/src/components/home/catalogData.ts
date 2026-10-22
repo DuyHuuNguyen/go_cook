@@ -1,9 +1,8 @@
-import type { HomeMenu } from '../../types/HomeTypes';
+import type { HomeChef, HomeMenu } from '../../types/HomeTypes';
 
-// Giữ kiểu dữ liệu này để trang chủ và danh sách thực đơn dùng chung.
-// Không khai báo dữ liệu mẫu: danh sách thực đơn được lấy từ API.
 export interface CatalogMenu extends HomeMenu {
     dishes?: string[];
+    sample?: boolean;
 }
 
 export function displayPrice(value: number): string {

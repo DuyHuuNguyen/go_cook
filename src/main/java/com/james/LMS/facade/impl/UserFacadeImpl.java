@@ -288,9 +288,13 @@ public class UserFacadeImpl implements UserFacade {
             .id(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
-            //            .emailVerified(user.isEmailVerified())
             .avatarUrl(user.getAvatarUrl())
             .build();
+
+    if (user.getChefProfile() != null) {
+      userDetailResponse.addChefInfo(user.getChefProfile());
+    }
+
     return BaseResponse.build(userDetailResponse, true);
   }
 

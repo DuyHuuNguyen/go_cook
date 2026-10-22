@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Builder
@@ -77,5 +78,10 @@ public class SecurityUserDetails implements UserDetails {
     return this.authorities.stream()
         .map(GrantedAuthority::getAuthority)
         .anyMatch(role -> role.equals(RoleEnum.ROLE_CHEF.getContent()));
+  }
+
+  public static SecurityUserDetails getPrincipal() {
+    return (SecurityUserDetails)
+        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
   }
 }

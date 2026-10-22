@@ -12,6 +12,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Dish extends BaseEntity {
 
+  @ManyToOne
+  @JoinColumn(name = "chef_id")
+  private User chef;
+
   @Column(name = "name", nullable = false)
   private String name;
 }

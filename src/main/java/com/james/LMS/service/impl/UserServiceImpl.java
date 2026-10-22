@@ -36,4 +36,9 @@ public class UserServiceImpl implements UserService {
   public Optional<User> findUserAndInstructorById(Long id) {
     return this.userRepository.findUserAndInstructorById(id);
   }
+
+  @Override
+  public Optional<User> findUserAndFetchRolesById(Long id) {
+    return this.userRepository.findUserAndFetchRolesById(id);
+  }
 }
