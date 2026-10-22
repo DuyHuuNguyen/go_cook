@@ -21,7 +21,12 @@ const endpoint = (
 }
 
 export const ENDPOINTS = {
-    HOME: { GET: { V1: endpoint(SERVICE.USER, VERSION.V1, "/home") } },
+    HOME: {
+        GET: {
+            V1: endpoint(SERVICE.USER, VERSION.V1, "/home")
+        }
+    },
+
     LOCATION :{
         PROVINCE:{
             V1:  endpoint(SERVICE.USER, VERSION.V1, "/locations/provinces"),

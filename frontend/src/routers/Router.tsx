@@ -11,11 +11,11 @@ import { BecomeChefPage } from "../pages/seller/BecomeChefPage";
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { useSyncExternalStore } from "react";
 import Home from "../pages/Home";
+import MenuCatalog from "../pages/MenuCatalog";
+import CustomMenu from "../pages/CustomMenu";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import { useProfile } from "../contexts/ProfileContext";
-import MenuCatalog from "../pages/MenuCatalog";
-import CustomMenu from "../pages/CustomMenu";
 import { Profile } from "../pages/Profile";
 import MainLayout from "../layouts/MainLayout";
 import NotFound from "../components/common/NotFound";
@@ -44,16 +44,17 @@ export const router = createBrowserRouter(
             { path: "schedule", element: <SellerSchedulePage /> },
           ],
         },
-        // Home and Login must work for visitors without an account.
-        { index: true, element: <Home /> },
-        { path: "/chef-pub-info/:chefId", element: <PublicChefInfo /> },
-        { path: "/menus", element: <MenuCatalog /> },
-        { path: "/create-menu", element: <CustomMenu /> },
+        // Preserve main: Home and Profile require authentication.
         { path: "/login", element: <Login /> },
         { path: "/signup", element: <Signup /> },
         {
           element: <ProtectedRoute />,
-          children: [{ path: "/profile", element: <Profile /> }],
+          children: [
+            { index: true, element: <Home /> },
+            { path: "/menus", element: <MenuCatalog /> },
+            { path: "/create-menu", element: <CustomMenu /> },
+            { path: "/profile", element: <Profile /> },
+          ],
         },
       ],
     },
