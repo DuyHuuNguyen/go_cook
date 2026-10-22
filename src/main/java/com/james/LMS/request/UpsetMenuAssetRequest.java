@@ -9,6 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 @ToString
 @Getter
 public class UpsetMenuAssetRequest {
-    private Long menuId;
-    private MultipartFile file;
+  private Long menuId;
+  private MultipartFile file;
 }

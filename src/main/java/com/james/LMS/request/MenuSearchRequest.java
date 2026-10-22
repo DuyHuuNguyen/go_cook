@@ -16,8 +16,7 @@ import lombok.Setter;
 public class MenuSearchRequest {
   private String keyword;
 
-  @Positive
-  private Long categoryId;
+  @Positive private Long categoryId;
 
   @DecimalMin("0.0")
   private BigDecimal minPrice;
@@ -25,11 +24,9 @@ public class MenuSearchRequest {
   @DecimalMin("0.0")
   private BigDecimal maxPrice;
 
-  @Positive
-  private Integer diners;
+  @Positive private Integer diners;
 
-  @NotNull
-  private MenuSort sort = MenuSort.LATEST;
+  @NotNull private MenuSort sort = MenuSort.LATEST;
 
   @Min(1)
   private int page = 1;

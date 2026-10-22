@@ -1,7 +1,6 @@
 package com.james.LMS.facade.impl;
 
 import com.james.LMS.config.SecurityUserDetails;
-import com.james.LMS.dto.CategorySelectionContext;
 import com.james.LMS.entity.*;
 import com.james.LMS.enums.ErrorCode;
 import com.james.LMS.enums.FileType;
@@ -15,10 +14,8 @@ import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.MenuResponse;
 import com.james.LMS.response.PaginationResponse;
 import com.james.LMS.service.*;
-
 import java.io.IOException;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +30,10 @@ public class MenuFacadeImpl implements MenuFacade {
   private final CloudinaryService cloudinaryService;
   private final MenuAssetService menuAssetService;
 
-    @Override
-    public BaseResponse<PaginationResponse<MenuResponse>> findMenus(MenuSearchRequest request) {
-        return BaseResponse.build(PaginationResponse.from(menuService.findMenus(request)), true);
-    }
+  @Override
+  public BaseResponse<PaginationResponse<MenuResponse>> findMenus(MenuSearchRequest request) {
+    return BaseResponse.build(PaginationResponse.from(menuService.findMenus(request)), true);
+  }
 
   @Override
   @Transactional
@@ -59,9 +56,10 @@ public class MenuFacadeImpl implements MenuFacade {
             .seller(chef)
             .build();
 
-
-   Category category =  this.categoryService
-            .findById(request.getCategoryId()).orElseThrow(()-> new EntityNotFoundException(ErrorCode.CATEGORY_NOT_FOUND));
+    Category category =
+        this.categoryService
+            .findById(request.getCategoryId())
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CATEGORY_NOT_FOUND));
 
     menu.addCategory(category);
     List<Dish> dishes = this.dishService.findByIds(request.getDishIds(), principal.getId());
@@ -78,13 +76,15 @@ public class MenuFacadeImpl implements MenuFacade {
   public BaseResponse<Void> addMenuAssets(UpsetMenuAssetRequest request) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
 
-    Menu menu = menuService.findByIdAndChefId(request.getMenuId(), principal.getId())
+    Menu menu =
+        menuService
+            .findByIdAndChefId(request.getMenuId(), principal.getId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MENU_NOT_FOUND));
 
-    byte [] imageBytes;
+    byte[] imageBytes;
     try {
       imageBytes = request.getFile().getBytes();
-    } catch (IOException ioException){
+    } catch (IOException ioException) {
       throw new UploadFileException(ErrorCode.FILE_ERROR_UPLOAD);
     }
     String url = cloudinaryService.uploadFile(imageBytes, FileType.IMAGE);

@@ -10,11 +10,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MenuAssetServiceImpl implements MenuAssetService {
 
-    private final MenuAssetRepository menuAssetRepository;
+  private final MenuAssetRepository menuAssetRepository;
 
-    @Override
-    public void save(MenuAsset menuAsset) {
-        this.menuAssetRepository.save(menuAsset);
-    }
-
+  @Override
+  public void save(MenuAsset menuAsset) {
+    this.menuAssetRepository.save(menuAsset);
+  }
 }

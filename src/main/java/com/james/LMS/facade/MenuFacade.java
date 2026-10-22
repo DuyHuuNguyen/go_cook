@@ -10,7 +10,7 @@ import com.james.LMS.response.PaginationResponse;
 public interface MenuFacade {
   BaseResponse<PaginationResponse<MenuResponse>> findMenus(MenuSearchRequest request);
 
-    BaseResponse<Void> createMenu(UpsetMenuRequest request);
+  BaseResponse<Void> createMenu(UpsetMenuRequest request);
 
-    BaseResponse<Void> addMenuAssets(UpsetMenuAssetRequest request);
+  BaseResponse<Void> addMenuAssets(UpsetMenuAssetRequest request);
 }
