@@ -1637,3 +1637,17 @@
     color: #8a3329;
     font-size: 14px;
 }
+
+/* Phase 1 moderation UI, scoped to the existing admin frame. */
+.gca-root .gca-workflow-summary { display: grid; gap: 12px; margin-bottom: 20px; padding: 18px 20px; border: 1px solid #dce4dc; background: #fff; border-radius: 8px; font-size: 14px; }
+.gca-root .gca-workflow-summary p { margin: 0; }
+.gca-root .gca-workflow-notice { padding: 12px 14px; background: #f7f5eb; border-left: 3px solid #9a7a34; font-size: 13px; line-height: 1.6; }
+.gca-root .gca-demo-switch { display: flex; align-items: flex-start; gap: 10px; }
+.gca-root .gca-demo-switch input { margin-top: 4px; }
+.gca-root .gca-workflow-filter { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.gca-root .gca-workflow-filter select { max-width: 100%; padding: 8px 12px; border: 1px solid #cbd5cf; border-radius: 4px; background: white; }
+.gca-root .gca-workflow-help { font-size: 12px; color: #687268; }
+.gca-root .gca-action-controls { flex-wrap: wrap; }
+.gca-root .gca-detail-drawer dd { white-space: pre-wrap; overflow-wrap: anywhere; }
+.gca-root .gca-btn:disabled { cursor: not-allowed; opacity: .6; }
+@media (max-width: 650px) { .gca-root .gca-workflow-summary { padding: 14px; } .gca-root .gca-workflow-filter { align-items: stretch; flex-direction: column; } .gca-root .gca-action-controls > .gca-btn { flex: 1 1 100%; } }
