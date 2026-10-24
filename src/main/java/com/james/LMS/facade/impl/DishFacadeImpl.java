@@ -10,6 +10,7 @@ import com.james.LMS.request.UpsertDishRequest;
 import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.DishResponse;
 import com.james.LMS.response.KeySetPaginationResponse;
+import com.james.LMS.service.ChefApplicationService;
 import com.james.LMS.service.DishService;
 import com.james.LMS.service.UserService;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DishFacadeImpl implements DishFacade {
   private final DishService dishService;
   private final UserService userService;
+  private final ChefApplicationService chefApplicationService;
 
   @Override
   public BaseResponse<KeySetPaginationResponse<DishResponse>> findByLastId(Long lastId) {
@@ -49,6 +51,7 @@ public class DishFacadeImpl implements DishFacade {
   @Transactional
   public BaseResponse<Void> createDish(UpsertDishRequest request) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    chefApplicationService.requireApprovedSeller(principal.getId());
 
     User chef =
         this.userService

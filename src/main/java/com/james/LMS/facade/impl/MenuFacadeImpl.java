@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MenuFacadeImpl implements MenuFacade {
   private final MenuService menuService;
   private final UserService userService;
+  private final ChefApplicationService chefApplicationService;
   private final DishService dishService;
   private final CategoryService categoryService;
   private final CloudinaryService cloudinaryService;
@@ -39,6 +40,7 @@ public class MenuFacadeImpl implements MenuFacade {
   @Transactional
   public BaseResponse<Void> createMenu(UpsetMenuRequest request) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    chefApplicationService.requireApprovedSeller(principal.getId());
 
     User chef =
         this.userService
@@ -75,6 +77,7 @@ public class MenuFacadeImpl implements MenuFacade {
   @Transactional
   public BaseResponse<Void> addMenuAssets(UpsetMenuAssetRequest request) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    chefApplicationService.requireApprovedSeller(principal.getId());
 
     Menu menu =
         menuService

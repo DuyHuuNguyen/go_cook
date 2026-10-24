@@ -27,7 +27,7 @@ public class DishController {
       tags = {"Category APIs"},
       summary = "Pagination with id > last id and limit = 20")
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
-  @PreAuthorize("hasRole('ROLE_CHEF')")
+  @PreAuthorize("hasAuthority('ROLE_CHEF')")
   public BaseResponse<KeySetPaginationResponse<DishResponse>> findByLastId(
       @PathVariable("lastId") Long lastId) {
     return this.dishFacade.findByLastId(lastId);
@@ -37,7 +37,7 @@ public class DishController {
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"Category APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
-  @PreAuthorize("hasRole('ROLE_CHEF')")
+  @PreAuthorize("hasAuthority('ROLE_CHEF')")
   BaseResponse<Void> createDish(@Valid @RequestBody UpsertDishRequest request) {
     return this.dishFacade.createDish(request);
   }
