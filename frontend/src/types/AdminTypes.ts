@@ -16,6 +16,29 @@ export type AdminRow = {
   [key: string]: string | undefined;
 };
 
+export type ChefApplicationStatus =
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "SUSPENDED";
+
+export type ChefApplication = {
+  id: number;
+  userId: number;
+  username: string;
+  email: string;
+  phone: string;
+  provinceCode: string | null;
+  wardCode: string | null;
+  bio: string | null;
+  experienceYears: number;
+  status: ChefApplicationStatus;
+  reason: string | null;
+  submittedAt: number | null;
+  statusChangedAt: number | null;
+  statusChangedBy: number | null;
+};
+
 export type AdminCollection = {
   rows: AdminRow[];
   total: number | null;
@@ -52,9 +75,12 @@ export const adminSections: Record<AdminSection, AdminSectionInfo> = {
     columns: [
       { key: "id", label: "Mã hồ sơ" },
       { key: "name", label: "Tên đầu bếp" },
-      { key: "area", label: "Khu vực" },
+      { key: "email", label: "Email" },
+      { key: "phone", label: "Số điện thoại" },
+      { key: "area", label: "Khu vực (mã)" },
       { key: "experience", label: "Kinh nghiệm" },
       { key: "status", label: "Hồ sơ / hoạt động" },
+      { key: "submittedAt", label: "Ngày gửi" },
     ],
   },
   menus: {

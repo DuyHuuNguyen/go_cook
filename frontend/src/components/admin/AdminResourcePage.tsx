@@ -6,7 +6,11 @@ import {
   type AdminRow,
   type AdminSection,
 } from "../../types/AdminTypes";
-import { clearAdminTableCache } from "../../clients/AdminClient";
+import {
+  adminApiErrorMessage,
+  clearAdminTableCache,
+  getChefApplication,
+} from "../../clients/AdminClient";
 import AdminDataTable from "./AdminDataTable";
 import AdminActionPanel from "./AdminActionPanel";
 
@@ -43,7 +47,29 @@ export default function AdminResourcePage({ resource }: Props) {
   );
   const [revision, setRevision] = useState(0);
   const [selected, setSelected] = useState<AdminRow | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
+  const [detailRevision, setDetailRevision] = useState(0);
   const [editing, setEditing] = useState<AdminRow | "new" | null>(null);
+
+  useEffect(() => {
+    if (resource !== "chefs" || demoEnabled || !selected) return;
+    const controller = new AbortController();
+    setDetailLoading(true);
+    setDetailError("");
+    void getChefApplication(selected.id, controller.signal)
+      .then((detail) => {
+        if (!controller.signal.aborted) setSelected(detail);
+      })
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted)
+          setDetailError(adminApiErrorMessage(reason));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDetailLoading(false);
+      });
+    return () => controller.abort();
+  }, [resource, demoEnabled, selected?.id, detailRevision]);
 
   useEffect(() => {
     setSelected(null);
@@ -90,8 +116,9 @@ export default function AdminResourcePage({ resource }: Props) {
             <p>{workflowNotes[resource]}</p>
           </details>
           <p className="gca-workflow-notice">
-            Chế độ chỉ đọc · Các thao tác quản trị chưa có API và chưa thể áp
-            dụng.
+            {resource === "chefs" && !demoEnabled
+              ? "Xét duyệt đầu bếp sử dụng API và dữ liệu PostgreSQL."
+              : "Chế độ chỉ đọc · Các thao tác quản trị chưa có API và chưa thể áp dụng."}
           </p>
           {import.meta.env.DEV && (
             <label className="gca-demo-switch">
@@ -120,7 +147,7 @@ export default function AdminResourcePage({ resource }: Props) {
               <select
                 aria-label="Lọc trạng thái"
                 value={statusFilter}
-                disabled={!demoEnabled}
+                disabled={!demoEnabled && resource !== "chefs"}
                 onChange={(event) => {
                   setStatusFilter(event.target.value);
                   setSelected(null);
@@ -139,8 +166,9 @@ export default function AdminResourcePage({ resource }: Props) {
           </div>
           {!demoEnabled && (
             <p className="gca-workflow-help">
-              Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các
-              trạng thái nghiệp vụ. Tìm kiếm của bảng vẫn dùng API đọc hiện tại.
+              {resource === "chefs"
+                ? "Lọc trạng thái và phân trang dùng backend. Tìm kiếm từ khóa và sắp xếp toàn bộ hồ sơ chưa được API hỗ trợ nên đã tắt."
+                : "Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các trạng thái nghiệp vụ. Tìm kiếm của bảng vẫn dùng API đọc hiện tại."}
             </p>
           )}
         </section>
@@ -157,10 +185,17 @@ export default function AdminResourcePage({ resource }: Props) {
         <AdminDataTable
           key={`${resource}-${revision}-${query}-${demoEnabled}-${statusFilter}`}
           resource={resource}
-          initialSearch={query}
+          initialSearch={resource === "chefs" && !demoEnabled ? "" : query}
           revision={revision}
-          onView={setSelected}
+          onView={(row) => {
+            setDetailLoading(resource === "chefs" && !demoEnabled);
+            setDetailError("");
+            setSelected(row);
+          }}
           demoRows={demoRows}
+          statusFilter={
+            resource === "chefs" && !demoEnabled ? statusFilter : ""
+          }
         />
       </section>
       {selected && (
@@ -186,31 +221,47 @@ export default function AdminResourcePage({ resource }: Props) {
                 <XLg size={20} />
               </button>
             </div>
-            <dl>
-              {section.columns.map((column) => (
-                <div key={column.key}>
-                  <dt>{column.label}</dt>
-                  <dd>
-                    {column.key === "status" && isWorkflowSection(resource)
-                      ? workflowLabel(resource, selected)
-                      : selected[column.key] || "—"}
-                  </dd>
-                </div>
-              ))}
-              {isWorkflowSection(resource) &&
-                workflowDetails[resource].map((field) => (
-                  <div key={field.key}>
-                    <dt>{field.label}</dt>
-                    <dd>{selected[field.key] || "Chưa được cung cấp"}</dd>
+            {detailLoading && resource === "chefs" && !demoEnabled && (
+              <p role="status">Đang tải chi tiết hồ sơ...</p>
+            )}
+            {detailError && resource === "chefs" && !demoEnabled && (
+              <div role="alert" className="gca-form-error">
+                {detailError}{" "}
+                <button
+                  type="button"
+                  onClick={() => setDetailRevision((value) => value + 1)}
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
+            {!detailLoading && !detailError && (
+              <dl>
+                {section.columns.map((column) => (
+                  <div key={column.key}>
+                    <dt>{column.label}</dt>
+                    <dd>
+                      {column.key === "status" && isWorkflowSection(resource)
+                        ? workflowLabel(resource, selected)
+                        : selected[column.key] || "—"}
+                    </dd>
                   </div>
                 ))}
-              {selected.description && (
-                <div>
-                  <dt>Mô tả</dt>
-                  <dd>{selected.description}</dd>
-                </div>
-              )}
-            </dl>
+                {isWorkflowSection(resource) &&
+                  workflowDetails[resource].map((field) => (
+                    <div key={field.key}>
+                      <dt>{field.label}</dt>
+                      <dd>{selected[field.key] || "Chưa được cung cấp"}</dd>
+                    </div>
+                  ))}
+                {resource !== "chefs" && selected.description && (
+                  <div>
+                    <dt>Mô tả</dt>
+                    <dd>{selected.description}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
             <div className="gca-heading-buttons">
               <button
                 type="button"
@@ -219,20 +270,28 @@ export default function AdminResourcePage({ resource }: Props) {
               >
                 Đóng
               </button>
-              {(!isWorkflowSection(resource) ||
-                workflowActions(resource, selected).length > 0) && (
-                <button
-                  type="button"
-                  className="gca-btn gca-btn-primary"
-                  onClick={() => {
-                    setEditing(selected);
-                    setSelected(null);
-                  }}
-                >
-                  {managed ? "Xem thao tác quản trị" : "Chỉnh sửa"}
-                </button>
-              )}
-              {isWorkflowSection(resource) &&
+              {!detailLoading &&
+                !detailError &&
+                (!isWorkflowSection(resource) ||
+                  workflowActions(resource, selected).length > 0) && (
+                  <button
+                    type="button"
+                    className="gca-btn gca-btn-primary"
+                    onClick={() => {
+                      setEditing(selected);
+                      setSelected(null);
+                    }}
+                  >
+                    {resource === "chefs" && !demoEnabled
+                      ? "Xét duyệt hồ sơ"
+                      : managed
+                        ? "Xem thao tác quản trị"
+                        : "Chỉnh sửa"}
+                  </button>
+                )}
+              {!detailLoading &&
+                !detailError &&
+                isWorkflowSection(resource) &&
                 !workflowActions(resource, selected).length && (
                   <p className="gca-workflow-notice">
                     {resource === "chefs" &&
@@ -250,6 +309,7 @@ export default function AdminResourcePage({ resource }: Props) {
           key={`${resource}-${editing === "new" ? "new" : editing.id}`}
           resource={resource}
           record={editing === "new" ? null : editing}
+          demo={demoEnabled}
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);

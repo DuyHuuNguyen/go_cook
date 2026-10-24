@@ -11,7 +11,10 @@ import {
   type AdminRow,
   type AdminSection,
 } from "../../types/AdminTypes";
-import { getAdminTablePage } from "../../clients/AdminClient";
+import {
+  adminApiErrorMessage,
+  getAdminTablePage,
+} from "../../clients/AdminClient";
 
 import {
   isWorkflowSection,
@@ -27,6 +30,7 @@ type Props = {
   onView: (row: AdminRow) => void;
   revision: number;
   demoRows?: AdminRow[];
+  statusFilter?: string;
 };
 
 function escapeText(value: string | null | undefined): string {
@@ -80,8 +84,10 @@ export default function AdminDataTable({
   onView,
   revision,
   demoRows,
+  statusFilter = "",
 }: Props) {
   const [error, setError] = useState<string | null>(null);
+  const realChefs = resource === "chefs" && demoRows === undefined;
   const section = adminSections[resource];
   const tableKey = `${resource}-${revision}-${initialSearch}`;
 
@@ -148,12 +154,15 @@ export default function AdminDataTable({
     () => ({
       serverSide: demoRows === undefined,
       data: demoRows,
+      searching: !realChefs,
+      ordering: !realChefs,
       processing: true,
       pageLength: 10,
       lengthMenu: [10, 20, 50],
       order: [] as Array<[number, "asc" | "desc"]>,
       initComplete: function () {
-        if (initialSearch) this.api().search(initialSearch).draw();
+        if (initialSearch && !realChefs)
+          this.api().search(initialSearch).draw();
       },
       searchDelay: 400,
       autoWidth: false,
@@ -192,9 +201,10 @@ export default function AdminDataTable({
               resource,
               page,
               pageSize,
-              request.search?.value || "",
-              sortBy,
+              realChefs ? "" : request.search?.value || "",
+              realChefs ? "" : sortBy,
               direction,
+              statusFilter,
             )
               .then((result) => {
                 setError(null);
@@ -206,7 +216,11 @@ export default function AdminDataTable({
                 });
               })
               .catch((reason: unknown) => {
-                setError(errorMessage(reason));
+                setError(
+                  realChefs
+                    ? adminApiErrorMessage(reason)
+                    : errorMessage(reason),
+                );
                 callback({
                   draw: request.draw || 0,
                   recordsTotal: 0,
@@ -216,7 +230,7 @@ export default function AdminDataTable({
               });
           },
     }),
-    [resource, section, initialSearch, demoRows],
+    [resource, section, initialSearch, demoRows, realChefs, statusFilter],
   );
 
   const slots = useMemo(

@@ -1,8 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import { XLg } from "react-bootstrap-icons";
-import { saveAdminRecord } from "../../clients/AdminClient";
-import { type AdminRow, type AdminSection } from "../../types/AdminTypes";
+import {
+  adminApiErrorMessage,
+  reviewChefApplication,
+  saveAdminRecord,
+} from "../../clients/AdminClient";
+import {
+  type AdminRow,
+  type AdminSection,
+  type ChefApplicationStatus,
+} from "../../types/AdminTypes";
+import { useApp } from "../../contexts/AppContext";
 
 import {
   isWorkflowSection,
@@ -16,6 +25,7 @@ type Props = {
   record: AdminRow | null;
   onClose: () => void;
   onSaved: () => void;
+  demo: boolean;
 };
 
 type ActionInfo = {
@@ -66,6 +76,7 @@ export default function AdminActionPanel({
   record,
   onClose,
   onSaved,
+  demo,
 }: Props) {
   const info = actions[resource];
   const [value, setValue] = useState(record?.[info.key] || "");
@@ -99,6 +110,11 @@ export default function AdminActionPanel({
       setSaving(false);
     }
   }
+
+  if (resource === "chefs" && record && !demo)
+    return (
+      <ChefActionPanel record={record} onClose={onClose} onSaved={onSaved} />
+    );
 
   if (isWorkflowSection(resource) && record)
     return (
@@ -185,6 +201,157 @@ export default function AdminActionPanel({
               type="submit"
             >
               {saving ? "Đang lưu..." : "Lưu"}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+const chefTargets: Record<string, ChefApplicationStatus> = {
+  approve: "APPROVED",
+  reject: "REJECTED",
+  suspend: "SUSPENDED",
+  resume: "APPROVED",
+};
+
+function ChefActionPanel({
+  record,
+  onClose,
+  onSaved,
+}: {
+  record: AdminRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { notify } = useApp();
+  const available = workflowActions("chefs", record);
+  const [actionId, setActionId] = useState(available[0]?.id || "");
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const inFlight = useRef(false);
+  const action = available.find((item) => item.id === actionId);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (inFlight.current) return;
+    if (!action || !chefTargets[action.id]) {
+      setError("Trạng thái hồ sơ hiện không cho phép thao tác này.");
+      return;
+    }
+    if (action.reasonRequired && !reason.trim()) {
+      setError("Vui lòng nhập lý do, không chỉ khoảng trắng.");
+      return;
+    }
+    inFlight.current = true;
+    setSaving(true);
+    setError("");
+    try {
+      await reviewChefApplication(record.id, chefTargets[action.id], reason);
+      notify(`${action.label} thành công.`, {
+        title: "Hồ sơ đầu bếp",
+        variant: "success",
+      });
+      onSaved();
+    } catch (reason) {
+      setError(adminApiErrorMessage(reason));
+    } finally {
+      inFlight.current = false;
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      className="gca-dialog-backdrop"
+      role="presentation"
+      onClick={() => {
+        if (!saving) onClose();
+      }}
+    >
+      <section
+        className="gca-detail-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Xét duyệt đầu bếp"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="gca-drawer-head">
+          <h2>Xét duyệt đầu bếp</h2>
+          <button
+            type="button"
+            aria-label="Đóng"
+            disabled={saving}
+            onClick={onClose}
+          >
+            <XLg size={20} />
+          </button>
+        </div>
+        <p className="gca-action-record">
+          {record.name} · #{record.id}
+          <br />
+          {workflowLabel("chefs", record)}
+        </p>
+        <form
+          className="gca-action-form"
+          onSubmit={(event) => void submit(event)}
+        >
+          <label>
+            Hành động
+            <select
+              autoFocus
+              required
+              disabled={saving}
+              value={actionId}
+              onChange={(event) => {
+                setActionId(event.target.value);
+                setError("");
+              }}
+            >
+              {available.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {action && <p>{action.description}</p>}
+          <label>
+            Lý do {action?.reasonRequired ? "(bắt buộc)" : "(không bắt buộc)"}
+            <textarea
+              rows={4}
+              maxLength={1000}
+              required={action?.reasonRequired}
+              disabled={saving}
+              value={reason}
+              onChange={(event) => {
+                setReason(event.target.value);
+                setError("");
+              }}
+            />
+          </label>
+          {error && (
+            <p role="alert" className="gca-form-error">
+              {error}
+            </p>
+          )}
+          <div className="gca-action-controls">
+            <button
+              type="button"
+              className="gca-btn gca-btn-outline"
+              disabled={saving}
+              onClick={onClose}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              className="gca-btn gca-btn-primary"
+              disabled={saving || !action}
+            >
+              {saving ? "Đang xử lý..." : "Xác nhận"}
             </button>
           </div>
         </form>

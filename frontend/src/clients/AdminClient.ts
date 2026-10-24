@@ -5,6 +5,8 @@ import type {
   AdminCollection,
   AdminRow,
   AdminSection,
+  ChefApplication,
+  ChefApplicationStatus,
 } from "../types/AdminTypes";
 
 type JsonRecord = Record<string, unknown>;
@@ -89,6 +91,127 @@ function money(value: unknown): string {
   return Number.isFinite(numeric)
     ? `${numeric.toLocaleString("vi-VN")} đ`
     : text(value);
+}
+
+const chefStatuses: ChefApplicationStatus[] = [
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "SUSPENDED",
+];
+
+function chefApplication(input: unknown): ChefApplication {
+  const record = object(input);
+  if (
+    typeof record.id !== "number" ||
+    !Number.isSafeInteger(record.id) ||
+    typeof record.userId !== "number" ||
+    !Number.isSafeInteger(record.userId) ||
+    typeof record.username !== "string" ||
+    typeof record.email !== "string" ||
+    typeof record.phone !== "string" ||
+    typeof record.experienceYears !== "number" ||
+    !chefStatuses.includes(record.status as ChefApplicationStatus)
+  ) {
+    throw new Error("API trả hồ sơ đầu bếp không hợp lệ.");
+  }
+  return record as ChefApplication;
+}
+
+function chefDate(value: number | null): string {
+  if (value == null) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function chefRow(input: unknown): AdminRow {
+  const chef = chefApplication(input);
+  return {
+    id: String(chef.id),
+    userId: String(chef.userId),
+    name: chef.username,
+    email: chef.email,
+    phone: chef.phone || "",
+    area: [chef.provinceCode, chef.wardCode].filter(Boolean).join(" / "),
+    provinceCode: chef.provinceCode || "",
+    wardCode: chef.wardCode || "",
+    experience: `${chef.experienceYears} năm`,
+    status: chef.status,
+    description: chef.bio || "",
+    submittedAt: chefDate(chef.submittedAt),
+    reason: chef.reason || "",
+    statusChangedAt: chefDate(chef.statusChangedAt),
+    statusChangedBy:
+      chef.statusChangedBy == null ? "" : String(chef.statusChangedBy),
+  };
+}
+
+export async function getChefApplication(
+  id: string,
+  signal?: AbortSignal,
+): Promise<AdminRow> {
+  const response = await axiosClient.get<unknown>(
+    `${ENDPOINTS.ADMIN.CHEFS}/${encodeURIComponent(id)}`,
+    { signal },
+  );
+  return chefRow(readPayload(response.data));
+}
+
+export async function reviewChefApplication(
+  id: string,
+  status: ChefApplicationStatus,
+  reason: string,
+): Promise<void> {
+  const response = await axiosClient.patch<unknown>(
+    `${ENDPOINTS.ADMIN.CHEFS}/${encodeURIComponent(id)}/status`,
+    { status, reason: reason.trim() || null },
+  );
+  chefApplication(readPayload(response.data));
+}
+
+export function adminApiErrorMessage(reason: unknown): string {
+  if (!axios.isAxiosError(reason))
+    return reason instanceof Error
+      ? reason.message
+      : "Không thể xử lý yêu cầu.";
+  const status = reason.response?.status;
+  const response = object(reason.response?.data);
+  const detail = object(response.data);
+  const message = text(detail.message ?? response.message);
+  if (status === 401)
+    return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+  if (status === 403) return "Tài khoản không có quyền quản trị đầu bếp.";
+  if (status === 404) return "Không tìm thấy hồ sơ hoặc API quản trị đầu bếp.";
+  if (status === 409)
+    return message || "Hồ sơ đã thay đổi. Vui lòng tải lại danh sách.";
+  if (status === 400)
+    return message || "Dữ liệu không hợp lệ hoặc trạng thái đã thay đổi.";
+  if (!reason.response) return "Không kết nối được backend. Vui lòng thử lại.";
+  return message || "Backend không thể xử lý yêu cầu. Vui lòng thử lại.";
+}
+
+function chefPage(input: unknown): AdminTablePage {
+  const result = object(readPayload(input));
+  if (
+    !Array.isArray(result.data) ||
+    typeof result.totalElements !== "number" ||
+    !Number.isSafeInteger(result.totalElements) ||
+    result.totalElements < 0
+  )
+    throw new Error("API trả dữ liệu phân trang đầu bếp không hợp lệ.");
+  return {
+    rows: result.data.map(chefRow),
+    recordsTotal: result.totalElements,
+    recordsFiltered: result.totalElements,
+  };
 }
 
 function rowFor(section: AdminSection, item: unknown): AdminRow {
@@ -202,6 +325,21 @@ export async function getAdminCollection(
   cursor: number,
   signal?: AbortSignal,
 ): Promise<AdminCollection> {
+  if (section === "chefs") {
+    if (keyword.trim())
+      throw new Error("Backend chưa hỗ trợ tìm kiếm hồ sơ đầu bếp.");
+    const response = await axiosClient.get<unknown>(ENDPOINTS.ADMIN.CHEFS, {
+      signal,
+      params: { page, size: 10 },
+    });
+    const result = chefPage(response.data);
+    return {
+      rows: result.rows,
+      total: result.recordsTotal,
+      hasNext: page * 10 < result.recordsTotal,
+      nextCursor: null,
+    };
+  }
   let response;
   let keyset = false;
   try {
@@ -376,8 +514,24 @@ export async function getAdminTablePage(
   keyword: string,
   sortBy: string,
   sortDirection: AdminTableSort,
+  statusFilter = "",
 ): Promise<AdminTablePage> {
   const search = keyword.trim();
+  if (section === "chefs") {
+    if (search || sortBy)
+      throw new Error(
+        "Backend chưa hỗ trợ tìm kiếm hoặc sắp xếp hồ sơ đầu bếp.",
+      );
+    if (
+      statusFilter &&
+      !chefStatuses.includes(statusFilter as ChefApplicationStatus)
+    )
+      throw new Error("Trạng thái lọc đầu bếp không hợp lệ.");
+    const response = await axiosClient.get<unknown>(ENDPOINTS.ADMIN.CHEFS, {
+      params: { page, size, status: statusFilter || undefined },
+    });
+    return chefPage(response.data);
+  }
   let response;
 
   try {
