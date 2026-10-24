@@ -1,8 +1,10 @@
 package com.james.LMS.repository.specification;
 
+import com.james.LMS.entity.ChefProfile;
 import com.james.LMS.entity.Dish;
 import com.james.LMS.entity.Menu;
 import com.james.LMS.entity.MenuDish;
+import com.james.LMS.enums.ChefApplicationStatus;
 import com.james.LMS.request.MenuSearchRequest;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
@@ -21,6 +23,8 @@ public final class MenuSpecifications {
       List<Predicate> predicates = new ArrayList<>();
       predicates.add(builder.isTrue(root.get("isActive")));
       predicates.add(root.get("status").in("PUBLISHED", "ACTIVE"));
+      predicates.add(builder.isTrue(root.get("seller").get("isActive")));
+      predicates.add(approvedChef(root, query.subquery(Long.class), builder));
 
       if (request.getCategoryId() != null) {
         predicates.add(builder.equal(root.get("category").get("id"), request.getCategoryId()));
@@ -51,6 +55,18 @@ public final class MenuSpecifications {
 
       return builder.and(predicates.toArray(Predicate[]::new));
     };
+  }
+
+  private static Predicate approvedChef(
+      Root<Menu> menu, Subquery<Long> subquery, CriteriaBuilder builder) {
+    Root<ChefProfile> profile = subquery.from(ChefProfile.class);
+    subquery
+        .select(profile.get("id"))
+        .where(
+            builder.equal(profile.get("user").get("id"), menu.get("seller").get("id")),
+            builder.isTrue(profile.get("isActive")),
+            builder.equal(profile.get("reviewStatus"), ChefApplicationStatus.APPROVED));
+    return builder.exists(subquery);
   }
 
   private static Predicate dishNameMatches(
