@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,6 +44,7 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
   private final CacheService cacheService;
   private final AuthenticationManager authenticationManager;
   private final ChefApplicationService chefApplicationService;
+  private final UserService userService;
 
   @Value("${security.cookie.secure:false}")
   private boolean cookieSecure;
@@ -78,6 +81,9 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
   public BaseResponse<Void> refreshToken(
       RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
     String email = jwtService.getEmailFromJwtToken(refreshTokenRequest.getRefreshToken());
+    if (userService.findByEmail(email).filter(user -> user.isActive()).isEmpty()) {
+      throw new InvalidTokenException(ErrorCode.JWT_INVALID);
+    }
 
     String refreshTokenKey = cacheKey(TokenType.REFRESH_TOKEN, email);
     if (!refreshTokenRequest.getRefreshToken().equals(cacheService.retrieve(refreshTokenKey))) {
@@ -123,8 +129,12 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
   }
 
   private Authentication authenticate(String email, String password) {
-    return authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(email, password));
+    try {
+      return authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(email, password));
+    } catch (DisabledException exception) {
+      throw new BadCredentialsException("Email or password is incorrect");
+    }
   }
 
   private SecurityUserDetails getCurrentPrincipal() {

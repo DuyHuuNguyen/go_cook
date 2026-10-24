@@ -4,6 +4,7 @@ import { XLg } from "react-bootstrap-icons";
 import {
   adminApiErrorMessage,
   reviewChefApplication,
+  reviewAdminUser,
   saveAdminRecord,
 } from "../../clients/AdminClient";
 import {
@@ -111,6 +112,11 @@ export default function AdminActionPanel({
     }
   }
 
+  if (resource === "users" && record && !demo)
+    return (
+      <UserActionPanel record={record} onClose={onClose} onSaved={onSaved} />
+    );
+
   if (resource === "chefs" && record && !demo)
     return (
       <ChefActionPanel record={record} onClose={onClose} onSaved={onSaved} />
@@ -201,6 +207,129 @@ export default function AdminActionPanel({
               type="submit"
             >
               {saving ? "Đang lưu..." : "Lưu"}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+function UserActionPanel({
+  record,
+  onClose,
+  onSaved,
+}: {
+  record: AdminRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { notify } = useApp();
+  const action = workflowActions("users", record)[0];
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const inFlight = useRef(false);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (inFlight.current || !action) return;
+    if (action.reasonRequired && !reason.trim()) {
+      setError("Vui lòng nhập lý do khóa, không chỉ khoảng trắng.");
+      return;
+    }
+    inFlight.current = true;
+    setSaving(true);
+    setError("");
+    try {
+      await reviewAdminUser(
+        record.id,
+        action.id === "lock" ? "LOCKED" : "ACTIVE",
+        reason,
+      );
+      notify(`${action.label} thành công.`, {
+        title: "Tài khoản",
+        variant: "success",
+      });
+      onSaved();
+    } catch (failure) {
+      setError(adminApiErrorMessage(failure));
+    } finally {
+      inFlight.current = false;
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      className="gca-dialog-backdrop"
+      role="presentation"
+      onClick={() => {
+        if (!saving) onClose();
+      }}
+    >
+      <section
+        className="gca-detail-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Xử lý tài khoản"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="gca-drawer-head">
+          <h2>{action?.label || "Xử lý tài khoản"}</h2>
+          <button
+            type="button"
+            aria-label="Đóng"
+            disabled={saving}
+            onClick={onClose}
+          >
+            <XLg size={20} />
+          </button>
+        </div>
+        <p className="gca-action-record">
+          {record.name} · #{record.id}
+          <br />
+          {record.email}
+        </p>
+        <p className="gca-workflow-notice">{action?.description}</p>
+        <form
+          className="gca-action-form"
+          onSubmit={(event) => void submit(event)}
+        >
+          {action?.reasonRequired && (
+            <label>
+              Lý do khóa (bắt buộc)
+              <textarea
+                required
+                maxLength={1000}
+                rows={4}
+                disabled={saving}
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+              />
+            </label>
+          )}
+          {!action?.reasonRequired && <p>Xác nhận mở khóa tài khoản này?</p>}
+          {error && (
+            <p role="alert" className="gca-form-error">
+              {error}
+            </p>
+          )}
+          <div className="gca-action-controls">
+            <button
+              type="button"
+              className="gca-btn gca-btn-outline"
+              disabled={saving}
+              onClick={onClose}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              className="gca-btn gca-btn-primary"
+              disabled={saving || !action}
+            >
+              {saving ? "Đang xử lý..." : "Xác nhận"}
             </button>
           </div>
         </form>

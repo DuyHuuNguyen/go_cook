@@ -57,4 +57,11 @@ public class PublicEndpointsValidatorUtil {
   public static boolean isPublicEndpoint(String path) {
     return PUBLIC_ENDPOINTS.contains(path) || PUBLIC_PREFIXES.stream().anyMatch(path::startsWith);
   }
+
+  public static boolean isPublicEndpoint(String path, String method) {
+    if ("/api/v1/menus".equals(path)) {
+      return "GET".equals(method);
+    }
+    return isPublicEndpoint(path);
+  }
 }

@@ -8,11 +8,11 @@ const { outputText } = ts.transpileModule(source, { compilerOptions: { module: t
 const { workflowActions, workflowState } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
 const row = (values) => ({ id: 'TEST', name: 'Test record', ...values });
 
-test('USER can only lock or unlock, with a required reason for either action', () => {
+test('USER lock requires a reason; unlock preserves the last lock reason', () => {
   for (const status of ['ACTIVE', 'LOCKED']) {
     const actions = workflowActions('users', row({ status }));
     assert.equal(actions.length, 1);
-    assert.equal(actions[0].reasonRequired, true);
+    assert.equal(actions[0].reasonRequired, status === 'ACTIVE');
     assert.equal(actions[0].id, status === 'ACTIVE' ? 'lock' : 'unlock');
   }
   assert.deepEqual(workflowActions('users', row({ status: 'unknown' })), []);

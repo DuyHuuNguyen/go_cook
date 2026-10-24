@@ -13,7 +13,7 @@ output = output
   .replace('import axiosClient from "./AxiosClient";',
     'const axiosClient = globalThis.__chefAdminTestClient;')
   .replace('import { ENDPOINTS } from "../config/ApiConfig";',
-    'const ENDPOINTS = { ADMIN: { CHEFS: "/api/v1/admin/chef-applications" } };');
+    'const ENDPOINTS = { ADMIN: { CHEFS: "/api/v1/admin/chef-applications", USERS: "/api/v1/admin/users" } };');
 
 const requests = [];
 globalThis.__chefAdminTestClient = {
@@ -52,6 +52,19 @@ test("Chef list sends the backend status and page, maps real fields and total", 
   assert.equal(result.rows[0].experience, "5 năm");
   assert.match(result.rows[0].submittedAt, /24\/10\/2026/);
   assert.equal(requests.length, 1);
+});
+
+test("USER list uses backend search and status; detail and lock use real endpoints", async () => {
+  requests.length = 0;
+  const user = { id: 23, username: "User Test", email: "user@example.invalid", phone: "0900000000", roles: ["ROLE_USER"], status: "ACTIVE", lockReason: null, lockedAt: null, lockedBy: null };
+  globalThis.__chefAdminTestResponse = { data: [user], totalElements: 1 };
+  const page = await client.getAdminTablePage("users", 1, 10, "user@", "", "asc", "ACTIVE");
+  assert.deepEqual(requests[0], { method: "GET", url: "/api/v1/admin/users", options: { params: { page: 1, size: 10, keyword: "user@", status: "ACTIVE" } } });
+  assert.equal(page.rows[0].status, "ACTIVE");
+  globalThis.__chefAdminTestResponse = user;
+  assert.equal((await client.getAdminUser("23")).email, user.email);
+  await client.reviewAdminUser("23", "LOCKED", "  Vi phạm  ");
+  assert.deepEqual(requests[2], { method: "PATCH", url: "/api/v1/admin/users/23/status", body: { status: "LOCKED", reason: "Vi phạm" } });
 });
 
 test("Chef client refuses unsupported global search and sorting", async () => {

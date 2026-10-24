@@ -88,6 +88,7 @@ export default function AdminDataTable({
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const realChefs = resource === "chefs" && demoRows === undefined;
+  const realUsers = resource === "users" && demoRows === undefined;
   const section = adminSections[resource];
   const tableKey = `${resource}-${revision}-${initialSearch}`;
 
@@ -155,7 +156,7 @@ export default function AdminDataTable({
       serverSide: demoRows === undefined,
       data: demoRows,
       searching: !realChefs,
-      ordering: !realChefs,
+      ordering: !realChefs && !realUsers,
       processing: true,
       pageLength: 10,
       lengthMenu: [10, 20, 50],
@@ -202,7 +203,7 @@ export default function AdminDataTable({
               page,
               pageSize,
               realChefs ? "" : request.search?.value || "",
-              realChefs ? "" : sortBy,
+              realChefs || realUsers ? "" : sortBy,
               direction,
               statusFilter,
             )
@@ -217,7 +218,7 @@ export default function AdminDataTable({
               })
               .catch((reason: unknown) => {
                 setError(
-                  realChefs
+                  realChefs || realUsers
                     ? adminApiErrorMessage(reason)
                     : errorMessage(reason),
                 );
@@ -230,7 +231,15 @@ export default function AdminDataTable({
               });
           },
     }),
-    [resource, section, initialSearch, demoRows, realChefs, statusFilter],
+    [
+      resource,
+      section,
+      initialSearch,
+      demoRows,
+      realChefs,
+      realUsers,
+      statusFilter,
+    ],
   );
 
   const slots = useMemo(

@@ -1,22 +1,33 @@
 package com.james.LMS.chef;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.james.LMS.config.SecurityUserDetails;
 import com.james.LMS.controller.ChefApplicationController;
 import com.james.LMS.controller.UserControllerV2;
+import com.james.LMS.entity.Category;
 import com.james.LMS.entity.User;
 import com.james.LMS.enums.ChefApplicationStatus;
 import com.james.LMS.enums.RoleEnum;
+import com.james.LMS.enums.TokenType;
 import com.james.LMS.facade.DishFacade;
 import com.james.LMS.facade.MenuFacade;
+import com.james.LMS.repository.CategoryRepository;
 import com.james.LMS.repository.ChefProfileRepository;
+import com.james.LMS.repository.MenuRepository;
 import com.james.LMS.repository.RoleRepository;
 import com.james.LMS.repository.UserRepository;
 import com.james.LMS.request.BecomeChefRequest;
 import com.james.LMS.request.ChefReviewRequest;
+import com.james.LMS.service.CacheService;
 import com.james.LMS.service.ChefApplicationService;
+import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +37,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Local PostgreSQL only; application fixtures are rolled back after every test. */
@@ -41,11 +56,14 @@ import org.springframework.transaction.annotation.Transactional;
       "spring.rabbitmq.listener.direct.auto-startup=false"
     })
 @EnabledIfEnvironmentVariable(named = "GOCOOK_CHEF_INTEGRATION", matches = "true")
+@AutoConfigureMockMvc
 @Transactional
 class ChefApplicationIntegrationTest {
   @Autowired UserRepository users;
   @Autowired RoleRepository roles;
   @Autowired ChefProfileRepository profiles;
+  @Autowired CategoryRepository categories;
+  @Autowired MenuRepository menuRepository;
   @Autowired ChefApplicationService service;
   @Autowired UserControllerV2 userController;
   @Autowired ChefApplicationController controller;
@@ -54,10 +72,276 @@ class ChefApplicationIntegrationTest {
   @Autowired JdbcTemplate jdbc;
   @Autowired ObjectMapper mapper;
   @Autowired DataSource dataSource;
+  @Autowired MockMvc mvc;
+  @Autowired PasswordEncoder encoder;
+  @Autowired CacheService cache;
 
   @AfterEach
   void clearSecurity() {
     SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  void httpLifecycleUsesRealLoginCookiesAndDatabase() throws Exception {
+    try (var connection = dataSource.getConnection()) {
+      assertThat(connection.getMetaData().getURL()).startsWith("jdbc:postgresql://localhost:");
+    }
+    String password = "ChefHttpTest-" + UUID.randomUUID();
+    User user = createHttpUser(RoleEnum.ROLE_USER, password);
+    User admin = createHttpUser(RoleEnum.ROLE_SYSTEM_ADMIN, password);
+    try {
+      Cookie userCookie = loginCookie(user.getEmail(), password);
+      Cookie adminCookie = loginCookie(admin.getEmail(), password);
+      Category category =
+          categories.saveAndFlush(
+              Category.builder().name("Chef HTTP " + UUID.randomUUID()).build());
+      String menuRequest =
+          mapper.writeValueAsString(
+              Map.of(
+                  "name",
+                  "Chef HTTP menu " + UUID.randomUUID(),
+                  "tempPrice",
+                  100000,
+                  "minGuests",
+                  2,
+                  "maxGuests",
+                  4,
+                  "status",
+                  "ACTIVE",
+                  "categoryId",
+                  category.getId(),
+                  "dishIds",
+                  List.of()));
+      mvc.perform(get("/api/v1/menus")).andExpect(status().isOk());
+      mvc.perform(
+              options("/api/v1/menus")
+                  .header("Origin", "http://localhost:5173")
+                  .header("Access-Control-Request-Method", "POST"))
+          .andExpect(status().isOk());
+      mvc.perform(post("/api/v1/menus").contentType("application/json").content(menuRequest))
+          .andExpect(status().isUnauthorized());
+      mvc.perform(
+              post("/api/v1/menus")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content(menuRequest))
+          .andExpect(status().isForbidden());
+      mvc.perform(get("/api/v1/admin/chef-applications")).andExpect(status().isUnauthorized());
+      mvc.perform(get("/api/v1/admin/chef-applications").cookie(userCookie))
+          .andExpect(status().isForbidden());
+      var location = jdbc.queryForMap("SELECT code, province_code FROM wards LIMIT 1");
+      var application =
+          Map.of(
+              "phone",
+              "0912345678",
+              "provinceCode",
+              location.get("province_code"),
+              "wardCode",
+              location.get("code"),
+              "bio",
+              "Hồ sơ Chef thử nghiệm",
+              "experienceYears",
+              3);
+      mvc.perform(
+              post("/api/v2/users/become-chef")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content(mapper.writeValueAsString(application)))
+          .andExpect(status().isOk());
+      Long id = profiles.findByUserId(user.getId()).orElseThrow().getId();
+      assertThat(chefGrants(user)).isZero();
+      assertThat(
+              responseData(get("/api/v2/users/chef-application").cookie(userCookie))
+                  .path("status")
+                  .asText())
+          .isEqualTo("PENDING");
+      mvc.perform(
+              post("/api/v2/users/become-chef")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content(mapper.writeValueAsString(application)))
+          .andExpect(status().isBadRequest());
+      mvc.perform(
+              patch("/api/v1/admin/chef-applications/{id}/status", id)
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content("{\"status\":\"APPROVED\"}"))
+          .andExpect(status().isForbidden());
+      var pending =
+          responseData(
+              get("/api/v1/admin/chef-applications")
+                  .param("status", "PENDING")
+                  .param("page", "1")
+                  .param("size", "1")
+                  .cookie(adminCookie));
+      assertThat(pending.path("totalElements").asLong()).isGreaterThanOrEqualTo(1);
+      assertThat(pending.path("currentPage").asInt()).isEqualTo(1);
+      assertThat(pending.path("data").size()).isEqualTo(1);
+      assertThat(
+              responseData(get("/api/v1/admin/chef-applications/{id}", id).cookie(adminCookie))
+                  .path("status")
+                  .asText())
+          .isEqualTo("PENDING");
+      mvc.perform(
+              patch("/api/v1/admin/chef-applications/{id}/status", id)
+                  .cookie(adminCookie)
+                  .contentType("application/json")
+                  .content("{\"status\":\"REJECTED\",\"reason\":\" \"}"))
+          .andExpect(status().isBadRequest());
+      reviewHttp(id, adminCookie, "REJECTED", "Cần bổ sung giới thiệu");
+      assertThat(
+              responseData(get("/api/v1/admin/chef-applications/{id}", id).cookie(adminCookie))
+                  .path("reason")
+                  .asText())
+          .isEqualTo("Cần bổ sung giới thiệu");
+      var resubmission = new java.util.HashMap<>(application);
+      resubmission.put("bio", "Đã bổ sung giới thiệu mới");
+      mvc.perform(
+              post("/api/v2/users/become-chef")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content(mapper.writeValueAsString(resubmission)))
+          .andExpect(status().isOk());
+      assertThat(
+              responseData(get("/api/v1/admin/chef-applications/{id}", id).cookie(adminCookie))
+                  .path("status")
+                  .asText())
+          .isEqualTo("PENDING");
+      assertThat(
+              responseData(get("/api/v1/admin/chef-applications/{id}", id).cookie(adminCookie))
+                  .path("bio")
+                  .asText())
+          .isEqualTo("Đã bổ sung giới thiệu mới");
+      reviewHttp(id, adminCookie, "APPROVED", null);
+      assertThat(chefGrants(user)).isEqualTo(1);
+      long menuCount = menuRepository.count();
+      mvc.perform(
+              post("/api/v1/menus")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content(menuRequest))
+          .andExpect(status().isOk());
+      assertThat(menuRepository.count()).isEqualTo(menuCount + 1);
+      mvc.perform(
+              patch("/api/v1/admin/chef-applications/{id}/status", id)
+                  .cookie(adminCookie)
+                  .contentType("application/json")
+                  .content("{\"status\":\"APPROVED\"}"))
+          .andExpect(status().isBadRequest());
+      mvc.perform(
+              patch("/api/v1/admin/chef-applications/{id}/status", id)
+                  .cookie(adminCookie)
+                  .contentType("application/json")
+                  .content("{\"status\":\"SUSPENDED\",\"reason\":\" \"}"))
+          .andExpect(status().isBadRequest());
+      reviewHttp(id, adminCookie, "SUSPENDED", "Tạm ngừng thử nghiệm");
+      mvc.perform(
+              post("/api/v1/menus")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content(menuRequest))
+          .andExpect(status().isForbidden());
+      assertThat(menuRepository.count()).isEqualTo(menuCount + 1);
+      mvc.perform(
+              post("/api/v1/dishes")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content("{\"name\":\"Suspended dish\"}"))
+          .andExpect(status().isForbidden());
+      assertThat(users.findById(user.getId()).orElseThrow().isActive()).isTrue();
+      assertThat(
+              roles.findAllByUserId(user.getId()).stream()
+                  .anyMatch(role -> role.getRoleName() == RoleEnum.ROLE_USER))
+          .isTrue();
+      assertThat(
+              responseData(
+                      get("/api/v1/admin/chef-applications")
+                          .param("status", "SUSPENDED")
+                          .param("page", "1")
+                          .param("size", "10")
+                          .cookie(adminCookie))
+                  .path("totalElements")
+                  .asLong())
+          .isGreaterThanOrEqualTo(1);
+      assertThat(
+              responseData(get("/api/v2/users/chef-application").cookie(userCookie))
+                  .path("status")
+                  .asText())
+          .isEqualTo("SUSPENDED");
+      reviewHttp(id, adminCookie, "APPROVED", null);
+      mvc.perform(
+              post("/api/v1/menus")
+                  .cookie(userCookie)
+                  .contentType("application/json")
+                  .content(menuRequest))
+          .andExpect(status().isOk());
+      assertThat(menuRepository.count()).isEqualTo(menuCount + 2);
+      assertThat(
+              responseData(get("/api/v1/admin/chef-applications/{id}", id).cookie(adminCookie))
+                  .path("status")
+                  .asText())
+          .isEqualTo("APPROVED");
+      assertThat(chefGrants(user)).isEqualTo(1);
+    } finally {
+      for (String email : List.of(user.getEmail(), admin.getEmail())) {
+        cache.delete(String.format(TokenType.ACCESS_TOKEN.getCacheKeyTemplate(), email));
+        cache.delete(String.format(TokenType.REFRESH_TOKEN.getCacheKeyTemplate(), email));
+      }
+    }
+  }
+
+  private User createHttpUser(RoleEnum role, String password) {
+    return users.saveAndFlush(
+        User.builder()
+            .username("Chef HTTP test")
+            .email("chef-http-" + UUID.randomUUID() + "@example.invalid")
+            .password(encoder.encode(password))
+            .phone("0900000000")
+            .roles(new java.util.ArrayList<>(List.of(roles.findRoleByRoleName(role).orElseThrow())))
+            .build());
+  }
+
+  private Cookie loginCookie(String email, String password) throws Exception {
+    MvcResult result =
+        mvc.perform(
+                post("/api/v2/users/login")
+                    .contentType("application/json")
+                    .content(
+                        mapper.writeValueAsString(Map.of("email", email, "password", password))))
+            .andExpect(status().isOk())
+            .andReturn();
+    String header =
+        result.getResponse().getHeaders("Set-Cookie").stream()
+            .filter(value -> value.startsWith("access-token="))
+            .findFirst()
+            .orElseThrow();
+    return new Cookie("access-token", header.substring("access-token=".length()).split(";", 2)[0]);
+  }
+
+  private com.fasterxml.jackson.databind.JsonNode responseData(
+      org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request)
+      throws Exception {
+    return mapper
+        .readTree(
+            mvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString())
+        .path("data");
+  }
+
+  private void reviewHttp(Long id, Cookie adminCookie, String targetStatus, String reason)
+      throws Exception {
+    var payload = new java.util.HashMap<String, String>();
+    payload.put("status", targetStatus);
+    payload.put("reason", reason);
+    mvc.perform(
+            patch("/api/v1/admin/chef-applications/{id}/status", id)
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content(mapper.writeValueAsString(payload)))
+        .andExpect(status().isOk());
   }
 
   @Test

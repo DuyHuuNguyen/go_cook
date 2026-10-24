@@ -46,6 +46,15 @@ public class User extends BaseEntity {
   @Column(name = "address_detail", length = 500)
   private String addressDetail;
 
+  @Column(name = "lock_reason", length = 1000)
+  private String lockReason;
+
+  @Column(name = "locked_at")
+  private Long lockedAt;
+
+  @Column(name = "locked_by")
+  private Long lockedBy;
+
   @OneToOne(
       mappedBy = "user",
       cascade = {CascadeType.MERGE, CascadeType.PERSIST})
@@ -91,5 +100,16 @@ public class User extends BaseEntity {
 
   public void addWard(Ward ward) {
     this.ward = ward;
+  }
+
+  public void lock(String reason, Long actorId) {
+    this.isActive = false;
+    this.lockReason = reason;
+    this.lockedAt = System.currentTimeMillis();
+    this.lockedBy = actorId;
+  }
+
+  public void unlock() {
+    this.isActive = true;
   }
 }
