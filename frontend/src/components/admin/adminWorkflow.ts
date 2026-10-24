@@ -81,7 +81,7 @@ export function workflowActions(
           label: "Mở khóa tài khoản",
           description:
             "Khôi phục hoạt động của tài khoản, giữ nguyên vai trò và dữ liệu.",
-          reasonRequired: true,
+          reasonRequired: false,
         },
       ];
   }
@@ -162,7 +162,9 @@ export const workflowDetails: Record<
 > = {
   users: [
     { key: "phone", label: "Số điện thoại" },
-    { key: "reason", label: "Lý do khóa/mở khóa gần nhất" },
+    { key: "reason", label: "Lý do khóa gần nhất" },
+    { key: "lockedAt", label: "Thời gian khóa gần nhất" },
+    { key: "lockedBy", label: "Admin khóa gần nhất" },
   ],
   chefs: [
     { key: "userId", label: "Mã tài khoản" },

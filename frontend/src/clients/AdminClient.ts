@@ -264,6 +264,9 @@ function rowFor(section: AdminSection, item: unknown): AdminRow {
             : text(record.status),
       phone: text(record.phone),
       reason: first(record, "lockReason", "reason"),
+      lockedAt:
+        typeof record.lockedAt === "number" ? chefDate(record.lockedAt) : "",
+      lockedBy: text(record.lockedBy),
     };
   if (section === "chefs")
     return {
@@ -517,6 +520,30 @@ export async function getAdminTablePage(
   statusFilter = "",
 ): Promise<AdminTablePage> {
   const search = keyword.trim();
+  if (section === "users") {
+    if (sortBy) throw new Error("Backend chưa hỗ trợ sắp xếp tài khoản.");
+    if (statusFilter && !["ACTIVE", "LOCKED"].includes(statusFilter))
+      throw new Error("Trạng thái tài khoản không hợp lệ.");
+    const response = await axiosClient.get<unknown>(ENDPOINTS.ADMIN.USERS, {
+      params: {
+        page,
+        size,
+        keyword: search || undefined,
+        status: statusFilter || undefined,
+      },
+    });
+    const result = object(readPayload(response.data));
+    if (
+      !Array.isArray(result.data) ||
+      !Number.isSafeInteger(result.totalElements)
+    )
+      throw new Error("API trả danh sách tài khoản không hợp lệ.");
+    return {
+      rows: result.data.map((item) => rowFor("users", item)),
+      recordsTotal: Number(result.totalElements),
+      recordsFiltered: Number(result.totalElements),
+    };
+  }
   if (section === "chefs") {
     if (search || sortBy)
       throw new Error(
@@ -609,4 +636,30 @@ export async function getAdminTablePage(
       Number.isSafeInteger(total) && total >= filtered ? total : filtered,
     recordsFiltered: filtered,
   };
+}
+
+export async function getAdminUser(
+  id: string,
+  signal?: AbortSignal,
+): Promise<AdminRow> {
+  const response = await axiosClient.get<unknown>(
+    `${ENDPOINTS.ADMIN.USERS}/${id}`,
+    { signal },
+  );
+  return rowFor("users", readPayload(response.data));
+}
+
+export async function reviewAdminUser(
+  id: string,
+  status: "ACTIVE" | "LOCKED",
+  reason: string,
+): Promise<void> {
+  const response = await axiosClient.patch<unknown>(
+    `${ENDPOINTS.ADMIN.USERS}/${id}/status`,
+    {
+      status,
+      reason: status === "LOCKED" ? reason.trim() : null,
+    },
+  );
+  readPayload(response.data);
 }

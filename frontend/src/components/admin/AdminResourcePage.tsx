@@ -9,6 +9,7 @@ import {
 import {
   adminApiErrorMessage,
   clearAdminTableCache,
+  getAdminUser,
   getChefApplication,
 } from "../../clients/AdminClient";
 import AdminDataTable from "./AdminDataTable";
@@ -53,11 +54,16 @@ export default function AdminResourcePage({ resource }: Props) {
   const [editing, setEditing] = useState<AdminRow | "new" | null>(null);
 
   useEffect(() => {
-    if (resource !== "chefs" || demoEnabled || !selected) return;
+    if (!["chefs", "users"].includes(resource) || demoEnabled || !selected)
+      return;
     const controller = new AbortController();
     setDetailLoading(true);
     setDetailError("");
-    void getChefApplication(selected.id, controller.signal)
+    void (
+      resource === "chefs"
+        ? getChefApplication(selected.id, controller.signal)
+        : getAdminUser(selected.id, controller.signal)
+    )
       .then((detail) => {
         if (!controller.signal.aborted) setSelected(detail);
       })
@@ -116,8 +122,8 @@ export default function AdminResourcePage({ resource }: Props) {
             <p>{workflowNotes[resource]}</p>
           </details>
           <p className="gca-workflow-notice">
-            {resource === "chefs" && !demoEnabled
-              ? "Xét duyệt đầu bếp sử dụng API và dữ liệu PostgreSQL."
+            {(resource === "chefs" || resource === "users") && !demoEnabled
+              ? "Thao tác quản trị sử dụng API và dữ liệu PostgreSQL."
               : "Chế độ chỉ đọc · Các thao tác quản trị chưa có API và chưa thể áp dụng."}
           </p>
           {import.meta.env.DEV && (
@@ -147,7 +153,9 @@ export default function AdminResourcePage({ resource }: Props) {
               <select
                 aria-label="Lọc trạng thái"
                 value={statusFilter}
-                disabled={!demoEnabled && resource !== "chefs"}
+                disabled={
+                  !demoEnabled && resource !== "chefs" && resource !== "users"
+                }
                 onChange={(event) => {
                   setStatusFilter(event.target.value);
                   setSelected(null);
@@ -168,7 +176,9 @@ export default function AdminResourcePage({ resource }: Props) {
             <p className="gca-workflow-help">
               {resource === "chefs"
                 ? "Lọc trạng thái và phân trang dùng backend. Tìm kiếm từ khóa và sắp xếp toàn bộ hồ sơ chưa được API hỗ trợ nên đã tắt."
-                : "Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các trạng thái nghiệp vụ. Tìm kiếm của bảng vẫn dùng API đọc hiện tại."}
+                : resource === "users"
+                  ? "Tìm kiếm tên, email, số điện thoại; lọc trạng thái và phân trang dùng backend. Sắp xếp tùy ý chưa được hỗ trợ."
+                  : "Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các trạng thái nghiệp vụ. Tìm kiếm của bảng vẫn dùng API đọc hiện tại."}
             </p>
           )}
         </section>
@@ -188,13 +198,17 @@ export default function AdminResourcePage({ resource }: Props) {
           initialSearch={resource === "chefs" && !demoEnabled ? "" : query}
           revision={revision}
           onView={(row) => {
-            setDetailLoading(resource === "chefs" && !demoEnabled);
+            setDetailLoading(
+              (resource === "chefs" || resource === "users") && !demoEnabled,
+            );
             setDetailError("");
             setSelected(row);
           }}
           demoRows={demoRows}
           statusFilter={
-            resource === "chefs" && !demoEnabled ? statusFilter : ""
+            (resource === "chefs" || resource === "users") && !demoEnabled
+              ? statusFilter
+              : ""
           }
         />
       </section>
@@ -221,20 +235,22 @@ export default function AdminResourcePage({ resource }: Props) {
                 <XLg size={20} />
               </button>
             </div>
-            {detailLoading && resource === "chefs" && !demoEnabled && (
-              <p role="status">Đang tải chi tiết hồ sơ...</p>
-            )}
-            {detailError && resource === "chefs" && !demoEnabled && (
-              <div role="alert" className="gca-form-error">
-                {detailError}{" "}
-                <button
-                  type="button"
-                  onClick={() => setDetailRevision((value) => value + 1)}
-                >
-                  Thử lại
-                </button>
-              </div>
-            )}
+            {detailLoading &&
+              (resource === "chefs" || resource === "users") &&
+              !demoEnabled && <p role="status">Đang tải chi tiết hồ sơ...</p>}
+            {detailError &&
+              (resource === "chefs" || resource === "users") &&
+              !demoEnabled && (
+                <div role="alert" className="gca-form-error">
+                  {detailError}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setDetailRevision((value) => value + 1)}
+                  >
+                    Thử lại
+                  </button>
+                </div>
+              )}
             {!detailLoading && !detailError && (
               <dl>
                 {section.columns.map((column) => (
@@ -282,8 +298,11 @@ export default function AdminResourcePage({ resource }: Props) {
                       setSelected(null);
                     }}
                   >
-                    {resource === "chefs" && !demoEnabled
-                      ? "Xét duyệt hồ sơ"
+                    {(resource === "chefs" || resource === "users") &&
+                    !demoEnabled
+                      ? resource === "chefs"
+                        ? "Xét duyệt hồ sơ"
+                        : "Xử lý tài khoản"
                       : managed
                         ? "Xem thao tác quản trị"
                         : "Chỉnh sửa"}

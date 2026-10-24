@@ -120,6 +120,9 @@ public class UserFacadeImpl implements UserFacade {
   @Override
   public BaseResponse<RefreshTokenResponse> refreshToken(RefreshTokenRequest refreshTokenRequest) {
     String email = this.jwtService.getEmailFromJwtToken(refreshTokenRequest.getRefreshToken());
+    if (this.userService.findByEmail(email).filter(user -> user.isActive()).isEmpty()) {
+      throw new PermissionDeniedException(ErrorCode.JWT_INVALID);
+    }
     String refreshTokenKey = String.format(TokenType.REFRESH_TOKEN.getCacheKeyTemplate(), email);
 
     boolean isInvalidRefreshToken =
