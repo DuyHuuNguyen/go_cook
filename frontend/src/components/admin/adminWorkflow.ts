@@ -91,15 +91,14 @@ export function workflowActions(
         {
           id: "approve",
           label: "Duyệt hồ sơ",
-          description:
-            "Chỉ sau khi được APPROVED, hệ thống backend mới cấp ROLE_CHEF. Giao diện này không tự cấp quyền.",
+          description: "Duyệt hồ sơ để đầu bếp có thể bắt đầu hoạt động.",
           reasonRequired: false,
         },
         {
           id: "reject",
           label: "Từ chối hồ sơ",
           description:
-            "Bắt buộc ghi lý do. USER được sửa hồ sơ và gửi lại; lần gửi lại chuyển về PENDING để Admin xem xét.",
+            "Cần ghi rõ lý do. Người dùng có thể chỉnh sửa và gửi lại hồ sơ.",
           reasonRequired: true,
         },
       ];
@@ -148,11 +147,7 @@ export function workflowActions(
   }
   return [];
 }
-export const workflowNotes: Record<WorkflowSection, string> = {
-  users:
-    "Admin chỉ khóa/mở khóa tài khoản với lý do. Không sửa thông tin cá nhân, mật khẩu, Role hoặc xóa cứng.",
-  chefs:
-    "USER gửi hồ sơ → PENDING → APPROVED hoặc REJECTED. Hồ sơ bị từ chối được USER sửa và gửi lại. Chỉ APPROVED mới cấp ROLE_CHEF. SUSPENDED chỉ ngừng nhận đơn mới, không khóa tài khoản USER hay thay đổi đơn đã phát sinh.",
+export const workflowNotes: Record<"menus", string> = {
   menus:
     "Đầu bếp đã được duyệt tự công khai thực đơn, không cần duyệt từng thực đơn. Phân biệt đầu bếp tự ẩn và Admin ẩn vi phạm; chỉ Admin gỡ ẩn do Admin. Nội dung thực đơn luôn chỉ đọc tại đây.",
 };

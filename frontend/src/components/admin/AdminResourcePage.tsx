@@ -35,13 +35,13 @@ export default function AdminResourcePage({ resource }: Props) {
   const [demo, setDemo] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const managed = isWorkflowSection(resource);
-  const demoEnabled = import.meta.env.DEV && managed && demo;
+  const demoEnabled = import.meta.env.DEV && resource === "menus" && demo;
   const demoRows = useMemo(
     () =>
-      demoEnabled && isWorkflowSection(resource)
-        ? adminDemoRows[resource].filter(
+      demoEnabled
+        ? adminDemoRows.menus.filter(
             (row) =>
-              !statusFilter || workflowState(resource, row) === statusFilter,
+              !statusFilter || workflowState("menus", row) === statusFilter,
           )
         : undefined,
     [resource, demoEnabled, statusFilter],
@@ -115,18 +115,17 @@ export default function AdminResourcePage({ resource }: Props) {
           )}
         </div>
       </div>
-      {isWorkflowSection(resource) && (
+      {resource === "menus" && (
         <section className="gca-workflow-summary" aria-label="Quy tắc quản lý">
           <details>
             <summary>Quy tắc quản trị</summary>
             <p>{workflowNotes[resource]}</p>
           </details>
           <p className="gca-workflow-notice">
-            {(resource === "chefs" || resource === "users") && !demoEnabled
-              ? "Thao tác quản trị sử dụng API và dữ liệu PostgreSQL."
-              : "Chế độ chỉ đọc · Các thao tác quản trị chưa có API và chưa thể áp dụng."}
+            Chế độ chỉ đọc · Các thao tác quản trị chưa có API và chưa thể áp
+            dụng.
           </p>
-          {import.meta.env.DEV && (
+          {import.meta.env.DEV && resource === "menus" && (
             <label className="gca-demo-switch">
               <input
                 type="checkbox"
@@ -153,9 +152,7 @@ export default function AdminResourcePage({ resource }: Props) {
               <select
                 aria-label="Lọc trạng thái"
                 value={statusFilter}
-                disabled={
-                  !demoEnabled && resource !== "chefs" && resource !== "users"
-                }
+                disabled={!demoEnabled}
                 onChange={(event) => {
                   setStatusFilter(event.target.value);
                   setSelected(null);
@@ -174,11 +171,8 @@ export default function AdminResourcePage({ resource }: Props) {
           </div>
           {!demoEnabled && (
             <p className="gca-workflow-help">
-              {resource === "chefs"
-                ? "Lọc trạng thái và phân trang dùng backend. Tìm kiếm từ khóa và sắp xếp toàn bộ hồ sơ chưa được API hỗ trợ nên đã tắt."
-                : resource === "users"
-                  ? "Tìm kiếm tên, email, số điện thoại; lọc trạng thái và phân trang dùng backend. Sắp xếp tùy ý chưa được hỗ trợ."
-                  : "Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các trạng thái nghiệp vụ. Tìm kiếm của bảng vẫn dùng API đọc hiện tại."}
+              Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các
+              trạng thái nghiệp vụ. Tìm kiếm của bảng vẫn dùng API đọc hiện tại.
             </p>
           )}
         </section>
@@ -186,11 +180,34 @@ export default function AdminResourcePage({ resource }: Props) {
       <section className="gca-panel">
         <div className="gca-list-heading">
           <h2>Danh sách {section.eyebrow.toLocaleLowerCase("vi")}</h2>
-          <span>
-            {demoEnabled
-              ? "Dữ liệu mẫu · Không lưu thay đổi"
-              : "Dữ liệu từ backend"}
-          </span>
+          {resource === "users" || resource === "chefs" ? (
+            <label className="gca-workflow-filter">
+              Lọc trạng thái
+              <select
+                aria-label="Lọc trạng thái"
+                value={statusFilter}
+                onChange={(event) => {
+                  setStatusFilter(event.target.value);
+                  setSelected(null);
+                }}
+              >
+                <option value="">Tất cả trạng thái</option>
+                {Object.entries(workflowFilters[resource]).map(
+                  ([value, label]) => (
+                    <option value={value} key={value}>
+                      {label}
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+          ) : (
+            <span>
+              {demoEnabled
+                ? "Dữ liệu mẫu · Không lưu thay đổi"
+                : "Dữ liệu từ backend"}
+            </span>
+          )}
         </div>
         <AdminDataTable
           key={`${resource}-${revision}-${query}-${demoEnabled}-${statusFilter}`}
@@ -315,7 +332,7 @@ export default function AdminResourcePage({ resource }: Props) {
                   <p className="gca-workflow-notice">
                     {resource === "chefs" &&
                     workflowState(resource, selected) === "REJECTED"
-                      ? "Hồ sơ bị từ chối: chờ USER chỉnh sửa và gửi lại. Admin không tự sửa hồ sơ hoặc tự cấp ROLE_CHEF."
+                      ? "Hồ sơ bị từ chối. Người dùng có thể chỉnh sửa và gửi lại."
                       : "Chưa đủ dữ liệu trạng thái để xác định hành động quản trị an toàn."}
                   </p>
                 )}
