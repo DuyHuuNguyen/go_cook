@@ -59,7 +59,11 @@ export default function AdminResourcePage({ resource }: Props) {
   return (
     <div className="gca-page">
       <div className="gca-page-heading">
-        <h1>{section.title}</h1>
+        <div>
+          <span className="gca-eyebrow">{section.eyebrow} · GoCook Admin</span>
+          <h1>{section.title}</h1>
+          <p>Theo dõi thông tin và xem xét hoạt động trong hệ thống.</p>
+        </div>
         <div className="gca-heading-buttons">
           <button
             type="button"
@@ -81,11 +85,13 @@ export default function AdminResourcePage({ resource }: Props) {
       </div>
       {isWorkflowSection(resource) && (
         <section className="gca-workflow-summary" aria-label="Quy tắc quản lý">
-          <p>{workflowNotes[resource]}</p>
+          <details>
+            <summary>Quy tắc quản trị</summary>
+            <p>{workflowNotes[resource]}</p>
+          </details>
           <p className="gca-workflow-notice">
-            Giai đoạn 1: chỉ đọc dữ liệu backend. Các thao tác xét duyệt,
-            khóa/mở khóa, tạm ngừng và ẩn/khôi phục chưa có API; không thể áp
-            dụng thay đổi.
+            Chế độ chỉ đọc · Các thao tác quản trị chưa có API và chưa thể áp
+            dụng.
           </p>
           {import.meta.env.DEV && (
             <label className="gca-demo-switch">
@@ -103,32 +109,34 @@ export default function AdminResourcePage({ resource }: Props) {
               Admin)
             </label>
           )}
-          <p role="status">
-            {demoEnabled
-              ? "ĐANG XEM DEMO: dữ liệu giả lập, không phải bản ghi backend. Không lưu thay đổi."
-              : "Nguồn: backend. Không tự thay dữ liệu lỗi hoặc rỗng bằng dữ liệu mẫu."}
-          </p>
-          <label className="gca-workflow-filter">
-            Lọc trạng thái
-            <select
-              aria-label="Lọc trạng thái"
-              value={statusFilter}
-              disabled={!demoEnabled}
-              onChange={(event) => {
-                setStatusFilter(event.target.value);
-                setSelected(null);
-              }}
-            >
-              <option value="">Tất cả trạng thái</option>
-              {Object.entries(workflowFilters[resource]).map(
-                ([value, label]) => (
-                  <option value={value} key={value}>
-                    {label}
-                  </option>
-                ),
-              )}
-            </select>
-          </label>
+          <div className="gca-source-controls">
+            <p className="gca-source-label" role="status">
+              {demoEnabled
+                ? "ĐANG XEM DEMO: dữ liệu giả lập, không phải bản ghi backend. Không lưu thay đổi."
+                : "Nguồn: backend. Không tự thay dữ liệu lỗi hoặc rỗng bằng dữ liệu mẫu."}
+            </p>
+            <label className="gca-workflow-filter">
+              Lọc trạng thái
+              <select
+                aria-label="Lọc trạng thái"
+                value={statusFilter}
+                disabled={!demoEnabled}
+                onChange={(event) => {
+                  setStatusFilter(event.target.value);
+                  setSelected(null);
+                }}
+              >
+                <option value="">Tất cả trạng thái</option>
+                {Object.entries(workflowFilters[resource]).map(
+                  ([value, label]) => (
+                    <option value={value} key={value}>
+                      {label}
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+          </div>
           {!demoEnabled && (
             <p className="gca-workflow-help">
               Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các
@@ -138,6 +146,14 @@ export default function AdminResourcePage({ resource }: Props) {
         </section>
       )}
       <section className="gca-panel">
+        <div className="gca-list-heading">
+          <h2>Danh sách {section.eyebrow.toLocaleLowerCase("vi")}</h2>
+          <span>
+            {demoEnabled
+              ? "Dữ liệu mẫu · Không lưu thay đổi"
+              : "Dữ liệu từ backend"}
+          </span>
+        </div>
         <AdminDataTable
           key={`${resource}-${revision}-${query}-${demoEnabled}-${statusFilter}`}
           resource={resource}

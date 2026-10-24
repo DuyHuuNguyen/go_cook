@@ -5,7 +5,7 @@ import DT from "datatables.net-bs5";
 import type { Options, AjaxData, AjaxCallback } from "datatables.net";
 import "datatables.net-bs5/css/dataTables.bootstrap5.css";
 import "../../styles/adminDataTable.css";
-import { ArrowClockwise } from "react-bootstrap-icons";
+import { Eye, ExclamationTriangle, XLg } from "react-bootstrap-icons";
 import {
   adminSections,
   type AdminRow,
@@ -13,7 +13,11 @@ import {
 } from "../../types/AdminTypes";
 import { getAdminTablePage } from "../../clients/AdminClient";
 
-import { isWorkflowSection, workflowLabel } from "./adminWorkflow";
+import {
+  isWorkflowSection,
+  workflowLabel,
+  workflowState,
+} from "./adminWorkflow";
 
 DataTable.use(DT);
 
@@ -46,6 +50,30 @@ function errorMessage(reason: unknown): string {
   return reason instanceof Error ? reason.message : "Không thể tải dữ liệu.";
 }
 
+function badgeTone(state: string): string {
+  if (
+    [
+      "ACTIVE",
+      "APPROVED",
+      "PUBLIC",
+      "COMPLETED",
+      "RESOLVED",
+      "RECONCILED",
+    ].includes(state)
+  )
+    return "is-positive";
+  if (
+    ["LOCKED", "REJECTED", "ADMIN_HIDDEN", "FAILED", "CANCELLED"].includes(
+      state,
+    )
+  )
+    return "is-negative";
+  if (["PENDING", "SUSPENDED", "OPEN"].includes(state)) return "is-warning";
+  if (["IN_PROGRESS", "PROCESSING", "CONFIRMED"].includes(state))
+    return "is-info";
+  return "";
+}
+
 export default function AdminDataTable({
   resource,
   initialSearch,
@@ -63,16 +91,53 @@ export default function AdminDataTable({
         data: column.key,
         title: column.label,
         defaultContent: "—",
+        className:
+          column.key === "id"
+            ? "gca-id-cell"
+            : column.key === "name"
+              ? "gca-name-cell"
+              : column.key === "status"
+                ? "gca-status-cell"
+                : "",
         render: (
           value: string | null | undefined,
-          _type: string,
+          type: string,
           row: AdminRow,
-        ) =>
-          escapeText(
+        ) => {
+          const label =
             column.key === "status" && isWorkflowSection(resource)
               ? workflowLabel(resource, row)
-              : value,
-          ),
+              : value || "—";
+          if (type !== "display") return label;
+          if (column.key === "status") {
+            const state = isWorkflowSection(resource)
+              ? workflowState(resource, row)
+              : String(value || "").toUpperCase();
+            return (
+              '<span class="gca-status-badge ' +
+              badgeTone(state) +
+              '">' +
+              escapeText(label) +
+              "</span>"
+            );
+          }
+          if (column.key === "name") {
+            const secondary = row.description || row.email || row.area;
+            return (
+              '<strong class="gca-record-name">' +
+              escapeText(label) +
+              "</strong>" +
+              (secondary
+                ? '<span class="gca-record-subtitle" title="' +
+                  escapeText(secondary) +
+                  '">' +
+                  escapeText(secondary) +
+                  "</span>"
+                : "")
+            );
+          }
+          return escapeText(label);
+        },
       })),
       { data: "id", title: "Thao tác", orderable: false, searchable: false },
     ],
@@ -98,8 +163,10 @@ export default function AdminDataTable({
         info: "Hiển thị _START_–_END_ / _TOTAL_ bản ghi",
         infoEmpty: "Chưa có dữ liệu",
         infoFiltered: "",
-        zeroRecords: "Không tìm thấy kết quả",
-        emptyTable: "Chưa có dữ liệu",
+        zeroRecords:
+          '<div class="gca-empty-table"><strong>Không tìm thấy kết quả</strong><span>Thử thay đổi từ khóa hoặc trạng thái lọc.</span></div>',
+        emptyTable:
+          '<div class="gca-empty-table"><strong>Chưa có bản ghi để hiển thị</strong><span>Dữ liệu sẽ xuất hiện khi nguồn hiện tại có kết quả.</span></div>',
         processing: "Đang tải...",
         paginate: {
           first: "Đầu",
@@ -160,7 +227,7 @@ export default function AdminDataTable({
           type="button"
           onClick={() => onView(row)}
         >
-          Xem
+          <Eye size={14} aria-hidden="true" /> Chi tiết
         </button>
       ),
     }),
@@ -171,20 +238,24 @@ export default function AdminDataTable({
     <div className="gca-datatables">
       {error && (
         <div className="gca-table-error" role="alert">
-          <span>{error}</span>
+          <ExclamationTriangle size={20} aria-hidden="true" />
+          <div>
+            <strong>Chưa thể tải danh sách</strong>
+            <span>{error}</span>
+          </div>
           <button
             className="gca-btn gca-btn-outline"
             type="button"
             onClick={() => setError(null)}
           >
-            <ArrowClockwise size={14} /> Đóng
+            <XLg size={12} aria-hidden="true" /> Đóng
           </button>
         </div>
       )}
       <div className="gca-table-wrap">
         <DataTable
           key={tableKey}
-          className="table table-striped table-hover gca-table"
+          className="table gca-table"
           columns={columns}
           options={options}
           slots={slots}

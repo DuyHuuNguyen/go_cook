@@ -1,9 +1,14 @@
 .gca-root {
     display: flex;
     min-height: 100vh;
-    background: #f7f7f4;
+    --gca-brand: #376412;
+    --gca-ink: #253126;
+    --gca-line: #e5e8df;
+    --gca-muted: #71806b;
+    --gca-soft: #edf5e7;
+    background: #fcf9f0;
     color: #253126;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
     font-size: 14px;
 }
 
@@ -11,7 +16,7 @@
 .gca-root *::before,
 .gca-root *::after {
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
 }
 
 .gca-root button,
@@ -96,13 +101,13 @@
     align-items: center;
     border: 1px solid #e3e8d9;
     background: #f8f9f4;
-    border-radius: 4px;
+    border-radius: 12px;
 }
 
 .gca-workspace-symbol {
     width: 38px;
     height: 38px;
-    border-radius: 4px;
+    border-radius: 12px;
     display: grid;
     place-items: center;
     background: #e2f0d9;
@@ -151,7 +156,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 13px;
-    border-radius: 4px;
+    border-radius: 12px;
     color: #59665b;
     font-size: 13px;
     margin-bottom: 3px;
@@ -244,7 +249,7 @@
     width: 35px;
     height: 35px;
     border: 0;
-    border-radius: 4px;
+    border-radius: 12px;
     color: #53644f;
     background: transparent;
 }
@@ -300,7 +305,7 @@
     padding: 20px;
     background: #fff;
     border: 1px solid #e0e6da;
-    border-radius: 4px;
+    border-radius: 12px;
     box-shadow: 0 2px 10px #1e2e1812;
 }
 
@@ -319,7 +324,7 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    border-radius: 4px;
+    border-radius: 12px;
     background: #f5f7f2;
     padding: 5px 10px;
     color: #72816f;
@@ -420,7 +425,7 @@
     gap: 9px;
     min-height: 39px;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: 12px;
     padding: 9px 15px;
     font-size: 12px;
     font-weight: 700;
@@ -454,7 +459,7 @@
     align-items: center;
     background: #eef4e8;
     color: #467337;
-    border-radius: 4px;
+    border-radius: 12px;
     padding: 7px 11px;
     font-size: 11px;
     font-weight: 700;
@@ -466,8 +471,8 @@
 .gca-welcome {
     background: #fff;
     border: 1px solid #e5eae0;
-    border-radius: 4px;
-    box-shadow: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px #283d1408;
 }
 
 .gca-panel {
@@ -509,7 +514,7 @@
     flex-shrink: 0;
     width: 54px;
     height: 54px;
-    border-radius: 4px;
+    border-radius: 12px;
     background: #d2e8c7;
     display: grid;
     place-items: center;
@@ -594,7 +599,7 @@
     background: #fafbf8;
     border: 1px solid #edf0e8;
     padding: 17px 13px;
-    border-radius: 4px;
+    border-radius: 12px;
     color: #374937;
 }
 
@@ -627,7 +632,7 @@
     height: 39px;
     display: grid;
     place-items: center;
-    border-radius: 4px;
+    border-radius: 12px;
     color: #407132;
     background: #eaf3e4;
     flex-shrink: 0;
@@ -686,7 +691,7 @@
 .gca-insight-strip {
     background: #fff;
     border: 1px solid #e5eae0;
-    border-radius: 4px;
+    border-radius: 12px;
     padding: 20px 14px;
     gap: 0;
 }
@@ -737,7 +742,7 @@
     flex: 1;
     min-width: 220px;
     border: 1px solid #e1e7de;
-    border-radius: 4px;
+    border-radius: 12px;
     padding-left: 13px;
     color: #779073;
 }
@@ -778,7 +783,7 @@
     min-height: 40px;
     color: #66805c;
     border: 1px solid #e1e7de;
-    border-radius: 4px;
+    border-radius: 12px;
     background: #fff;
 }
 
@@ -834,7 +839,7 @@
     background: #f0f5e9;
     color: #477539;
     padding: 6px 10px;
-    border-radius: 4px;
+    border-radius: 12px;
     font-weight: 700;
     font-size: 11px;
 }
@@ -870,7 +875,7 @@
     border: 1px solid #e1e7db;
     background: #fff;
     color: #416237;
-    border-radius: 4px;
+    border-radius: 12px;
     padding: 8px 12px;
 }
 
@@ -889,7 +894,7 @@
     place-items: center;
     width: 65px;
     height: 65px;
-    border-radius: 4px;
+    border-radius: 12px;
     background: #eef5e9;
     color: #5b824f;
     margin-bottom: 18px;
@@ -914,7 +919,7 @@
     gap: 12px;
     padding: 18px 21px;
     border: 1px solid #e7e6d7;
-    border-radius: 4px;
+    border-radius: 12px;
     background: #fffcf2;
 }
 
@@ -972,7 +977,7 @@
 .gca-drawer-head button {
     background: #f1f5ed;
     border: 0;
-    border-radius: 4px;
+    border-radius: 12px;
     width: 33px;
     height: 33px;
     display: grid;
@@ -1008,7 +1013,7 @@
 .gca-drawer-note {
     background: #f5f8ef;
     color: #6d8069;
-    border-radius: 4px;
+    border-radius: 12px;
     padding: 13px;
     margin: 22px 0;
     line-height: 1.5;
@@ -1041,7 +1046,7 @@
     background: transparent;
     border: 0;
     color: #6c7a68;
-    border-radius: 4px;
+    border-radius: 12px;
     text-align: left;
     padding: 13px 15px;
     font-size: 13px;
@@ -1077,7 +1082,7 @@
     width: 100%;
     padding: 12px 13px;
     border: 1px solid #e0e8dc;
-    border-radius: 4px;
+    border-radius: 12px;
     background: #f9faf7;
     color: #465446;
     font-size: 12px;
@@ -1093,7 +1098,7 @@
     color: #55764c;
     font-size: 12px;
     line-height: 1.5;
-    border-radius: 4px;
+    border-radius: 12px;
 }
 
 .gca-settings-panel > .gca-btn {
@@ -1167,10 +1172,10 @@
     padding: 35px;
     background: #f8faf6;
     border: 1px solid #e1e8d8;
-    border-radius: 4px;
+    border-radius: 12px;
     max-width: 600px;
     text-align: center;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
 }
 
 .gca-backdrop {
@@ -1347,7 +1352,7 @@
     gap: 11px;
     padding: 15px;
     border: 1px solid #eee2c9;
-    border-radius: 4px;
+    border-radius: 12px;
     background: #fff9eb;
     color: #80632e;
     font-size: 12px;
@@ -1366,7 +1371,7 @@
     gap: 7px;
     border: 1px solid #e2eadb;
     background: #f4f8f0;
-    border-radius: 4px;
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 22px;
 }
@@ -1410,7 +1415,7 @@
     display: block;
     width: 100%;
     padding: 12px;
-    border-radius: 4px;
+    border-radius: 12px;
     border: 1px solid #dce5d8;
     outline: none;
     background: #fff;
@@ -1434,7 +1439,7 @@
 }
 
 .gca-root {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
 }
 
 .gca-content {
@@ -1565,79 +1570,6 @@
 }
 
 
-.gca-datatables {
-    width: 100%;
-    padding: 18px 20px;
-    font-family: Arial, sans-serif;
-}
-
-.gca-datatables .dt-container {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-}
-
-.gca-datatables .dt-layout-row {
-    margin: 0 0 16px;
-    gap: 12px;
-}
-
-.gca-datatables .dt-layout-row:last-child {
-    margin: 16px 0 0;
-}
-
-.gca-datatables .dt-search input,
-.gca-datatables .dt-length select {
-    border: 1px solid #cbd5cf;
-    border-radius: 3px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    padding: 6px 9px;
-    box-shadow: none;
-}
-
-.gca-datatables .dt-search input:focus,
-.gca-datatables .dt-length select:focus {
-    border-color: #276647;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(39, 102, 71, 0.09);
-}
-
-.gca-datatables .gca-table {
-    width: 100% !important;
-    border-collapse: collapse;
-}
-
-.gca-datatables .gca-table td,
-.gca-datatables .gca-table th {
-    white-space: normal;
-    vertical-align: middle;
-    padding: 11px 12px;
-}
-
-.gca-datatables .page-link {
-    border-radius: 3px;
-    color: #245d41;
-}
-
-.gca-datatables .page-item.active .page-link {
-    background: #245d41;
-    border-color: #245d41;
-    color: #fff;
-}
-
-.gca-table-error {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-    padding: 12px;
-    border: 1px solid #dfbeb4;
-    background: #fff8f5;
-    color: #8a3329;
-    font-size: 14px;
-}
-
 /* Phase 1 moderation UI, scoped to the existing admin frame. */
 .gca-root .gca-workflow-summary { display: grid; gap: 12px; margin-bottom: 20px; padding: 18px 20px; border: 1px solid #dce4dc; background: #fff; border-radius: 8px; font-size: 14px; }
 .gca-root .gca-workflow-summary p { margin: 0; }
@@ -1645,9 +1577,334 @@
 .gca-root .gca-demo-switch { display: flex; align-items: flex-start; gap: 10px; }
 .gca-root .gca-demo-switch input { margin-top: 4px; }
 .gca-root .gca-workflow-filter { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-.gca-root .gca-workflow-filter select { max-width: 100%; padding: 8px 12px; border: 1px solid #cbd5cf; border-radius: 4px; background: white; }
+.gca-root .gca-workflow-filter select { max-width: 100%; padding: 8px 12px; border: 1px solid #cbd5cf; border-radius: 12px; background: white; }
 .gca-root .gca-workflow-help { font-size: 12px; color: #687268; }
 .gca-root .gca-action-controls { flex-wrap: wrap; }
 .gca-root .gca-detail-drawer dd { white-space: pre-wrap; overflow-wrap: anywhere; }
 .gca-root .gca-btn:disabled { cursor: not-allowed; opacity: .6; }
 @media (max-width: 650px) { .gca-root .gca-workflow-summary { padding: 14px; } .gca-root .gca-workflow-filter { align-items: stretch; flex-direction: column; } .gca-root .gca-action-controls > .gca-btn { flex: 1 1 100%; } }
+
+/* Admin presentation: shares Seller's palette, without importing Seller CSS. */
+.gca-root .gca-topbar {
+    background: #fffefa;
+    min-height: 80px;
+}
+.gca-root .gca-workspace {
+    border-radius: 14px;
+    background: #f8faf4;
+}
+.gca-root .gca-nav-link {
+    border-radius: 10px;
+    min-height: 44px;
+}
+.gca-root .gca-nav-link.is-active {
+    background: var(--gca-brand);
+    color: white;
+}
+.gca-root .gca-content {
+    padding: 30px clamp(18px, 3vw, 42px) 44px;
+}
+.gca-root .gca-page {
+    gap: 22px;
+    min-width: 0;
+}
+.gca-root .gca-page-heading h1 {
+    font-size: clamp(26px, 2.5vw, 34px);
+    letter-spacing: -0.035em;
+    line-height: 1.25;
+    margin: 0 0 8px;
+}
+.gca-root .gca-eyebrow {
+    color: var(--gca-brand);
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    margin-bottom: 8px;
+}
+.gca-root .gca-page-heading p {
+    font-size: 13px;
+}
+.gca-root .gca-panel,
+.gca-root .gca-kpi-card,
+.gca-root .gca-welcome,
+.gca-root .gca-insight-strip {
+    border-radius: 16px;
+    border-color: var(--gca-line);
+    box-shadow: 0 5px 24px #283d1407;
+}
+.gca-root .gca-btn {
+    min-height: 42px;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 12px;
+}
+.gca-root .gca-btn-primary {
+    background: var(--gca-brand);
+    border-color: var(--gca-brand);
+}
+.gca-root .gca-btn-primary:hover:not(:disabled) {
+    background: #294d0c;
+}
+.gca-root .gca-heading-buttons {
+    flex-wrap: wrap;
+}
+.gca-root .gca-panel-title {
+    padding: 22px 24px 18px;
+}
+.gca-root .gca-panel-title h2 {
+    font-size: 17px;
+}
+.gca-root .gca-kpi-card {
+    padding: 24px;
+}
+.gca-root .gca-kpi-top svg {
+    box-sizing: content-box;
+    padding: 10px;
+    background: var(--gca-soft);
+    border-radius: 12px;
+    color: var(--gca-brand);
+}
+.gca-root .gca-kpi-card > strong {
+    font-size: 32px;
+    letter-spacing: -0.04em;
+    color: var(--gca-brand);
+}
+.gca-root .gca-quick-item {
+    padding: 20px;
+    border-radius: 12px;
+    border-color: var(--gca-line);
+    background: #fcfdf9;
+}
+.gca-root .gca-quick-item strong {
+    font-size: 13px;
+}
+.gca-root .gca-workflow-summary {
+    margin-bottom: 0;
+    gap: 12px;
+    padding: 18px 22px;
+    border-radius: 16px;
+    border-color: var(--gca-line);
+    font-size: 13px;
+}
+.gca-root .gca-workflow-summary details summary {
+    cursor: pointer;
+    font-weight: 650;
+    color: #46593b;
+    font-size: 12px;
+}
+.gca-root .gca-workflow-summary details p {
+    margin-top: 10px;
+    line-height: 1.7;
+    color: #687268;
+}
+.gca-root .gca-workflow-notice {
+    border-left-width: 2px;
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-size: 12px;
+}
+.gca-root .gca-source-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.gca-root .gca-source-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #5d7053;
+    font-size: 12px;
+    flex: 1 1 260px;
+}
+.gca-root .gca-source-label::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    background: #70945b;
+    border-radius: 50%;
+    flex: 0 0 7px;
+}
+.gca-root .gca-demo-switch {
+    font-size: 12px;
+    color: #56674f;
+    align-items: center;
+}
+.gca-root .gca-demo-switch input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--gca-brand);
+}
+.gca-root .gca-workflow-filter {
+    font-size: 12px;
+    font-weight: 600;
+}
+.gca-root .gca-workflow-filter select {
+    min-height: 40px;
+    border-radius: 10px;
+    font-weight: 400;
+    border-color: var(--gca-line);
+}
+.gca-root .gca-workflow-help {
+    font-size: 11px;
+    line-height: 1.6;
+}
+.gca-root .gca-list-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px 22px 0;
+}
+.gca-root .gca-list-heading h2 {
+    font-size: 16px;
+    font-weight: 650;
+    margin: 0;
+}
+.gca-root .gca-list-heading span {
+    color: var(--gca-muted);
+    font-size: 11px;
+}
+.gca-root .gca-dialog-backdrop {
+    background: #18231166;
+    backdrop-filter: blur(2px);
+}
+.gca-root .gca-detail-drawer {
+    border-radius: 16px 0 0 16px;
+    background: #fffefa;
+    box-shadow: -12px 0 48px #1d2a151c;
+    padding: 28px;
+}
+.gca-root .gca-drawer-head {
+    gap: 18px;
+    border-bottom: 1px solid var(--gca-line);
+    padding-bottom: 20px;
+    margin-bottom: 22px;
+}
+.gca-root .gca-drawer-head h2 {
+    font-size: 23px;
+    line-height: 1.35;
+    letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
+}
+.gca-root .gca-drawer-head button {
+    border-radius: 50%;
+    background: var(--gca-soft);
+    color: var(--gca-brand);
+    min-width: 36px;
+    min-height: 36px;
+}
+.gca-root .gca-detail-drawer dl > div {
+    padding: 13px 0;
+    border-bottom-color: var(--gca-line);
+}
+.gca-root .gca-detail-drawer dt {
+    color: #71806b;
+    font-size: 12px;
+    font-weight: 500;
+}
+.gca-root .gca-detail-drawer dd {
+    color: #2d392a;
+    font-size: 13px;
+    line-height: 1.65;
+}
+.gca-root .gca-action-record {
+    border-radius: 12px;
+    border-color: #dfe8d6;
+    background: #f3f7ee;
+    line-height: 1.7;
+}
+.gca-root .gca-action-form {
+    gap: 18px;
+}
+.gca-root .gca-action-form label {
+    font-size: 13px;
+    gap: 8px;
+}
+.gca-root .gca-action-form input,
+.gca-root .gca-action-form select,
+.gca-root .gca-action-form textarea,
+.gca-root .gca-field-grid input,
+.gca-root .gca-simple-select {
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.gca-root .gca-action-form textarea {
+    resize: vertical;
+}
+.gca-root .gca-action-form :is(input, select, textarea):focus-visible {
+    outline: 2px solid #739c54;
+    outline-offset: 2px;
+}
+.gca-root .gca-state {
+    border-top: 0;
+    min-height: 210px;
+    padding: 36px 22px;
+    gap: 8px;
+}
+.gca-root .gca-state-icon {
+    border-radius: 18px;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 6px;
+}
+.gca-root .gca-state strong {
+    font-size: 15px;
+}
+.gca-root .gca-state p {
+    font-size: 12px;
+    margin: 0 0 12px;
+}
+.gca-root .gca-soft-label {
+    border-radius: 999px;
+}
+@media (max-width: 850px) {
+    .gca-root .gca-content {
+        padding: 24px 18px 36px;
+    }
+}
+@media (max-width: 590px) {
+    .gca-root .gca-content {
+        padding: 20px 12px 30px;
+    }
+    .gca-root .gca-workflow-summary {
+        padding: 16px;
+    }
+    .gca-root .gca-source-controls {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .gca-root .gca-source-label {
+        flex-basis: auto;
+    }
+    .gca-root .gca-workflow-filter select {
+        width: 100%;
+    }
+    .gca-root .gca-detail-drawer {
+        width: calc(100% - 12px);
+        padding: 22px 18px;
+    }
+    .gca-root .gca-detail-drawer dl > div {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    .gca-root .gca-list-heading {
+        padding: 18px 16px 0;
+    }
+    .gca-root .gca-kpi-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 590px) {
+    .gca-root .gca-topbar { flex-wrap: wrap; gap: 12px; padding: 14px 16px; min-height: 72px; }
+    .gca-root .gca-top-left, .gca-root .gca-top-actions { min-width: 0; }
+    .gca-root .gca-topbar:has(.gca-quick-search) .gca-top-actions { flex: 1 1 100%; justify-content: space-between; }
+    .gca-root .gca-quick-search { flex: 1; min-width: 0; }
+    .gca-root .gca-quick-search input { width: 100%; min-width: 0; }
+}
