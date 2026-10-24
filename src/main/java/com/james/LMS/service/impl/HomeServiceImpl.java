@@ -1,6 +1,7 @@
 package com.james.LMS.service.impl;
 
 import com.james.LMS.entity.Menu;
+import com.james.LMS.enums.ChefApplicationStatus;
 import com.james.LMS.repository.CategoryRepository;
 import com.james.LMS.repository.ChefProfileRepository;
 import com.james.LMS.repository.MenuAssetRepository;
@@ -32,7 +33,8 @@ public class HomeServiceImpl implements HomeService {
             .map(category -> new HomeResponse.CategoryItem(category.getId(), category.getName()))
             .toList();
 
-    var menus = menuRepository.findPublicMenus(PageRequest.of(0, 24));
+    var menus =
+        menuRepository.findPublicMenus(PageRequest.of(0, 24), ChefApplicationStatus.APPROVED);
     Set<Long> menuIds = menus.stream().map(Menu::getId).collect(Collectors.toSet());
     Map<Long, String> images =
         menuIds.isEmpty()

@@ -1,0 +1,363 @@
+/* DataTables presentation stays inside the existing Admin layout. */
+.gca-root .gca-datatables {
+    width: 100%;
+    min-width: 0;
+    padding: 18px 22px 8px;
+    font-family: inherit;
+}
+.gca-root .gca-datatables .dt-container {
+    width: 100%;
+    font-family: inherit;
+    font-size: 13px;
+}
+.gca-root .gca-datatables .dt-layout-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 0 0 18px;
+}
+.gca-root .gca-datatables .dt-layout-row:last-child {
+    margin: 18px 0 10px;
+}
+.gca-root .gca-datatables .dt-layout-cell {
+    min-width: 0;
+}
+.gca-root .gca-datatables .gca-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #c5d2b9 transparent;
+}
+.gca-root .gca-datatables table.gca-table {
+    width: 100% !important;
+    min-width: 660px;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    white-space: normal;
+    margin: 0 !important;
+    --bs-table-bg: transparent;
+    --bs-table-color: #4b5946;
+    --bs-table-striped-bg: transparent;
+    --bs-table-hover-bg: #f6f9f0;
+}
+.gca-root .gca-datatables table.gca-table th,
+.gca-root .gca-datatables table.gca-table td {
+    padding: 16px 14px;
+    vertical-align: middle;
+    overflow-wrap: normal;
+    border: 0;
+    border-bottom: 1px solid #edf0e7;
+    font-size: 12px;
+    line-height: 1.6;
+    box-shadow: none;
+    background: transparent;
+}
+.gca-root .gca-datatables table.gca-table thead th {
+    background: #f4f6ee;
+    color: #69765f;
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: 0.035em;
+    white-space: nowrap;
+    padding-block: 13px;
+    border-bottom-color: #e6eadf;
+}
+.gca-root .gca-datatables table.gca-table thead th:first-child {
+    border-radius: 10px 0 0 10px;
+}
+.gca-root .gca-datatables table.gca-table thead th:last-child {
+    border-radius: 0 10px 10px 0;
+}
+.gca-root .gca-datatables table.gca-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+.gca-root .gca-datatables table.gca-table tbody tr:hover td {
+    background: #f8faf4;
+}
+.gca-root .gca-datatables table.gca-table td.gca-id-cell {
+    width: 1%;
+    white-space: nowrap;
+    color: #87907d;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+.gca-root .gca-datatables table.gca-table td.gca-name-cell {
+    min-width: 190px;
+    max-width: 300px;
+}
+.gca-root .gca-record-name {
+    display: block;
+    color: #293923;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.55;
+}
+.gca-root .gca-record-subtitle {
+    display: block;
+    font-size: 11px;
+    color: #89917f;
+    margin-top: 4px;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.gca-root .gca-datatables table.gca-table td.gca-status-cell {
+    white-space: nowrap;
+}
+.gca-root .gca-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #f0f2ec;
+    color: #747e6a;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.55;
+    white-space: nowrap;
+}
+.gca-root .gca-status-badge::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+.gca-root .gca-status-badge.is-positive {
+    background: #edf5e7;
+    color: #477227;
+}
+.gca-root .gca-status-badge.is-warning {
+    background: #fcf2df;
+    color: #99702d;
+}
+.gca-root .gca-status-badge.is-negative {
+    background: #fcece7;
+    color: #a14736;
+}
+.gca-root .gca-status-badge.is-info {
+    background: #eaf2f8;
+    color: #496c87;
+}
+.gca-root .gca-table-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    border: 1px solid #e1e8d8;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    color: #42632d;
+    font-weight: 600;
+}
+.gca-root .gca-table-action:hover {
+    border-color: #a9bf94;
+    background: #f1f6eb;
+}
+.gca-root .gca-datatables .dt-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.gca-root .gca-datatables .dt-search label,
+.gca-root .gca-datatables .dt-length label {
+    font-size: 11px;
+    color: #7b8671;
+    white-space: nowrap;
+}
+.gca-root .gca-datatables .dt-search input {
+    width: 250px;
+    max-width: 100%;
+    min-height: 40px;
+    padding: 10px 14px;
+    margin: 0;
+    border: 1px solid #e1e6d9;
+    border-radius: 999px;
+    background: #fcfdf9;
+    color: #33422b;
+    font: inherit;
+    box-shadow: none;
+}
+.gca-root .gca-datatables .dt-length {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+.gca-root .gca-datatables .dt-length select {
+    appearance: auto !important;
+    min-width: 68px;
+    width: auto !important;
+    min-height: 40px;
+    padding: 8px 12px !important;
+    border: 1px solid #e1e6d9;
+    border-radius: 10px;
+    background: #fff;
+    background-image: none !important;
+    color: #435238;
+    font: inherit;
+    box-shadow: none;
+}
+.gca-root .gca-datatables :is(.dt-search input, .dt-length select):focus {
+    border-color: #99b67d;
+    outline: 2px solid #dcebcf;
+    outline-offset: 1px;
+}
+.gca-root .gca-datatables .dt-info {
+    font-size: 11px;
+    color: #818b77;
+    padding: 0;
+}
+.gca-root .gca-datatables .pagination {
+    gap: 5px;
+    flex-wrap: wrap;
+    margin: 0;
+}
+.gca-root .gca-datatables .page-link {
+    display: grid;
+    place-items: center;
+    min-width: 33px;
+    min-height: 33px;
+    border: 1px solid #e4e9dd;
+    border-radius: 10px !important;
+    background: #fff;
+    color: #5d7150;
+    font-size: 11px;
+    box-shadow: none;
+}
+.gca-root .gca-datatables .page-link:hover {
+    background: #f0f6e9;
+    border-color: #cddcbc;
+}
+.gca-root .gca-datatables .page-item.active .page-link {
+    background: #376412;
+    border-color: #376412;
+    color: #fff;
+}
+.gca-root .gca-datatables .page-item.disabled .page-link {
+    background: #fafbf7;
+    color: #b2baa9;
+    border-color: #eef0e9;
+}
+.gca-root .gca-datatables .dt-processing {
+    border: 1px solid #e3e9db;
+    border-radius: 14px;
+    background: #fffffff5;
+    box-shadow: 0 6px 26px #283d1410;
+    color: #526748;
+    padding: 16px;
+}
+.gca-root .gca-empty-table {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 40px 20px;
+    color: #839077;
+}
+.gca-root .gca-empty-table strong {
+    font-size: 14px;
+    color: #526548;
+}
+.gca-root .gca-empty-table span {
+    font-size: 12px;
+}
+.gca-root .gca-table-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 16px;
+    margin: 0 0 18px;
+    border: 1px solid #efdfd5;
+    border-radius: 12px;
+    background: #fff8f3;
+    color: #995945;
+    font-size: 12px;
+}
+.gca-root .gca-table-error > svg {
+    flex-shrink: 0;
+}
+.gca-root .gca-table-error > div {
+    flex: 1;
+}
+.gca-root .gca-table-error strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 12px;
+}
+.gca-root .gca-table-error .gca-btn {
+    min-height: 32px;
+    padding: 6px 10px;
+}
+@media (max-width: 700px) {
+    .gca-root .gca-datatables {
+        padding: 16px 12px 6px;
+    }
+    .gca-root .gca-datatables .dt-layout-row {
+        gap: 12px;
+    }
+    .gca-root .gca-datatables .dt-search {
+        width: 100%;
+    }
+    .gca-root .gca-datatables .dt-search input {
+        width: 100%;
+    }
+    .gca-root .gca-datatables .dt-search label {
+        width: 100%;
+    }
+    .gca-root .gca-datatables table.gca-table th,
+    .gca-root .gca-datatables table.gca-table td {
+        padding: 13px 12px;
+    }
+    .gca-root .gca-datatables .dt-layout-cell {
+        max-width: 100%;
+    }
+    .gca-root .gca-table-error {
+        align-items: flex-start;
+    }
+}
+
+/* Bootstrap integration uses .row wrappers rather than .dt-layout-row. */
+.gca-root .gca-datatables .dt-container > .row {
+    margin: 0 0 18px !important;
+    row-gap: 14px;
+}
+.gca-root .gca-datatables .dt-container > .row:last-child {
+    margin: 18px 0 10px !important;
+}
+.gca-root .gca-datatables .dt-container > .row > * {
+    padding-inline: 0;
+    margin-top: 0;
+}
+.gca-root .gca-datatables .gca-table-wrap {
+    overflow: visible;
+}
+.gca-root .gca-datatables .dt-container > .dt-layout-table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c5d2b9 transparent;
+    overscroll-behavior-x: contain;
+}
+.gca-root .gca-datatables .dt-layout-table > * {
+    width: 100%;
+    max-width: 100%;
+}
+.gca-root .gca-datatables input[type="search"] {
+    background-color: #fcfdf9 !important;
+}
+@media (max-width: 700px) {
+    .gca-root .gca-datatables .dt-container > .row:first-child > div:last-child {
+        width: 100%;
+    }
+}

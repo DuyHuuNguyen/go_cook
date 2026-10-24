@@ -41,7 +41,7 @@ public class MenuController {
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"Menu APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
-  @PreAuthorize("hasRole('ROLE_CHEF')")
+  @PreAuthorize("hasAuthority('ROLE_CHEF')")
   BaseResponse<Void> createMenu(@Valid @RequestBody UpsetMenuRequest request) {
     return this.menuFacade.createMenu(request);
   }
@@ -50,7 +50,7 @@ public class MenuController {
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"Menu APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
-  @PreAuthorize("hasRole('ROLE_CHEF')")
+  @PreAuthorize("hasAuthority('ROLE_CHEF')")
   public BaseResponse<Void> addMenuAsset(
       @PathVariable Long menuId, @RequestPart("file") MultipartFile file) {
     UpsetMenuAssetRequest request =

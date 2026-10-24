@@ -1,153 +1,134 @@
+import { useEffect } from "react";
 import {
-  Navbar as BsNavbar,
   Container,
   Nav,
+  Navbar as BsNavbar,
   NavDropdown,
 } from "react-bootstrap";
-import { Link, useNavigate } from "react-router";
+import { BoxArrowUpRight, ShieldCheck } from "react-bootstrap-icons";
+import { Link, NavLink, useNavigate } from "react-router";
 import { UserProvider, useUser } from "../../contexts/UserContext.tsx";
-import logo from "../../assets/go-cook-logo.svg";
 import { useProfile } from "../../contexts/ProfileContext.tsx";
-import { useEffect } from "react";
 import { useApp } from "../../contexts/AppContext.tsx";
-
 import { authStore } from "../../stores/authStore";
+import logo from "../../assets/go-cook-logo.svg";
+import "../../styles/siteChrome.css";
 
-function NavbarChildren() {
+function NavbarContent() {
   const navigate = useNavigate();
   const { logout } = useUser();
-  const { profileData, fetchProfile, setProfileData } = useProfile();
+  const { profileData, loading, fetchProfile, setProfileData } = useProfile();
   const { notify } = useApp();
 
   useEffect(() => {
     void fetchProfile();
+
     return authStore.subscribe(() => {
       if (authStore.isAuthorized()) void fetchProfile();
       if (authStore.isUnAuthorized()) setProfileData(null);
     });
   }, [fetchProfile, setProfileData]);
 
-  const username = profileData?.username || "User";
-  const firstLetter = username.charAt(0).toUpperCase();
-  const hasAvatar = Boolean(profileData?.avatarUrl);
+  const isAdmin = profileData?.roles?.includes("ROLE_SYSTEM_ADMIN") ?? false;
+  const username = profileData?.username || "Tài khoản";
+  const initial = username.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     try {
       await logout();
-      notify("Log out successfully", {
-        title: "Log out",
-        variant: "success",
-      });
       setProfileData(null);
+      notify("Đã đăng xuất", { title: "Tài khoản", variant: "success" });
       navigate("/login");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      notify(message, {
-        title: "Log out",
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Không thể đăng xuất", {
+        title: "Tài khoản",
         variant: "danger",
       });
     }
   };
 
   return (
-    <BsNavbar expand="lg" bg="light" variant="light" className="border-bottom">
-      <Container>
-        <BsNavbar.Brand as={Link} to="/">
-          <link
-            rel="icon"
-            type="image/svg+xml"
-            href="../../assets/go-cook-icon.svg"
-          />
+    <BsNavbar expand="lg" sticky="top" className="gc-navbar">
+      <Container className="gc-navbar-container">
+        <BsNavbar.Brand as={Link} to="/" className="gc-navbar-brand">
+          <img src={logo} alt="GoCook" />
         </BsNavbar.Brand>
 
-        <BsNavbar.Toggle aria-controls="main-navbar" />
-        <BsNavbar.Collapse id="main-navbar">
-          <Nav className="me-auto fs-5">
-            <Nav.Link as={Link} to="/">
-              <img src={logo} alt="GO Cook" height={48} />
-            </Nav.Link>
-            <Nav.Link as={Link} to="/courses">
+        <BsNavbar.Toggle
+          className="gc-navbar-toggle"
+          aria-controls="gc-main-nav"
+          aria-label="Mở menu điều hướng"
+        />
+
+        <BsNavbar.Collapse id="gc-main-nav" className="gc-navbar-collapse">
+          <Nav className="gc-nav-links">
+            <Nav.Link as={Link} to="/#dau-bep">
               Khám phá đầu bếp
             </Nav.Link>
-            <Nav.Link as={Link} to="/menus">
+            <Nav.Link as={NavLink} to="/menus">
               Thực đơn
             </Nav.Link>
-            <Nav.Link as={Link} to="/create-menu">
+            <Nav.Link as={NavLink} to="/create-menu">
               Tạo yêu cầu
             </Nav.Link>
             {(!profileData || !profileData.isChef) && (
-              <Nav.Link as={Link} to="/become-chef">
+              <Nav.Link as={NavLink} to="/become-chef">
                 Trở thành đầu bếp
               </Nav.Link>
             )}
           </Nav>
 
-          {profileData && (
-            <Nav className="fs-5">
+          <Nav className="gc-navbar-account">
+            {isAdmin && (
+              <Nav.Link as={Link} to="/admin" className="gc-admin-link">
+                <ShieldCheck size={17} />
+                <span>Quản trị</span>
+                <BoxArrowUpRight size={13} />
+              </Nav.Link>
+            )}
+
+            {profileData ? (
               <NavDropdown
-                title={
-                  hasAvatar ? (
-                    <img
-                      src={profileData.avatarUrl}
-                      alt={username}
-                      className="rounded-circle"
-                      style={{
-                        width: "38px",
-                        height: "38px",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle bg-second-light text-secondary"
-                      style={{
-                        width: "38px",
-                        height: "38px",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {firstLetter}
-                    </div>
-                  )
-                }
-                id="user-dropdown"
                 align="end"
+                id="gc-user-menu"
+                className="gc-profile-menu"
+                title={
+                  <span className="gc-profile-trigger">
+                    {profileData.avatarUrl ? (
+                      <img src={profileData.avatarUrl} alt="" className="gc-profile-avatar" />
+                    ) : (
+                      <span className="gc-user-initial">{initial}</span>
+                    )}
+                    <span className="gc-profile-name">{username}</span>
+                  </span>
+                }
               >
                 <NavDropdown.Item as={Link} to="/profile">
-                  <span>Tài khoản</span>
+                  Tài khoản của tôi
                 </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/my-learning-space">
-                  Bookings
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/wishlist">
-                  Tạo yêu cầu
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                {profileData?.isChef && (
+                {profileData.isChef && (
                   <NavDropdown.Item as={Link} to="/seller">
-                    gian bếp
+                    Gian bếp
                   </NavDropdown.Item>
                 )}
-
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleLogout}>
-                  Log out
+                  Đăng xuất
                 </NavDropdown.Item>
               </NavDropdown>
-            </Nav>
-          )}
-          {!profileData && (
-            <Nav>
-              <Nav.Link as={Link} to="/login">
-                Đăng nhập
-              </Nav.Link>
-              <Nav.Link as={Link} to="/signup">
-                Đăng ký
-              </Nav.Link>
-            </Nav>
-          )}
+            ) : (
+              !loading && (
+                <>
+                  <Nav.Link as={Link} to="/login" className="gc-navbar-signin">
+                    Đăng nhập
+                  </Nav.Link>
+                  <Nav.Link as={Link} to="/signup" className="gc-navbar-signup">
+                    Đăng ký
+                  </Nav.Link>
+                </>
+              )
+            )}
+          </Nav>
         </BsNavbar.Collapse>
       </Container>
     </BsNavbar>
@@ -157,7 +138,7 @@ function NavbarChildren() {
 export default function Navbar() {
   return (
     <UserProvider>
-      <NavbarChildren />
+      <NavbarContent />
     </UserProvider>
   );
 }

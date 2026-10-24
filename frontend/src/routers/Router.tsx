@@ -23,6 +23,12 @@ import NotFound from "../components/common/NotFound";
 import { authStore } from "../stores/authStore";
 import PublicChefInfo from "../pages/PublicChefInfo.tsx";
 import DemoPage from "../pages/DemoPage.tsx";
+import AdminLayout from "../components/admin/AdminLayout";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminResourcePage from "../components/admin/AdminResourcePage";
+import AdminReports from "../pages/admin/AdminReports";
+import AdminSettings from "../pages/admin/AdminSettings";
+import { adminSectionKeys } from "../types/AdminTypes";
 
 export const router = createBrowserRouter(
   [
@@ -58,6 +64,19 @@ export const router = createBrowserRouter(
             { path: "/profile", element: <Profile /> },
           ],
         },
+      ],
+    },
+    {
+      path: "/admin",
+      element: <AdminLayout />,
+      children: [
+        { index: true, element: <AdminDashboard /> },
+        ...adminSectionKeys.map((resource) => ({
+          path: resource,
+          element: <AdminResourcePage resource={resource} />,
+        })),
+        { path: "reports", element: <AdminReports /> },
+        { path: "settings", element: <AdminSettings /> },
       ],
     },
     { path: "*", element: <NotFound /> },
