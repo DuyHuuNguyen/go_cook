@@ -18,30 +18,30 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/menus")
 @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
 public class AdminMenuController {
-    private final AdminMenuFacade facade;
+  private final AdminMenuFacade facade;
 
-    @GetMapping
-    public BaseResponse<PaginationResponse<AdminMenuResponse>> list(
-            @Valid @ParameterObject MenuSearchRequest request,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) Boolean isActive) {
-        return facade.list(request, status, isActive);
-    }
+  @GetMapping
+  public BaseResponse<PaginationResponse<AdminMenuResponse>> list(
+      @Valid @ParameterObject MenuSearchRequest request,
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false) Boolean isActive) {
+    return facade.list(request, status, isActive);
+  }
 
-    @GetMapping("/{id}")
-    public BaseResponse<AdminMenuResponse> detail(@PathVariable Long id) {
-        return facade.detail(id);
-    }
+  @GetMapping("/{id}")
+  public BaseResponse<AdminMenuResponse> detail(@PathVariable Long id) {
+    return facade.detail(id);
+  }
 
-    @PutMapping("/{id}")
-    public BaseResponse<AdminMenuResponse> update(
-            @PathVariable Long id, @Valid @RequestBody AdminMenuUpdateRequest request) {
-        return facade.update(id, request);
-    }
+  @PutMapping("/{id}")
+  public BaseResponse<AdminMenuResponse> update(
+      @PathVariable Long id, @Valid @RequestBody AdminMenuUpdateRequest request) {
+    return facade.update(id, request);
+  }
 
-    @PatchMapping("/{id}/status")
-    public BaseResponse<AdminMenuResponse> updateStatus(
-            @PathVariable Long id, @Valid @RequestBody AdminMenuStatusRequest request) {
-        return facade.updateStatus(id, request);
-    }
+  @PatchMapping("/{id}/status")
+  public BaseResponse<AdminMenuResponse> updateStatus(
+      @PathVariable Long id, @Valid @RequestBody AdminMenuStatusRequest request) {
+    return facade.updateStatus(id, request);
+  }
 }

@@ -103,6 +103,8 @@ export const adminSections: Record<AdminSection, AdminSectionInfo> = {
     columns: [
       { key: "id", label: "Mã món" },
       { key: "name", label: "Tên món ăn" },
+      { key: "chef", label: "Đầu bếp" },
+      { key: "status", label: "Trạng thái" },
     ],
   },
   categories: {

@@ -16,6 +16,8 @@ import {
   getAdminTablePage,
 } from "../../clients/AdminClient";
 import { getAdminMenusPage } from "../../clients/AdminMenuClient";
+import { getAdminDishesPage } from "../../clients/AdminDishClient";
+import type { AdminDishFilters } from "../../types/AdminDishTypes";
 import type { AdminMenuFilters } from "../../types/AdminMenuTypes";
 
 import {
@@ -35,6 +37,7 @@ type Props = {
   demoRows?: AdminRow[];
   statusFilter?: string;
   menuFilters?: AdminMenuFilters;
+  dishFilters?: AdminDishFilters;
 };
 
 function escapeText(value: string | null | undefined): string {
@@ -91,6 +94,7 @@ export default function AdminDataTable({
   demoRows,
   statusFilter = "",
   menuFilters,
+  dishFilters,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const realChefs = resource === "chefs" && demoRows === undefined;
@@ -104,7 +108,8 @@ export default function AdminDataTable({
         data: column.key,
         title: column.label,
         defaultContent: "—",
-        orderable: resource !== "menus" || ["id", "name", "price"].includes(column.key),
+        orderable: (resource !== "menus" && resource !== "dishes") ||
+          ["id", "name", resource === "menus" ? "price" : "id"].includes(column.key),
         className:
           column.key === "id"
             ? "gca-id-cell"
@@ -167,7 +172,7 @@ export default function AdminDataTable({
       processing: true,
       pageLength: 10,
       lengthMenu: [10, 20, 50],
-      order: (resource === "menus" ? [[0, "asc"]] : []) as Array<[number, "asc" | "desc"]>,
+      order: (["menus", "dishes"].includes(resource) ? [[0, "asc"]] : []) as Array<[number, "asc" | "desc"]>,
       initComplete: function () {
         if (initialSearch && !realChefs)
           this.api().search(initialSearch).draw();
@@ -214,7 +219,16 @@ export default function AdminDataTable({
                   sortDirection: direction,
                   filters: menuFilters,
                 })
-              : getAdminTablePage(
+              : resource === "dishes"
+                ? getAdminDishesPage({
+                    page,
+                    size: pageSize,
+                    keyword: request.search?.value || "",
+                    sortBy,
+                    sortDirection: direction,
+                    filters: dishFilters,
+                  })
+                : getAdminTablePage(
                   resource,
                   page,
                   pageSize,
@@ -257,6 +271,7 @@ export default function AdminDataTable({
       realUsers,
       statusFilter,
       menuFilters,
+      dishFilters,
     ],
   );
 
@@ -271,7 +286,7 @@ export default function AdminDataTable({
           >
             <Eye size={14} aria-hidden="true" /> Chi tiết
           </button>
-          {resource === "menus" && onEdit && (
+          {(resource === "menus" || resource === "dishes") && onEdit && (
             <button
               className="gca-table-action"
               type="button"

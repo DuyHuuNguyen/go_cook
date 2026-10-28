@@ -15,28 +15,33 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AdminMenuFacadeImpl implements AdminMenuFacade {
-    private final AdminMenuService service;
+  private final AdminMenuService service;
 
-    @Override
-    public BaseResponse<PaginationResponse<AdminMenuResponse>> list(
-            MenuSearchRequest request, String status, Boolean isActive) {
-        return BaseResponse.build(PaginationResponse.from(service.list(request, status, isActive)), true);
-    }
+  @Override
+  public BaseResponse<PaginationResponse<AdminMenuResponse>> list(
+      MenuSearchRequest request, String status, Boolean isActive) {
+    return BaseResponse.build(
+        PaginationResponse.from(service.list(request, status, isActive)), true);
+  }
 
-    @Override
-    public BaseResponse<AdminMenuResponse> detail(Long id) {
-        return BaseResponse.build(service.detail(id), true);
-    }
+  @Override
+  public BaseResponse<AdminMenuResponse> detail(Long id) {
+    return BaseResponse.build(service.detail(id), true);
+  }
 
-    @Override
-    public BaseResponse<AdminMenuResponse> update(Long id, AdminMenuUpdateRequest request) {
-        return BaseResponse.build(service.update(id, request), true);
-    }
+  @Override
+  public BaseResponse<AdminMenuResponse> update(Long id, AdminMenuUpdateRequest request) {
+    return BaseResponse.build(service.update(id, request), true);
+  }
 
-    @Override
-    public BaseResponse<AdminMenuResponse> updateStatus(Long id, AdminMenuStatusRequest request) {
-        return BaseResponse.build(
-                service.updateStatus(id, SecurityUserDetails.getPrincipal().getId(),
-                        request.getIsActive(), request.getReason()), true);
-    }
+  @Override
+  public BaseResponse<AdminMenuResponse> updateStatus(Long id, AdminMenuStatusRequest request) {
+    return BaseResponse.build(
+        service.updateStatus(
+            id,
+            SecurityUserDetails.getPrincipal().getId(),
+            request.getIsActive(),
+            request.getReason()),
+        true);
+  }
 }

@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class AdminMenuStatusRequest {
-    @NotNull
-    private Boolean isActive;
+  @NotNull private Boolean isActive;
 
-    @Size(max = 1000)
-    private String reason;
+  @Size(max = 1000)
+  private String reason;
 }

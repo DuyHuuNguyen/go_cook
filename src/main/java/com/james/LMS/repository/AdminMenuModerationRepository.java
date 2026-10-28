@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface AdminMenuModerationRepository extends JpaRepository<AdminMenuModeration, Long> {
-    Optional<AdminMenuModeration> findFirstByMenu_IdAndRestoredAtIsNullOrderByIdDesc(Long menuId);
+  Optional<AdminMenuModeration> findFirstByMenu_IdAndRestoredAtIsNullOrderByIdDesc(Long menuId);
 
-    @Query("select a from AdminMenuModeration a where a.restoredAt is null and a.menu.id in :ids")
-    List<AdminMenuModeration> findActiveForMenuIds(@Param("ids") Collection<Long> ids);
+  @Query("select a from AdminMenuModeration a where a.restoredAt is null and a.menu.id in :ids")
+  List<AdminMenuModeration> findActiveForMenuIds(@Param("ids") Collection<Long> ids);
 }

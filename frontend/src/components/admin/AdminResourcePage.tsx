@@ -13,7 +13,8 @@ import {
   getChefApplication,
 } from "../../clients/AdminClient";
 import AdminDataTable from "./AdminDataTable";
-import AdminMenusPage from "../../pages/admin/AdminMenusPage";
+import AdminMenusPage from "./AdminMenusPage";
+import AdminDishesPage from "../../pages/admin/AdminDishesPage";
 import AdminActionPanel from "./AdminActionPanel";
 
 import {
@@ -29,6 +30,7 @@ type Props = { resource: AdminSection };
 
 export default function AdminResourcePage({ resource }: Props) {
   if (resource === "menus") return <AdminMenusPage />;
+  if (resource === "dishes") return <AdminDishesPage />;
   return <AdminOtherResourcePage resource={resource} />;
 }
 
