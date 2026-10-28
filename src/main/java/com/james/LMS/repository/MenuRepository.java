@@ -1,12 +1,14 @@
 package com.james.LMS.repository;
 
 import com.james.LMS.entity.Menu;
+import com.james.LMS.response.MenuResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -29,5 +31,18 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     @EntityGraph(attributePaths = {"category", "seller"})
     Page<Menu> findAll(Specification<Menu> specification, Pageable pageable);
 
+  @Query("""
+  SELECT m
+    from Menu m
+    join fetch m.category c
+    join fetch m.seller s
+    where m.seller.id =:chefId
+  """)
+  Page<Menu> findAllByChefId(@Param("chefId") Long chefId, Pageable pageable);
+
   Optional<Menu> findByIdAndSeller_idAndIsActiveTrue(Long id, Long sellerId);
+  
+
+  @EntityGraph(attributePaths = {"category", "seller"})
+  List<Menu> findByIdGreaterThanAndSeller_IdOrderByIdAsc(Long lastMenuId, Long chefId);
 }

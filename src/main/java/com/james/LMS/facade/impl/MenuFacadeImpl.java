@@ -7,19 +7,24 @@ import com.james.LMS.enums.FileType;
 import com.james.LMS.exception.EntityNotFoundException;
 import com.james.LMS.exception.UploadFileException;
 import com.james.LMS.facade.MenuFacade;
+import com.james.LMS.request.MenuOfChefRequest;
 import com.james.LMS.request.MenuSearchRequest;
 import com.james.LMS.request.UpsetMenuAssetRequest;
 import com.james.LMS.request.UpsetMenuRequest;
-import com.james.LMS.response.BaseResponse;
-import com.james.LMS.response.MenuResponse;
-import com.james.LMS.response.PaginationResponse;
+import com.james.LMS.response.*;
 import com.james.LMS.service.*;
+
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MenuFacadeImpl implements MenuFacade {
@@ -91,5 +96,31 @@ public class MenuFacadeImpl implements MenuFacade {
 
     menuAssetService.save(MenuAsset.builder().url(url).menu(menu).build());
     return BaseResponse.ok();
+  }
+
+  @Override
+  public BaseResponse<PaginationResponse<MenuResponse>> findAllMenuOfChef(MenuOfChefRequest request) {
+    var principle = SecurityUserDetails.getPrincipal();
+    Pageable pageable = PageRequest.of(request.getCurrentPage() -1, request.getPageSize());
+    return BaseResponse.build(PaginationResponse.from(menuService.findAllMenuByChefId(principle.getId(),pageable )), true);
+  }
+
+  @Override
+  public BaseResponse<KeySetPaginationResponse<MenuResponse>> findByLastId(Long lastId) {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+
+    List<MenuResponse> menuResponses =
+            this.menuService.findByIdGreaterThanOrderByChefId(lastId, principal.getId());
+
+    boolean hasNext = !menuResponses.isEmpty();
+    lastId = hasNext ? menuResponses.getLast().id() : -1l;
+
+    var paginationResponse =
+            KeySetPaginationResponse.<MenuResponse>builder()
+                    .data(menuResponses)
+                    .lastId(lastId)
+                    .hasNext(hasNext)
+                    .build();
+    return BaseResponse.build(paginationResponse, true);
   }
 }

@@ -2,10 +2,12 @@ package com.james.LMS.controller;
 
 import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.facade.MenuFacade;
+import com.james.LMS.request.MenuOfChefRequest;
 import com.james.LMS.request.MenuSearchRequest;
 import com.james.LMS.request.UpsetMenuAssetRequest;
 import com.james.LMS.request.UpsetMenuRequest;
 import com.james.LMS.response.BaseResponse;
+import com.james.LMS.response.KeySetPaginationResponse;
 import com.james.LMS.response.MenuResponse;
 import com.james.LMS.response.PaginationResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +39,26 @@ public class MenuController {
     return menuFacade.findMenus(request);
   }
 
-  @PostMapping
+  @GetMapping("/chef/menus")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(tags = {"Menu APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasRole('ROLE_CHEF')")
+  public BaseResponse<PaginationResponse<MenuResponse>> findAllMenuOfChef(@Valid MenuOfChefRequest request) {
+    return menuFacade.findAllMenuOfChef(request);
+  }
+
+  @GetMapping("/chef/menus/{lastId}")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(tags = {"Menu APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasRole('ROLE_CHEF')")
+  public BaseResponse<KeySetPaginationResponse<MenuResponse>> findAllMenuOfChef(@PathVariable("lastId") Long lastId) {
+    return menuFacade.findByLastId(lastId);
+  }
+
+
+  @PostMapping("/creation")
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"Menu APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)

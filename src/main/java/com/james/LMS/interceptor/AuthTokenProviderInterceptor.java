@@ -60,6 +60,7 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
       throws ServletException, IOException {
     String path = request.getRequestURI();
 
+
     if (PublicEndpointsValidatorUtil.isSwaggerUrl(path)
         || PublicEndpointsValidatorUtil.isPublicEndpoint(path)) {
       filterChain.doFilter(request, response);
