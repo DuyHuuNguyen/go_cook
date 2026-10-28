@@ -93,6 +93,13 @@ function money(value: unknown): string {
     : text(value);
 }
 
+export type AdminMenuFilters = {
+  categoryId?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  diners?: number;
+};
+
 const chefStatuses: ChefApplicationStatus[] = [
   "PENDING",
   "APPROVED",
@@ -228,27 +235,37 @@ function rowFor(section: AdminSection, item: unknown): AdminRow {
       "customerName",
     ) || id;
   const base: AdminRow = { id, name };
-  if (section === "menus")
+  if (section === "menus") {
+    const images = Array.isArray(record.imageUrls)
+      ? record.imageUrls.filter((url): url is string => typeof url === "string")
+      : [];
+    const category = object(record.category);
+    const seller = object(record.seller);
     return {
       ...base,
       description: text(record.description),
-      category: first(record, "category"),
-      chef: first(record, "seller", "chef", "chefName"),
+      category: text(category.name ?? record.category),
+      categoryId: text(category.id ?? record.categoryId),
+      chef: text(seller.username ?? record.chefName ?? record.seller),
+      chefId: text(seller.id ?? record.chefId),
       price: money(record.tempPrice ?? record.price),
-      status: text(record.status),
+      status: text(record.visibility ?? record.status),
       visibility: text(record.visibility),
-      visibilitySource: text(record.visibilitySource),
-      priorVisibility: text(record.priorVisibility),
       reason: first(record, "hiddenReason", "reason"),
-      chefApproval: text(record.chefApproval),
+      priorVisibility: text(record.priorVisibility),
       dishes: Array.isArray(record.dishes)
-        ? record.dishes.map(text).join(", ")
+        ? record.dishes.map(text).filter(Boolean).join(", ")
         : text(record.dishes),
       guests:
         record.minGuests != null && record.maxGuests != null
           ? String(record.minGuests) + "–" + String(record.maxGuests)
           : "",
+      imageUrl: images[0] ?? "",
+      imageUrls: JSON.stringify(images),
+      createdAt: text(record.createdAt),
+      source: text(record.visibility) ? "admin" : "public",
     };
+  }
   if (section === "users")
     return {
       ...base,
@@ -518,6 +535,7 @@ export async function getAdminTablePage(
   sortBy: string,
   sortDirection: AdminTableSort,
   statusFilter = "",
+  menuFilters?: AdminMenuFilters,
 ): Promise<AdminTablePage> {
   const search = keyword.trim();
   if (section === "users") {
@@ -569,6 +587,7 @@ export async function getAdminTablePage(
         keyword: search || undefined,
         sortBy: sortBy || undefined,
         sortDirection: sortBy ? sortDirection : undefined,
+        ...(section === "menus" ? menuFilters : {}),
       },
     });
   } catch (reason) {
@@ -612,6 +631,7 @@ export async function getAdminTablePage(
         size,
         keyword: search || undefined,
         sort: getMenuSort(sortBy, sortDirection),
+        ...menuFilters,
       },
     });
   }
@@ -660,6 +680,48 @@ export async function reviewAdminUser(
       status,
       reason: status === "LOCKED" ? reason.trim() : null,
     },
+  );
+  readPayload(response.data);
+}
+
+export async function getAdminMenuCategories(
+  signal?: AbortSignal,
+): Promise<Array<{ id: number; name: string }>> {
+  const rows: Array<{ id: number; name: string }> = [];
+  let cursor = 0;
+  for (let i = 0; i < 100; i += 1) {
+    const response = await axiosClient.get<unknown>(
+      `${ENDPOINTS.USER.CATEGORY.GET.V1}/${cursor}`,
+      { signal },
+    );
+    const payload = object(readPayload(response.data));
+    if (!Array.isArray(payload.data)) {
+      throw new Error("API danh mục trả dữ liệu không hợp lệ.");
+    }
+    for (const item of payload.data) {
+      const category = object(item);
+      if (typeof category.id === "number" && typeof category.name === "string") {
+        rows.push({ id: category.id, name: category.name });
+      }
+    }
+    if (payload.hasNext !== true) return rows;
+    const nextCursor = Number(payload.lastId);
+    if (!Number.isSafeInteger(nextCursor) || nextCursor <= cursor) {
+      throw new Error("API danh mục trả con trỏ không hợp lệ.");
+    }
+    cursor = nextCursor;
+  }
+  throw new Error("Danh sách danh mục vượt giới hạn tải.");
+}
+
+export async function changeAdminMenuVisibility(
+  id: string,
+  action: "HIDE" | "RESTORE",
+  reason: string,
+): Promise<void> {
+  const response = await axiosClient.patch<unknown>(
+    `${ENDPOINTS.ADMIN.MENUS}/${encodeURIComponent(id)}/visibility`,
+    { action, reason: action === "HIDE" ? reason.trim() : null },
   );
   readPayload(response.data);
 }

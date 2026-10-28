@@ -3,11 +3,14 @@ import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from "react
 import {
     BarChart, BoxArrowUpRight, CalendarCheck, CardChecklist,
     ChatDots, ChevronDown, Collection, CreditCard, EggFried,
-    Gear, Grid1x2, List, People, PersonBadge, Search, ShieldCheck, XLg,
+    BoxArrowRight, Gear, Grid1x2, List, People, PersonBadge, Search, ShieldCheck, XLg,
 } from "react-bootstrap-icons";
 import { useProfile } from "../../contexts/ProfileContext";
+import { UserProvider, useUser } from "../../contexts/UserContext";
+import { Dropdown } from "react-bootstrap";
 import logo from "../../assets/go-cook-logo.svg";
 import "../../styles/admin.css";
+import "../../styles/adminAccount.css";
 
 const navigation = [
     {
@@ -45,7 +48,10 @@ const navigation = [
 function AdminFrame() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { profileData } = useProfile();
+    const { profileData, setProfileData } = useProfile();
+    const { logout } = useUser();
+    const [loggingOut, setLoggingOut] = useState(false);
+    const [logoutError, setLogoutError] = useState("");
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [siteSearch, setSiteSearch] = useState("");
@@ -53,6 +59,21 @@ function AdminFrame() {
     useEffect(() => {
         setSidebarOpen(false);
     }, [location.pathname]);
+
+    async function handleLogout() {
+        if (loggingOut) return;
+        setLoggingOut(true);
+        setLogoutError("");
+        try {
+            await logout();
+            setProfileData(null);
+            navigate("/login", { replace: true });
+        } catch {
+            setLogoutError("Không thể đăng xuất. Vui lòng thử lại.");
+        } finally {
+            setLoggingOut(false);
+        }
+    }
 
     const activeItem = navigation.flatMap((section) => section.items).find(
         (item) => location.pathname === item.href || (item.href !== "/admin" && location.pathname.startsWith(`${item.href}/`))
@@ -112,7 +133,22 @@ function AdminFrame() {
                         ) : (
                             <button className="gca-icon-button" onClick={() => setSearchOpen(true)} aria-label="Tìm kiếm thực đơn"><Search size={19} /></button>
                         )}
-                        <div className="gca-account"><span className="gca-account-avatar">{(profileData?.username || "A").charAt(0).toUpperCase()}</span><span><strong>{profileData?.username || "Quản trị viên"}</strong><small>System Admin</small></span></div>
+                        <Dropdown align="end" className="gca-account-dropdown">
+                            <Dropdown.Toggle id="gca-account-menu" className="gca-account-trigger" aria-label="Mở menu tài khoản">
+                                <span className="gca-account-avatar">{(profileData?.username || "A").charAt(0).toUpperCase()}</span>
+                                <span className="gca-account-name"><strong>{profileData?.username || "Quản trị viên"}</strong><small>System Admin</small></span>
+                                <ChevronDown size={13} />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu className="gca-account-menu">
+                                <Dropdown.Item onClick={() => navigate("/profile")}>Tài khoản của tôi</Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item disabled={loggingOut} onClick={() => void handleLogout()}>
+                                    <BoxArrowRight size={16} className="gca-logout-icon" />
+                                    {loggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        {logoutError && <span className="gca-logout-error" role="alert">{logoutError}</span>}
                     </div>
                 </header>
                 <main className="gca-content"><Outlet /></main>
@@ -134,5 +170,5 @@ export default function AdminLayout() {
     if (!profileData.roles?.includes("ROLE_SYSTEM_ADMIN")) {
         return <div className="gca-auth-message" role="alert">Bạn không có quyền truy cập. <Link to="/">Về trang chủ</Link></div>;
     }
-    return <AdminFrame />;
+    return <UserProvider><AdminFrame /></UserProvider>;
 }

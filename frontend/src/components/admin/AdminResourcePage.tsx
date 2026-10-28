@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { ArrowClockwise, XLg } from "react-bootstrap-icons";
 import {
@@ -13,6 +13,7 @@ import {
   getChefApplication,
 } from "../../clients/AdminClient";
 import AdminDataTable from "./AdminDataTable";
+import AdminMenusPage from "../../pages/admin/AdminMenusPage";
 import AdminActionPanel from "./AdminActionPanel";
 
 import {
@@ -21,31 +22,22 @@ import {
   workflowDetails,
   workflowFilters,
   workflowLabel,
-  workflowNotes,
   workflowState,
 } from "./adminWorkflow";
-import { adminDemoRows } from "./adminDemoData";
 
 type Props = { resource: AdminSection };
 
 export default function AdminResourcePage({ resource }: Props) {
+  if (resource === "menus") return <AdminMenusPage />;
+  return <AdminOtherResourcePage resource={resource} />;
+}
+
+function AdminOtherResourcePage({ resource }: Props) {
   const section = adminSections[resource];
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const [demo, setDemo] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const managed = isWorkflowSection(resource);
-  const demoEnabled = import.meta.env.DEV && resource === "menus" && demo;
-  const demoRows = useMemo(
-    () =>
-      demoEnabled
-        ? adminDemoRows.menus.filter(
-            (row) =>
-              !statusFilter || workflowState("menus", row) === statusFilter,
-          )
-        : undefined,
-    [resource, demoEnabled, statusFilter],
-  );
   const [revision, setRevision] = useState(0);
   const [selected, setSelected] = useState<AdminRow | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -54,7 +46,7 @@ export default function AdminResourcePage({ resource }: Props) {
   const [editing, setEditing] = useState<AdminRow | "new" | null>(null);
 
   useEffect(() => {
-    if (!["chefs", "users"].includes(resource) || demoEnabled || !selected)
+    if (!["chefs", "users"].includes(resource) || !selected)
       return;
     const controller = new AbortController();
     setDetailLoading(true);
@@ -75,7 +67,7 @@ export default function AdminResourcePage({ resource }: Props) {
         if (!controller.signal.aborted) setDetailLoading(false);
       });
     return () => controller.abort();
-  }, [resource, demoEnabled, selected?.id, detailRevision]);
+  }, [resource, selected?.id, detailRevision]);
 
   useEffect(() => {
     setSelected(null);
@@ -115,72 +107,10 @@ export default function AdminResourcePage({ resource }: Props) {
           )}
         </div>
       </div>
-      {resource === "menus" && (
-        <section className="gca-workflow-summary" aria-label="Quy tắc quản lý">
-          <details>
-            <summary>Quy tắc quản trị</summary>
-            <p>{workflowNotes[resource]}</p>
-          </details>
-          <p className="gca-workflow-notice">
-            Chế độ chỉ đọc · Các thao tác quản trị chưa có API và chưa thể áp
-            dụng.
-          </p>
-          {import.meta.env.DEV && resource === "menus" && (
-            <label className="gca-demo-switch">
-              <input
-                type="checkbox"
-                checked={demo}
-                onChange={(event) => {
-                  setDemo(event.target.checked);
-                  setStatusFilter("");
-                  setSelected(null);
-                  setEditing(null);
-                }}
-              />{" "}
-              Xem dữ liệu mẫu frontend (chỉ development, vẫn yêu cầu quyền
-              Admin)
-            </label>
-          )}
-          <div className="gca-source-controls">
-            <p className="gca-source-label" role="status">
-              {demoEnabled
-                ? "ĐANG XEM DEMO: dữ liệu giả lập, không phải bản ghi backend. Không lưu thay đổi."
-                : "Nguồn: backend. Không tự thay dữ liệu lỗi hoặc rỗng bằng dữ liệu mẫu."}
-            </p>
-            <label className="gca-workflow-filter">
-              Lọc trạng thái
-              <select
-                aria-label="Lọc trạng thái"
-                value={statusFilter}
-                disabled={!demoEnabled}
-                onChange={(event) => {
-                  setStatusFilter(event.target.value);
-                  setSelected(null);
-                }}
-              >
-                <option value="">Tất cả trạng thái</option>
-                {Object.entries(workflowFilters[resource]).map(
-                  ([value, label]) => (
-                    <option value={value} key={value}>
-                      {label}
-                    </option>
-                  ),
-                )}
-              </select>
-            </label>
-          </div>
-          {!demoEnabled && (
-            <p className="gca-workflow-help">
-              Lọc trạng thái backend chưa khả dụng: cần API quản trị hỗ trợ các
-              trạng thái nghiệp vụ. Tìm kiếm của bảng vẫn dùng API đọc hiện tại.
-            </p>
-          )}
-        </section>
-      )}
       <section className="gca-panel">
         <div className="gca-list-heading">
           <h2>Danh sách {section.eyebrow.toLocaleLowerCase("vi")}</h2>
-          {resource === "users" || resource === "chefs" ? (
+          {(resource === "users" || resource === "chefs") && (
             <label className="gca-workflow-filter">
               Lọc trạng thái
               <select
@@ -201,29 +131,22 @@ export default function AdminResourcePage({ resource }: Props) {
                 )}
               </select>
             </label>
-          ) : (
-            <span>
-              {demoEnabled
-                ? "Dữ liệu mẫu · Không lưu thay đổi"
-                : "Dữ liệu từ backend"}
-            </span>
           )}
         </div>
         <AdminDataTable
-          key={`${resource}-${revision}-${query}-${demoEnabled}-${statusFilter}`}
+          key={`${resource}-${revision}-${query}-${statusFilter}`}
           resource={resource}
-          initialSearch={resource === "chefs" && !demoEnabled ? "" : query}
+          initialSearch={resource === "chefs" ? "" : query}
           revision={revision}
           onView={(row) => {
             setDetailLoading(
-              (resource === "chefs" || resource === "users") && !demoEnabled,
+              resource === "chefs" || resource === "users",
             );
             setDetailError("");
             setSelected(row);
           }}
-          demoRows={demoRows}
           statusFilter={
-            (resource === "chefs" || resource === "users") && !demoEnabled
+            (resource === "chefs" || resource === "users")
               ? statusFilter
               : ""
           }
@@ -253,11 +176,9 @@ export default function AdminResourcePage({ resource }: Props) {
               </button>
             </div>
             {detailLoading &&
-              (resource === "chefs" || resource === "users") &&
-              !demoEnabled && <p role="status">Đang tải chi tiết hồ sơ...</p>}
+              (resource === "chefs" || resource === "users") && <p role="status">Đang tải chi tiết hồ sơ...</p>}
             {detailError &&
-              (resource === "chefs" || resource === "users") &&
-              !demoEnabled && (
+              (resource === "chefs" || resource === "users") && (
                 <div role="alert" className="gca-form-error">
                   {detailError}{" "}
                   <button
@@ -315,12 +236,11 @@ export default function AdminResourcePage({ resource }: Props) {
                       setSelected(null);
                     }}
                   >
-                    {(resource === "chefs" || resource === "users") &&
-                    !demoEnabled
-                      ? resource === "chefs"
-                        ? "Xét duyệt hồ sơ"
-                        : "Xử lý tài khoản"
-                      : managed
+                    {resource === "chefs"
+                      ? "Xét duyệt hồ sơ"
+                      : resource === "users"
+                        ? "Xử lý tài khoản"
+                        : managed
                         ? "Xem thao tác quản trị"
                         : "Chỉnh sửa"}
                   </button>
@@ -345,7 +265,7 @@ export default function AdminResourcePage({ resource }: Props) {
           key={`${resource}-${editing === "new" ? "new" : editing.id}`}
           resource={resource}
           record={editing === "new" ? null : editing}
-          demo={demoEnabled}
+          demo={false}
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);

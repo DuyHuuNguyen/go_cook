@@ -5,7 +5,7 @@ import DT from "datatables.net-bs5";
 import type { Options, AjaxData, AjaxCallback } from "datatables.net";
 import "datatables.net-bs5/css/dataTables.bootstrap5.css";
 import "../../styles/adminDataTable.css";
-import { Eye, ExclamationTriangle, XLg } from "react-bootstrap-icons";
+import { Eye, PencilSquare, ExclamationTriangle, XLg } from "react-bootstrap-icons";
 import {
   adminSections,
   type AdminRow,
@@ -15,6 +15,8 @@ import {
   adminApiErrorMessage,
   getAdminTablePage,
 } from "../../clients/AdminClient";
+import { getAdminMenusPage } from "../../clients/AdminMenuClient";
+import type { AdminMenuFilters } from "../../types/AdminMenuTypes";
 
 import {
   isWorkflowSection,
@@ -28,9 +30,11 @@ type Props = {
   resource: AdminSection;
   initialSearch: string;
   onView: (row: AdminRow) => void;
+  onEdit?: (row: AdminRow) => void;
   revision: number;
   demoRows?: AdminRow[];
   statusFilter?: string;
+  menuFilters?: AdminMenuFilters;
 };
 
 function escapeText(value: string | null | undefined): string {
@@ -82,9 +86,11 @@ export default function AdminDataTable({
   resource,
   initialSearch,
   onView,
+  onEdit,
   revision,
   demoRows,
   statusFilter = "",
+  menuFilters,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const realChefs = resource === "chefs" && demoRows === undefined;
@@ -98,6 +104,7 @@ export default function AdminDataTable({
         data: column.key,
         title: column.label,
         defaultContent: "—",
+        orderable: resource !== "menus" || ["id", "name", "price"].includes(column.key),
         className:
           column.key === "id"
             ? "gca-id-cell"
@@ -112,12 +119,12 @@ export default function AdminDataTable({
           row: AdminRow,
         ) => {
           const label =
-            column.key === "status" && isWorkflowSection(resource)
+            column.key === "status" && isWorkflowSection(resource) && resource !== "menus"
               ? workflowLabel(resource, row)
               : value || "—";
           if (type !== "display") return label;
           if (column.key === "status") {
-            const state = isWorkflowSection(resource)
+            const state = isWorkflowSection(resource) && resource !== "menus"
               ? workflowState(resource, row)
               : String(value || "").toUpperCase();
             return (
@@ -160,7 +167,7 @@ export default function AdminDataTable({
       processing: true,
       pageLength: 10,
       lengthMenu: [10, 20, 50],
-      order: [] as Array<[number, "asc" | "desc"]>,
+      order: (resource === "menus" ? [[0, "asc"]] : []) as Array<[number, "asc" | "desc"]>,
       initComplete: function () {
         if (initialSearch && !realChefs)
           this.api().search(initialSearch).draw();
@@ -198,15 +205,25 @@ export default function AdminDataTable({
                 : "";
             const direction = sortColumn?.dir === "desc" ? "desc" : "asc";
 
-            void getAdminTablePage(
-              resource,
-              page,
-              pageSize,
-              realChefs ? "" : request.search?.value || "",
-              realChefs || realUsers ? "" : sortBy,
-              direction,
-              statusFilter,
-            )
+            const tableRequest = resource === "menus"
+              ? getAdminMenusPage({
+                  page,
+                  size: pageSize,
+                  keyword: request.search?.value || "",
+                  sortBy,
+                  sortDirection: direction,
+                  filters: menuFilters,
+                })
+              : getAdminTablePage(
+                  resource,
+                  page,
+                  pageSize,
+                  realChefs ? "" : request.search?.value || "",
+                  realChefs || realUsers ? "" : sortBy,
+                  direction,
+                  statusFilter,
+                );
+            void tableRequest
               .then((result) => {
                 setError(null);
                 callback({
@@ -239,22 +256,34 @@ export default function AdminDataTable({
       realChefs,
       realUsers,
       statusFilter,
+      menuFilters,
     ],
   );
 
   const slots = useMemo(
     () => ({
       [section.columns.length]: (_value: unknown, row: AdminRow) => (
-        <button
-          className="gca-table-action"
-          type="button"
-          onClick={() => onView(row)}
-        >
-          <Eye size={14} aria-hidden="true" /> Chi tiết
-        </button>
+        <div className={resource === "menus" ? "gca-menu-row-actions" : ""}>
+          <button
+            className="gca-table-action"
+            type="button"
+            onClick={() => onView(row)}
+          >
+            <Eye size={14} aria-hidden="true" /> Chi tiết
+          </button>
+          {resource === "menus" && onEdit && (
+            <button
+              className="gca-table-action"
+              type="button"
+              onClick={() => onEdit(row)}
+            >
+              <PencilSquare size={14} aria-hidden="true" /> Sửa
+            </button>
+          )}
+        </div>
       ),
     }),
-    [section, onView],
+    [section, resource, onView, onEdit],
   );
 
   return (

@@ -93,7 +93,7 @@ export const adminSections: Record<AdminSection, AdminSectionInfo> = {
       { key: "category", label: "Danh mục" },
       { key: "chef", label: "Đầu bếp" },
       { key: "price", label: "Giá dự kiến" },
-      { key: "status", label: "Hiển thị / nguồn ẩn" },
+      { key: "status", label: "Trạng thái" },
     ],
   },
   dishes: {
