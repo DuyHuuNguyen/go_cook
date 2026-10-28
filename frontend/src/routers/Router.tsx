@@ -21,8 +21,8 @@ import { Profile } from "../pages/Profile";
 import MainLayout from "../layouts/MainLayout";
 import NotFound from "../components/common/NotFound";
 import { authStore } from "../stores/authStore";
-import PublicChefInfo from "../pages/PublicChefInfo.tsx";
 import DemoPage from "../pages/DemoPage.tsx";
+import {MenuManagementPage} from "../pages/seller/MenuManagementPage.tsx";
 
 export const router = createBrowserRouter(
   [
@@ -36,6 +36,7 @@ export const router = createBrowserRouter(
           element: <SellerDemoLayout />,
           children: [
             { index: true, element: <SellerDashboardPage /> },
+            { path: "menu-management", element: <MenuManagementPage/> },
             { path: "products", element: <SellerProductsPage /> },
             { path: "product-new", element: <SellerProductNewPage /> },
             { path: "product-edit", element: <SellerProductEditPage /> },

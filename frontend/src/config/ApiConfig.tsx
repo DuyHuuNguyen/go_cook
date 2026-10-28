@@ -111,7 +111,7 @@ export const ENDPOINTS = {
         },
         MENU:{
             POST:{
-                V1: endpoint(SERVICE.USER, VERSION.V1, "/menus"),
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/menus/creation"),
             }
         },
         CATEGORY: {
