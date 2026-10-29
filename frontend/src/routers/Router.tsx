@@ -13,7 +13,7 @@ import { useSyncExternalStore } from "react";
 import Home from "../pages/Home";
 import MenuCatalog from "../pages/MenuCatalog";
 import MenuDetailPage from "../pages/MenuDetailPage";
-import CustomMenu from "../pages/CustomMenu";
+import CustomMenu from "../pages/order/CustomMenu.tsx";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import { useProfile } from "../contexts/ProfileContext";

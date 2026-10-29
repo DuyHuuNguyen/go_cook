@@ -14,6 +14,10 @@ import lombok.experimental.SuperBuilder;
 public class BookingItemDish extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "booking_id", nullable = false)
+  private Booking booking;
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "dish_id", nullable = false)
   private Dish dish;
 

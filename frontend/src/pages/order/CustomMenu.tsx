@@ -5,10 +5,10 @@ import {
     ArrowRight, Calendar3, CheckCircleFill, ClipboardCheck, Clock, GeoAlt, Heart,
     Images, People, PlusLg, ShieldCheck, Trash3, Wallet2,
 } from 'react-bootstrap-icons';
-import RequestSummary from '../components/customMenu/RequestSummary';
-import { useCustomMenu } from '../hooks/useCustomMenu';
-import { displayPrice } from '../components/home/catalogData';
-import '../styles/customMenu.css';
+import RequestSummary from '../../components/customMenu/RequestSummary.tsx';
+import { useCustomMenu } from '../../hooks/useCustomMenu.ts';
+import { displayPrice } from '../../components/home/catalogData.ts';
+import '../../styles/customMenu.css';
 
 const styles = [
     { value: 'gia-dinh', label: 'Cơm gia đình truyền thống', info: 'Món nhà, canh, món mặn, rau xanh, vừa miệng.' },

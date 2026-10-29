@@ -29,7 +29,9 @@ public enum ErrorCode {
   LOCATION_INVALID("1020", "Location is invalid"),
   MENU_NOT_FOUND("1021", "Menu not found"),
   CATEGORY_NOT_FOUND("1022", "Category not found"),
-  CHEF_PROFILE_NOT_FOUND("1023", "Chef application not found");
+  CHEF_PROFILE_NOT_FOUND("1023", "Chef application not found"),
+  BOOKING_NOT_FOUND("1024", "Booking not found"),
+  DISH_NOT_FOUND("1025", "One or more dishes were not found");
 
   private final String code;
   private final String message;

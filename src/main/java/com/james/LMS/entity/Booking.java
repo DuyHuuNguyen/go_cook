@@ -3,10 +3,10 @@ package com.james.LMS.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "bookings")
@@ -33,9 +33,7 @@ public class Booking extends BaseEntity {
   @Column(name = "service_address", nullable = false, length = 500)
   private String serviceAddress;
 
-  /** JSON string stored in a jsonb column. */
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "customer_note", columnDefinition = "jsonb")
+  @Column(name = "customer_note", columnDefinition = "VARCHAR(500)")
   private String customerNote;
 
   @Column(name = "guest_count", nullable = false)
@@ -51,4 +49,13 @@ public class Booking extends BaseEntity {
   @Column(name = "booking_status", nullable = false, length = 30)
   @Builder.Default
   private String bookingStatus = "PENDING";
+
+  @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<BookingItemDish> dishes = new ArrayList<>();
+
+  public void addDish(BookingItemDish bookingItemDish) {
+    dishes.add(bookingItemDish);
+    bookingItemDish.setBooking(this);
+  }
 }
