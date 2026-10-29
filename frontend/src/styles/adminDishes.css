@@ -1,0 +1,48 @@
+.gca-root .gca-dish-filters {
+    grid-template-columns: repeat(3, minmax(140px, 1fr)) auto;
+}
+
+.gca-root .gca-dish-manager .gca-detail-drawer dl {
+    margin-top: 16px;
+}
+
+.gca-root .gca-dish-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.gca-root .gca-dish-manager .gca-table-wrap {
+    overflow-x: visible;
+}
+
+.gca-root .gca-dish-manager table.gca-table {
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+.gca-root .gca-dish-manager table.gca-table th,
+.gca-root .gca-dish-manager table.gca-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding: 12px 10px;
+}
+
+.gca-root .gca-dish-manager .dt-length select {
+    min-width: 78px;
+    padding-right: 20px;
+}
+
+@media (max-width: 950px) {
+    .gca-root .gca-dish-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .gca-root .gca-dish-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
