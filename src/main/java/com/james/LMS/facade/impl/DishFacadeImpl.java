@@ -55,7 +55,7 @@ public class DishFacadeImpl implements DishFacade {
     var page =
         dishService
             .searchByName(
-                request.getName(),
+                request.getKeyword(),
                 org.springframework.data.domain.PageRequest.of(
                     request.getPage() - 1, request.getSize()))
             .map(dish -> DishResponse.builder().id(dish.getId()).name(dish.getName()).build());

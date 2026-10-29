@@ -37,10 +37,9 @@ public record BookingResponse(
                     new DishItem(
                         item.getDish().getId(),
                         item.getDishName(),
-                        item.getQuantity(),
-                        item.getUnitPrice()))
+                        item.getQuantity()))
             .toList());
   }
 
-  public record DishItem(Long dishId, String dishName, Integer quantity, BigDecimal unitPrice) {}
+  public record DishItem(Long dishId, String dishName, Integer quantity) {}
 }

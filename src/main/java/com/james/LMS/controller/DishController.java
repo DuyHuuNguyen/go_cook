@@ -31,7 +31,6 @@ public class DishController {
       description = "Name matching is case-insensitive. Page is one-based.",
       tags = {"Dish APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
-  @PreAuthorize("hasAuthority('ROLE_USER')")
   public BaseResponse<PaginationResponse<DishResponse>> searchByName(
       @Valid @ParameterObject DishSearchRequest request) {
     return dishFacade.searchByName(request);

@@ -12,7 +12,7 @@ import lombok.Setter;
 public class DishSearchRequest {
   @NotBlank
   @Size(max = 255)
-  private String name;
+  private String keyword;
 
   @Min(1)
   private int page = 1;

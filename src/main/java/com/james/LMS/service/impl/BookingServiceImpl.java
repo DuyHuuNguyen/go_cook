@@ -72,7 +72,6 @@ public class BookingServiceImpl implements BookingService {
                       .dish(dish)
                       .dishName(dish.getName())
                       .quantity(item.getQuantity())
-                      .unitPrice(BigDecimal.ZERO)
                       .build());
             });
 

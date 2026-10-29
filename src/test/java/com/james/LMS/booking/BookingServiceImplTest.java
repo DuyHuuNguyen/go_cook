@@ -57,6 +57,5 @@ class BookingServiceImplTest {
     assertEquals(booking, booking.getDishes().getFirst().getBooking());
     assertEquals("Roasted vegetables", booking.getDishes().getFirst().getDishName());
     assertEquals(2, booking.getDishes().getFirst().getQuantity());
-    assertEquals(0, booking.getDishes().getFirst().getUnitPrice().signum());
   }
 }

@@ -2,9 +2,11 @@ package com.james.LMS.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @Builder
+@ToString
 public class BaseResponse<T> {
   private boolean isSuccess;
   private T data;
