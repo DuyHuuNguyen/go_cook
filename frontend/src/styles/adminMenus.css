@@ -1,0 +1,232 @@
+.gca-root .gca-menu-manager {
+    font-family: Arial, sans-serif;
+    gap: 18px;
+}
+
+.gca-root .gca-menu-filters {
+    display: grid;
+    grid-template-columns: minmax(160px, 1.3fr) repeat(3, minmax(125px, 1fr)) auto;
+    gap: 14px;
+    align-items: end;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #dfe5d9;
+    border-radius: 4px;
+}
+
+.gca-root .gca-menu-filters label,
+.gca-root .gca-menu-moderation label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #435240;
+}
+
+.gca-root .gca-menu-filters select,
+.gca-root .gca-menu-filters input,
+.gca-root .gca-menu-moderation textarea {
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid #d4dbcf;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #263426;
+    padding: 8px 11px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+}
+
+.gca-root .gca-menu-filter-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.gca-root .gca-menu-manager .gca-btn {
+    border-radius: 3px;
+}
+
+.gca-root .gca-menu-filter-error,
+.gca-root .gca-menu-success {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.gca-root .gca-menu-filter-error {
+    grid-column: 1 / -1;
+    color: #a13d2d;
+}
+
+.gca-root .gca-menu-success {
+    border-left: 3px solid #477a30;
+    padding: 8px 12px;
+    background: #f0f7e9;
+    color: #376327;
+}
+
+.gca-root .gca-menu-manager .gca-panel {
+    border-radius: 4px;
+}
+
+.gca-root .gca-menu-manager .gca-datatables .gca-table-wrap,
+.gca-root .gca-menu-manager .gca-datatables .dt-container > .dt-layout-table {
+    overflow-x: visible;
+    max-width: 100%;
+}
+
+.gca-root .gca-menu-manager .gca-datatables table.gca-table {
+    min-width: 0;
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+.gca-root .gca-menu-manager .gca-datatables table.gca-table th,
+.gca-root .gca-menu-manager .gca-datatables table.gca-table td {
+    padding: 11px 8px;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+}
+
+.gca-root .gca-menu-manager .gca-datatables table.gca-table td.gca-name-cell {
+    min-width: 0;
+}
+
+.gca-root .gca-menu-manager .gca-datatables .dt-length select {
+    min-width: 78px;
+    padding-right: 18px !important;
+    border-radius: 3px;
+}
+
+.gca-root .gca-menu-manager .gca-datatables .dt-search input,
+.gca-root .gca-menu-manager .gca-datatables .page-link,
+.gca-root .gca-menu-manager .gca-table-action,
+.gca-root .gca-menu-manager .gca-status-badge {
+    border-radius: 3px !important;
+}
+
+.gca-root .gca-menu-detail {
+    width: min(650px, 96vw);
+    max-width: 96vw;
+    overflow-y: auto;
+}
+
+.gca-root .gca-menu-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 16px 0;
+}
+
+.gca-root .gca-menu-gallery img {
+    display: block;
+    width: 100%;
+    height: 145px;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+.gca-root .gca-menu-moderation {
+    display: grid;
+    gap: 10px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e8df;
+}
+
+.gca-root .gca-menu-moderation .gca-btn {
+    justify-self: start;
+}
+
+.gca-root .gca-menu-detail-footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 18px;
+}
+
+@media (max-width: 1100px) {
+    .gca-root .gca-menu-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .gca-root .gca-menu-filters {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .gca-root .gca-menu-manager .gca-datatables table.gca-table th,
+    .gca-root .gca-menu-manager .gca-datatables table.gca-table td {
+        padding: 9px 5px;
+        font-size: 11px;
+    }
+}
+
+.gca-root .gca-menu-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.gca-root .gca-menu-row-actions .gca-table-action {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.gca-root .gca-menu-edit {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.gca-root .gca-menu-edit label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #354934;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.gca-root .gca-menu-edit input,
+.gca-root .gca-menu-edit select,
+.gca-root .gca-menu-edit textarea {
+    width: 100%;
+    min-height: 38px;
+    padding: 9px 11px;
+    font: 13px Arial, sans-serif;
+    border: 1px solid #d4dbcf;
+    border-radius: 3px;
+    color: #263426;
+    background: #ffffff;
+}
+
+.gca-root .gca-menu-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.gca-root .gca-menu-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e8df;
+}
+
+.gca-root .gca-menu-loading {
+    margin: 20px 0;
+    font-size: 13px;
+}
+
+@media (max-width: 550px) {
+    .gca-root .gca-menu-edit-grid {
+        grid-template-columns: 1fr;
+    }
+}
