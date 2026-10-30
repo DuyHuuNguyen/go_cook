@@ -17,11 +17,13 @@ import com.james.LMS.service.*;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MenuFacadeImpl implements MenuFacade {
   private final MenuService menuService;
   private final UserService userService;

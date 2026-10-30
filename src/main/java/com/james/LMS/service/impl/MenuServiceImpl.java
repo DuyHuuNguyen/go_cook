@@ -12,6 +12,7 @@ import com.james.LMS.service.MenuService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class MenuServiceImpl implements MenuService {
   private final MenuRepository menuRepository;
   private final MenuDishRepository menuDishRepository;
@@ -57,6 +59,28 @@ public class MenuServiceImpl implements MenuService {
                 Collectors.groupingBy(
                     asset -> asset.getMenu().getId(),
                     Collectors.mapping(MenuAsset::getUrl, Collectors.toList())));
+
+
+    log.info("SERVICE: " +menus.map(
+            menu ->
+                    new MenuResponse(
+                            menu.getId(),
+                            menu.getName(),
+                            menu.getDescription(),
+                            menu.getTempPrice(),
+                            menu.getMinGuests(),
+                            menu.getMaxGuests(),
+                            menu.getStatus(),
+                            menu.getCreatedAt(),
+                            new MenuResponse.CategorySummary(
+                                    menu.getCategory().getId(), menu.getCategory().getName()),
+                            new MenuResponse.SellerSummary(
+                                    menu.getSeller().getId(),
+                                    menu.getSeller().getUsername(),
+                                    menu.getSeller().getAvatarUrl()),
+                            dishes.getOrDefault(menu.getId(), List.of()),
+                            images.getOrDefault(menu.getId(), List.of()))));
+
     return menus.map(
         menu ->
             new MenuResponse(

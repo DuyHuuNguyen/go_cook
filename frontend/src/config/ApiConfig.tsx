@@ -42,6 +42,21 @@ export const ENDPOINTS = {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/menus"),
     },
   },
+  BOOKINGS: {
+    CREATE: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/bookings"),
+    },
+    GET: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/bookings"),
+    },
+
+    LIST: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/bookings"),
+    },
+    DETAIL: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/bookings"),
+    },  
+  },
   LOCATION: {
     PROVINCE: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/locations/provinces"),
@@ -118,6 +133,9 @@ export const ENDPOINTS = {
     DISH: {
       GET: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/dishes"),
+      },
+      SEARCH: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/dishes/search"),
       },
     },
     MENU: {

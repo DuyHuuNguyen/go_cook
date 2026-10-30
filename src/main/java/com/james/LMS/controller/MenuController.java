@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/menus")
 @RequiredArgsConstructor
+@Slf4j
 public class MenuController {
 
   private final MenuFacade menuFacade;
@@ -32,8 +34,7 @@ public class MenuController {
       description =
           "Search by menu or dish, filter by category, price and diners, then sort by latest, price or name. Page is one-based.",
       tags = {"Menu APIs"})
-  public BaseResponse<PaginationResponse<MenuResponse>> findMenus(
-      @Valid @ParameterObject MenuSearchRequest request) {
+  public BaseResponse<PaginationResponse<MenuResponse>> findMenus(@Valid @ParameterObject MenuSearchRequest request) {
     return menuFacade.findMenus(request);
   }
 
