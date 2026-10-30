@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DishRepository extends JpaRepository<Dish, Long> {
-  List<Dish> findByIdGreaterThanAndChef_IdAndIsActiveTrueOrderByIdAsc(
-      Long id, Long chefId, Limit limit);
+  List<Dish> findByIdGreaterThanAndIsActiveTrueOrderByIdAsc(
+      Long id, Limit limit);
 
-  List<Dish> findByIdInAndIsActiveTrueAndChef_Id(List<Long> ids, Long chefId);
+  List<Dish> findByIdInAndIsActiveTrue(List<Long> ids);
 }

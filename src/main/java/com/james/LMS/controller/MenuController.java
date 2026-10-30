@@ -6,10 +6,7 @@ import com.james.LMS.request.MenuOfChefRequest;
 import com.james.LMS.request.MenuSearchRequest;
 import com.james.LMS.request.UpsetMenuAssetRequest;
 import com.james.LMS.request.UpsetMenuRequest;
-import com.james.LMS.response.BaseResponse;
-import com.james.LMS.response.KeySetPaginationResponse;
-import com.james.LMS.response.MenuResponse;
-import com.james.LMS.response.PaginationResponse;
+import com.james.LMS.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -44,7 +41,8 @@ public class MenuController {
   @Operation(tags = {"Menu APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("hasRole('ROLE_CHEF')")
-  public BaseResponse<PaginationResponse<MenuResponse>> findAllMenuOfChef(@Valid MenuOfChefRequest request) {
+  public BaseResponse<PaginationResponse<MenuResponse>> findAllMenuOfChef(
+      @Valid MenuOfChefRequest request) {
     return menuFacade.findAllMenuOfChef(request);
   }
 
@@ -53,17 +51,17 @@ public class MenuController {
   @Operation(tags = {"Menu APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("hasRole('ROLE_CHEF')")
-  public BaseResponse<KeySetPaginationResponse<MenuResponse>> findAllMenuOfChef(@PathVariable("lastId") Long lastId) {
+  public BaseResponse<KeySetPaginationResponse<MenuResponse>> findAllMenuOfChef(
+      @PathVariable("lastId") Long lastId) {
     return menuFacade.findByLastId(lastId);
   }
-
 
   @PostMapping("/creation")
   @ResponseStatus(HttpStatus.OK)
   @Operation(tags = {"Menu APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("hasRole('ROLE_CHEF')")
-  BaseResponse<Void> createMenu(@Valid @RequestBody UpsetMenuRequest request) {
+  public BaseResponse<Void> createMenu(@Valid @RequestBody UpsetMenuRequest request) {
     return this.menuFacade.createMenu(request);
   }
 
@@ -77,5 +75,38 @@ public class MenuController {
     UpsetMenuAssetRequest request =
         UpsetMenuAssetRequest.builder().menuId(menuId).file(file).build();
     return this.menuFacade.addMenuAssets(request);
+  }
+
+  @GetMapping("/{menuId}/assets/{lastAssetId}")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(tags = {"Menu APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasRole('ROLE_CHEF')")
+  public BaseResponse<KeySetPaginationResponse<MenuAssetResponse>> findAllMenuAssets(
+      @PathVariable("menuId") Long menuId, @PathVariable("lastAssetId") Long lastAssetId) {
+    return this.menuFacade.findAllAssets(menuId, lastAssetId);
+  }
+
+  @PatchMapping("/{menuId}/asset/{assetId}")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      tags = {"Menu APIs"},
+      summary = "Soft delete asset")
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasRole('ROLE_CHEF')")
+  public BaseResponse<Void> removeMenuAsset(
+      @PathVariable("menuId") Long menuId, @PathVariable("assetId") Long assetId) {
+    return this.menuFacade.removeMenuAsset(menuId, assetId);
+  }
+
+  @PatchMapping("/edit/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(tags = {"Menu APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasRole('ROLE_CHEF')")
+  public BaseResponse<Void> editMenu(
+      @PathVariable("id") Long id, @Valid @RequestBody UpsetMenuRequest request) {
+    request.withId(id);
+    return this.menuFacade.editMenu(request);
   }
 }

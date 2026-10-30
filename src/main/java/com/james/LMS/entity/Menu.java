@@ -1,8 +1,10 @@
 package com.james.LMS.entity;
 
+import com.james.LMS.dto.ModificationMenuDTO;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -69,5 +71,28 @@ public class Menu extends BaseEntity {
 
   public void addDish(Dish dish) {
     dishes.add(dish);
+  }
+
+  public void changeInfo(ModificationMenuDTO modificationMenuDTO) {
+    this.name = modificationMenuDTO.name();
+    this.tempPrice = modificationMenuDTO.tempPrice();
+    this.minGuests = modificationMenuDTO.minGuests();
+    this.maxGuests = modificationMenuDTO.maxGuests();
+    this.description = modificationMenuDTO.description();
+    this.status = modificationMenuDTO.status();
+  }
+
+  public boolean containDishById(Long dishId) {
+    return this.dishes.stream().anyMatch(dish -> dish.getId().equals(dishId));
+  }
+
+  public void removeDishes(List<Dish> deletableDishes) {
+    Iterator<Dish> it = this.dishes.iterator();
+    while (it.hasNext()) {
+      Dish dish = it.next();
+      if (deletableDishes.contains(dish)) {
+        it.remove();
+      }
+    }
   }
 }

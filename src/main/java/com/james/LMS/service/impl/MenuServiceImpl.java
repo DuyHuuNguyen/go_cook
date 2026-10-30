@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +125,11 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    public Optional<Menu> findByIdAndChefIdAndFetchDishesAndCategory(Long id, Long chefId) {
+        return this.menuRepository.findByIdAndChefIdAndIsActiveTrueAndFetchDishesAndCategory(id,chefId);
+    }
+
+    @Override
     public List<MenuResponse> findByIdGreaterThanOrderByChefId(Long lastMenuId, Long chefId) {
 
         List<Menu>  menus = this.menuRepository.findByIdGreaterThanAndSeller_IdOrderByIdAsc(lastMenuId,chefId);
@@ -164,6 +170,11 @@ public class MenuServiceImpl implements MenuService {
                                         menu.getSeller().getAvatarUrl()),
                                 dishes.getOrDefault(menu.getId(), List.of()),
                                 images.getOrDefault(menu.getId(), List.of()))).toList();
+    }
+
+    @Override
+    public Optional<Boolean> hasMenuByChefId(Long chefId,Long menuId) {
+        return this.menuRepository.hasMenuByChefId( chefId, menuId);
     }
 
     private Sort buildSort(MenuSearchRequest request) {

@@ -11,13 +11,15 @@ spring:
     password: ${PASSWORD_DB:app_password}
     driver-class-name: org.postgresql.Driver
 
+
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
   jpa:
     show-sql: false
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
+        show_sql: true
 
   cache:
     type: redis

@@ -9,11 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MenuOfChefRequest extends BaseCriteria{
-    @Positive
-    private Integer currentPage;
+public class MenuOfChefRequest extends BaseCriteria {
+  @Positive private Integer currentPage;
 
-    @Positive
-    @Max(30)
-    private Integer pageSize;
+  @Positive
+  @Max(30)
+  private Integer pageSize;
 }

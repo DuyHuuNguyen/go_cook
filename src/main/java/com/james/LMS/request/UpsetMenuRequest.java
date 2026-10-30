@@ -22,4 +22,8 @@ public class UpsetMenuRequest {
   private String status;
   private Long categoryId;
   private List<Long> dishIds;
+
+  public void withId(Long id) {
+    this.id = id;
+  }
 }

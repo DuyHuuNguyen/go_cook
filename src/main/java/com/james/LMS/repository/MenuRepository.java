@@ -41,7 +41,23 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
   Page<Menu> findAllByChefId(@Param("chefId") Long chefId, Pageable pageable);
 
   Optional<Menu> findByIdAndSeller_idAndIsActiveTrue(Long id, Long sellerId);
-  
+
+  @Query("""
+   from Menu m
+   left join fetch m.category c
+    left join fetch m.dishes
+    where m.seller.id =:chefId and m.id =:id and m.isActive
+  """)
+  Optional<Menu> findByIdAndChefIdAndIsActiveTrueAndFetchDishesAndCategory(
+          @Param("id") Long id,@Param("chefId") Long chefId);
+
+  @Query("""
+  SELECT count(m) > 0
+  from Menu m
+  where m.seller.id =:chefId
+  and m.id =:menuId
+  """)
+  Optional<Boolean> hasMenuByChefId(@Param("chefId") Long chefId,@Param("menuId") Long menuId);
 
   @EntityGraph(attributePaths = {"category", "seller"})
   List<Menu> findByIdGreaterThanAndSeller_IdOrderByIdAsc(Long lastMenuId, Long chefId);

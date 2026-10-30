@@ -8,5 +8,5 @@ public interface DishService {
 
   void save(Dish dish);
 
-  List<Dish> findByIds(List<Long> ids, Long chefId);
+  List<Dish> findByIds(List<Long> ids);
 }

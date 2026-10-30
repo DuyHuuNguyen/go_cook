@@ -17,8 +17,8 @@ public class DishServiceImpl implements DishService {
 
   @Override
   public List<Dish> findByIdGreaterThanOrderById(Long id, Long chefId) {
-    return this.dishRepository.findByIdGreaterThanAndChef_IdAndIsActiveTrueOrderByIdAsc(
-        id, chefId, Limit.of(LIMIT_DEFAULT));
+    return this.dishRepository.findByIdGreaterThanAndIsActiveTrueOrderByIdAsc(
+        id, Limit.of(LIMIT_DEFAULT));
   }
 
   @Override
@@ -27,7 +27,7 @@ public class DishServiceImpl implements DishService {
   }
 
   @Override
-  public List<Dish> findByIds(List<Long> ids, Long chefId) {
-    return this.dishRepository.findByIdInAndIsActiveTrueAndChef_Id(ids, chefId);
+  public List<Dish> findByIds(List<Long> ids) {
+    return this.dishRepository.findByIdInAndIsActiveTrue(ids);
   }
 }

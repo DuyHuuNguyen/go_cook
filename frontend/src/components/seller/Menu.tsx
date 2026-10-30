@@ -15,6 +15,13 @@ interface MenuFormState {
     categoryId: number;
 }
 
+const LIMITS = {
+    NAME_MIN: 3,
+    NAME_MAX: 255,
+    DESC_MIN: 10,
+    DESC_MAX: 3000,
+} as const;
+
 const initialState: MenuFormState = {
     name: "",
     tempPrice: 0,
@@ -46,8 +53,26 @@ function Menu() {
         setForm((prev) => ({...prev, [key]: value}));
     }
 
+    function setText(key: 'name' | 'description', value: string) {
+        const trimmed = value.trim();
+        setForm((prev) => ({...prev, [key]: trimmed ? value : trimmed}));
+    }
+
     async function handleSubmit(event: FormEvent) {
         event.preventDefault();
+
+        const trimmedName = form.name.trim();
+        const trimmedDesc = form.description.trim();
+
+        if (trimmedName.length < LIMITS.NAME_MIN) {
+            alert(`Tên thực đơn phải có ít nhất ${LIMITS.NAME_MIN} ký tự`);
+            return;
+        }
+
+        if (trimmedDesc && trimmedDesc.length < LIMITS.DESC_MIN) {
+            alert(`Mô tả phải có ít nhất ${LIMITS.DESC_MIN} ký tự hoặc để trống`);
+            return;
+        }
 
         if (form.categoryId === 0) {
             alert("Vui lòng chọn danh mục");
@@ -56,6 +81,8 @@ function Menu() {
 
         const ok = await submitMenu({
             ...form,
+            name: trimmedName,
+            description: trimmedDesc,
             dishIds: selectedDishes,
         });
 
@@ -76,11 +103,16 @@ function Menu() {
                     Tên thực đơn
                     <input
                         required
-                        maxLength={255}
+                        minLength={LIMITS.NAME_MIN}
+                        maxLength={LIMITS.NAME_MAX}
                         value={form.name}
-                        onChange={(e) => set("name", e.target.value)}
+                        onChange={(e) => setText("name", e.target.value)}
+                        onBlur={(e) => setText("name", e.target.value)}
                         placeholder="Ví dụ: Mâm cơm sum vầy"
                     />
+                    <small className="text-muted">
+                        {form.name.length}/{LIMITS.NAME_MAX} ký tự (tối thiểu {LIMITS.NAME_MIN})
+                    </small>
                 </label>
 
                 <div className="grid grid-2">
@@ -122,6 +154,7 @@ function Menu() {
                             step="1"
                             value={form.tempPrice}
                             onChange={(e) => set("tempPrice", Number(e.target.value))}
+                            onFocus={(e) => e.target.select()}
                         />
                     </label>
                 </div>
@@ -136,6 +169,7 @@ function Menu() {
                             max="100"
                             value={form.minGuests}
                             onChange={(e) => set("minGuests", Number(e.target.value))}
+                            onFocus={(e) => e.target.select()}
                         />
                     </label>
                     <label className="field">
@@ -147,6 +181,7 @@ function Menu() {
                             max="100"
                             value={form.maxGuests}
                             onChange={(e) => set("maxGuests", Number(e.target.value))}
+                            onFocus={(e) => e.target.select()}
                         />
                     </label>
                 </div>
@@ -171,16 +206,27 @@ function Menu() {
                     Mô tả
                     <textarea
                         rows={3}
-                        maxLength={3000}
+                        minLength={LIMITS.DESC_MIN}
+                        maxLength={LIMITS.DESC_MAX}
                         value={form.description}
-                        onChange={(e) => set("description", e.target.value)}
+                        onChange={(e) => setText("description", e.target.value)}
+                        onBlur={(e) => setText("description", e.target.value)}
                         placeholder="Hương vị, nguyên liệu và điều đặc biệt của thực đơn…"
                     />
+                    <small className="text-muted">
+                        {form.description.length}/{LIMITS.DESC_MAX} ký tự
+                        {form.description.trim() && form.description.trim().length < LIMITS.DESC_MIN &&
+                            ` (tối thiểu ${LIMITS.DESC_MIN})`
+                        }
+                    </small>
                 </label>
 
                 {error && <p className="text-danger">{error}</p>}
 
-                <button className="btn btn-primary" type="submit" disabled={loading}>
+                <button className="btn btn-primary" type="submit" onClick={()=> {
+                    if (!error)
+                        navigate("/seller/menu-management")
+                }} disabled={loading}>
                     {loading ? "Đang lưu..." : "Lưu thực đơn"}
                 </button>
             </section>

@@ -4,7 +4,7 @@ import {
     useContext,
     useMemo,
     useState,
-    type ReactNode, useRef,
+    type ReactNode, useRef, useEffect,
 } from "react";
 import {getDishes} from "../clients/DishClient.tsx";
 

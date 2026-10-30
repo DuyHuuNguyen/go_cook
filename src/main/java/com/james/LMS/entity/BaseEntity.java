@@ -2,6 +2,7 @@ package com.james.LMS.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.Objects;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
@@ -43,6 +44,22 @@ public class BaseEntity {
     isActive = true;
     if (this.createdAt == null) createdAt = Instant.now().toEpochMilli();
     if (this.updatedAt == null) updatedAt = Instant.now().toEpochMilli();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    BaseEntity that = (BaseEntity) o;
+    return isActive == that.isActive
+        && Objects.equals(id, that.id)
+        && Objects.equals(version, that.version)
+        && Objects.equals(createdAt, that.createdAt)
+        && Objects.equals(updatedAt, that.updatedAt);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, version, isActive, createdAt, updatedAt);
   }
 
   @PreUpdate

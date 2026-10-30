@@ -18,4 +18,8 @@ public class MenuAsset extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "menu_id", nullable = false)
   private Menu menu;
+
+  public void softDelete() {
+    super.isActive = false;
+  }
 }
