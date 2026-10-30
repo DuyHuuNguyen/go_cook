@@ -1,95 +1,96 @@
-import { useState } from 'react';
-import type { MenuRequestDraft } from '../types/MenuRequestTypes';
+import { useState } from "react";
+import type {
+  MenuRequestDraft,
+  DishSearchResponse,
+} from "../types/BookingTypes";
 
 const initialDraft: MenuRequestDraft = {
-    dishes: [],
-    servingStyle: 'gia-dinh',
-    preferences: [],
-    adults: 2,
-    children: 2,
-    notes: '',
-    mealDate: '',
-    mealTime: '18:30',
-    address: '',
-    locationNotes: '',
-    equipment: [],
-    minBudget: 600000,
-    maxBudget: 900000,
-    referenceFile: null,
+  dishes: [],
+  adults: 2,
+  notes: "",
+  mealDate: "",
+  mealTime: "18:30",
+  address: "",
 };
 
 export function useCustomMenu() {
-    const [draft, setDraft] = useState<MenuRequestDraft>(initialDraft);
-    const [newDish, setNewDish] = useState('');
-    const [message, setMessage] = useState('');
-    const [previewOpen, setPreviewOpen] = useState(false);
+  const [draft, setDraft] = useState<MenuRequestDraft>(initialDraft);
+  const [message, setMessage] = useState("");
 
-    function update<K extends keyof MenuRequestDraft>(key: K, value: MenuRequestDraft[K]) {
-        setDraft((current) => ({ ...current, [key]: value }));
-        setMessage('');
-    }
+  function update<K extends keyof MenuRequestDraft>(
+    key: K,
+    value: MenuRequestDraft[K],
+  ) {
+    setDraft((current) => ({ ...current, [key]: value }));
+    setMessage("");
+  }
 
-    function addDish() {
-        const name = newDish.trim().replace(/\s+/g, ' ');
-        if (!name) return;
-        if (draft.dishes.some((dish) => dish.toLocaleLowerCase('vi-VN') === name.toLocaleLowerCase('vi-VN'))) {
-            setMessage('Món ăn này đã có trong danh sách.');
-            return;
-        }
-        update('dishes', [...draft.dishes, name]);
-        setNewDish('');
-    }
+  function addDish(dish: DishSearchResponse) {
+    setDraft((current) => {
+      const existing = current.dishes.find((item) => item.dishId === dish.id);
 
-    function removeDish(name: string) {
-        update('dishes', draft.dishes.filter((dish) => dish !== name));
-    }
+      if (existing) {
+        return {
+          ...current,
+          dishes: current.dishes.map((item) =>
+            item.dishId === dish.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          ),
+        };
+      }
 
-    function toggleList(key: 'preferences' | 'equipment', value: string) {
-        const current = draft[key];
-        update(key, current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
-    }
+      return {
+        ...current,
+        dishes: [
+          ...current.dishes,
+          {
+            dishId: dish.id,
+            dishName: dish.name,
+            quantity: 1,
+          },
+        ],
+      };
+    });
 
-    function changeGuests(key: 'adults' | 'children', amount: number) {
-        update(key, Math.max(0, Math.min(100, draft[key] + amount)));
-    }
+    setMessage("");
+  }
 
-    function openPreview() {
-        if (!draft.dishes.length) {
-            setMessage('Bạn cần thêm ít nhất một món ăn.');
-            document.getElementById('tao-mon')?.scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
-        if (draft.adults + draft.children < 1) {
-            setMessage('Số khách phải lớn hơn 0.');
-            document.getElementById('so-khach')?.scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
-        if (!draft.mealDate || !draft.address.trim()) {
-            setMessage('Vui lòng nhập ngày dùng bữa và địa chỉ.');
-            document.getElementById('thoi-gian')?.scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
-        if (draft.minBudget <= 0 || draft.maxBudget < draft.minBudget) {
-            setMessage('Ngân sách tối đa phải lớn hơn hoặc bằng ngân sách tối thiểu.');
-            document.getElementById('ngan-sach')?.scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
-        setMessage('');
-        setPreviewOpen(true);
-    }
+  function changeDishQuantity(dishId: number, amount: number) {
+    setDraft((current) => ({
+      ...current,
+      dishes: current.dishes.map((dish) =>
+        dish.dishId === dishId
+          ? {
+              ...dish,
+              quantity: Math.max(1, Math.min(100, dish.quantity + amount)),
+            }
+          : dish,
+      ),
+    }));
 
-    return {
-        draft,
-        newDish,
-        setNewDish,
-        message,
-        previewOpen,
-        setPreviewOpen,
-        update,
-        addDish,
-        removeDish,
-        toggleList,
-        changeGuests,
-        openPreview,
-    };
+    setMessage("");
+  }
+
+  function removeDish(dishId: number) {
+    update(
+      "dishes",
+      draft.dishes.filter((dish) => dish.dishId !== dishId),
+    );
+  }
+
+  function changeGuests(amount: number) {
+    update("adults", Math.max(0, Math.min(100, draft.adults + amount)));
+  }
+
+  return {
+    draft,
+    message,
+    setMessage,
+    update,
+    addDish,
+    changeDishQuantity,
+    removeDish,
+    changeGuests,
+  };
 }

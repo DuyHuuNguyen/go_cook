@@ -1,5 +1,6 @@
 package com.james.LMS.entity;
 
+import com.james.LMS.enums.ChefApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -11,6 +12,23 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class ChefProfile extends BaseEntity {
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "review_status", nullable = false)
+  @Builder.Default
+  private ChefApplicationStatus reviewStatus = ChefApplicationStatus.PENDING;
+
+  @Column(name = "review_reason", length = 1000)
+  private String reviewReason;
+
+  @Column(name = "submitted_at")
+  private Long submittedAt;
+
+  @Column(name = "status_changed_at")
+  private Long statusChangedAt;
+
+  @Column(name = "status_changed_by")
+  private Long statusChangedBy;
 
   @Column(name = "bio", columnDefinition = "TEXT")
   private String bio;

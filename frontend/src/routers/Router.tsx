@@ -13,7 +13,7 @@ import { useSyncExternalStore } from "react";
 import Home from "../pages/Home";
 import MenuCatalog from "../pages/MenuCatalog";
 import MenuDetailPage from "../pages/MenuDetailPage";
-import CustomMenu from "../pages/CustomMenu";
+import CustomMenu from "../pages/booking/CustomMenu";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import { useProfile } from "../contexts/ProfileContext";
@@ -24,6 +24,12 @@ import { authStore } from "../stores/authStore";
 import DemoPage from "../pages/DemoPage.tsx";
 import {MenuManagementPage} from "../pages/seller/MenuManagementPage.tsx";
 import UpdateMenu from "../pages/seller/UpdateMenuPage.tsx";
+import AdminLayout from "../components/admin/AdminLayout";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminResourcePage from "../components/admin/AdminResourcePage";
+import AdminReports from "../pages/admin/AdminReports";
+import AdminSettings from "../pages/admin/AdminSettings";
+import { adminSectionKeys } from "../types/AdminTypes";
 
 export const router = createBrowserRouter(
   [
@@ -61,6 +67,19 @@ export const router = createBrowserRouter(
             { path: "/profile", element: <Profile /> },
           ],
         },
+      ],
+    },
+    {
+      path: "/admin",
+      element: <AdminLayout />,
+      children: [
+        { index: true, element: <AdminDashboard /> },
+        ...adminSectionKeys.map((resource) => ({
+          path: resource,
+          element: <AdminResourcePage resource={resource} />,
+        })),
+        { path: "reports", element: <AdminReports /> },
+        { path: "settings", element: <AdminSettings /> },
       ],
     },
     { path: "*", element: <NotFound /> },

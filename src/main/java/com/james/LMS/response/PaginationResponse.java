@@ -1,16 +1,14 @@
 package com.james.LMS.response;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.domain.Page;
 
 @Builder
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class PaginationResponse<T> {
   private List<T> data;
   private int currentPage;

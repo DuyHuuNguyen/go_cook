@@ -61,7 +61,7 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
     String path = request.getRequestURI();
 
     if (PublicEndpointsValidatorUtil.isSwaggerUrl(path)
-        || PublicEndpointsValidatorUtil.isPublicEndpoint(path)) {
+        || PublicEndpointsValidatorUtil.isPublicEndpoint(path, request.getMethod())) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -97,6 +97,9 @@ public class AuthTokenProviderInterceptor extends OncePerRequestFilter {
         userService
             .findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    if (!user.isActive()) {
+      throw new InvalidTokenException(ErrorCode.JWT_INVALID);
+    }
     List<Role> roles = this.roleService.findAllByUserId(user.getId());
     List<GrantedAuthority> authorityList =
         roles.stream()

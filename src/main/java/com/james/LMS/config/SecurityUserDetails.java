@@ -19,6 +19,7 @@ public class SecurityUserDetails implements UserDetails {
   @JsonIgnore private String password;
   private String username;
   @Getter private String avatarUrl;
+  @Builder.Default private boolean enabled = true;
   private Collection<? extends GrantedAuthority> authorities;
 
   public static SecurityUserDetails build(User user, List<GrantedAuthority> authorities) {
@@ -28,6 +29,7 @@ public class SecurityUserDetails implements UserDetails {
         .password(user.getPassword())
         .username(user.getUsername())
         .avatarUrl(user.getAvatarUrl())
+        .enabled(user.isActive())
         .authorities(authorities)
         .build();
   }
@@ -39,6 +41,7 @@ public class SecurityUserDetails implements UserDetails {
         .password(user.getPassword())
         .username(user.getUsername())
         .avatarUrl(user.getAvatarUrl())
+        .enabled(user.isActive())
         .build();
   }
 
@@ -55,6 +58,11 @@ public class SecurityUserDetails implements UserDetails {
   @Override
   public String getUsername() {
     return this.email;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return enabled;
   }
 
   public String getDisplayName() {

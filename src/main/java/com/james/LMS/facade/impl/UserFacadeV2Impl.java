@@ -2,17 +2,9 @@ package com.james.LMS.facade.impl;
 
 import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.config.SecurityUserDetails;
-import com.james.LMS.entity.ChefProfile;
-import com.james.LMS.entity.Role;
-import com.james.LMS.entity.User;
-import com.james.LMS.entity.location.Province;
-import com.james.LMS.entity.location.Ward;
 import com.james.LMS.enums.ErrorCode;
-import com.james.LMS.enums.RoleEnum;
 import com.james.LMS.enums.TokenType;
-import com.james.LMS.exception.EntityNotFoundException;
 import com.james.LMS.exception.InvalidTokenException;
-import com.james.LMS.exception.PermissionDeniedException;
 import com.james.LMS.facade.UserFacadeV2;
 import com.james.LMS.request.BecomeChefRequest;
 import com.james.LMS.request.LoginRequest;
@@ -30,6 +22,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,10 +43,8 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
   private final JwtService jwtService;
   private final CacheService cacheService;
   private final AuthenticationManager authenticationManager;
+  private final ChefApplicationService chefApplicationService;
   private final UserService userService;
-  private final RoleService roleService;
-  private final ProvinceService provinceService;
-  private final WardService wardService;
 
   @Value("${security.cookie.secure:false}")
   private boolean cookieSecure;
@@ -89,6 +81,9 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
   public BaseResponse<Void> refreshToken(
       RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
     String email = jwtService.getEmailFromJwtToken(refreshTokenRequest.getRefreshToken());
+    if (userService.findByEmail(email).filter(user -> user.isActive()).isEmpty()) {
+      throw new InvalidTokenException(ErrorCode.JWT_INVALID);
+    }
 
     String refreshTokenKey = cacheKey(TokenType.REFRESH_TOKEN, email);
     if (!refreshTokenRequest.getRefreshToken().equals(cacheService.retrieve(refreshTokenKey))) {
@@ -129,54 +124,17 @@ public class UserFacadeV2Impl implements UserFacadeV2 {
   @Override
   @Transactional
   public BaseResponse<Void> becomeChef(BecomeChefRequest request) {
-    SecurityUserDetails principal = getCurrentPrincipal();
-
-    if (principal.isChef()) throw new PermissionDeniedException(ErrorCode.USER_WAS_CHEF);
-
-    User user =
-        userService
-            .findUserAndFetchRolesById(principal.getId())
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
-
-    ChefProfile chefProfile =
-        ChefProfile.builder()
-            .bio(request.getBio())
-            .experienceYears(request.getExperienceYears())
-            .build();
-
-    user.addChefProfile(chefProfile);
-    Role chefRole =
-        this.roleService
-            .findByRoleName(RoleEnum.ROLE_CHEF)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROLE_NOT_FOUND));
-
-    user.addRole(chefRole);
-
-    Province province =
-        this.provinceService
-            .findByCode(request.getProvinceCode())
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PROVINCE_NOT_FOUND));
-
-    Ward ward =
-        this.wardService
-            .findByCode(request.getWardCode())
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.WARD_NOT_FOUND));
-
-    boolean isValidLocation = ward.getProvince().getCode().equals(province.getCode());
-    log.debug("Location valid  {}", isValidLocation);
-
-    if (!isValidLocation) throw new PermissionDeniedException(ErrorCode.LOCATION_INVALID);
-
-    user.addProvince(province);
-    user.addWard(ward);
-
-    this.userService.save(user);
+    chefApplicationService.submit(getCurrentPrincipal().getId(), request);
     return BaseResponse.ok();
   }
 
   private Authentication authenticate(String email, String password) {
-    return authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(email, password));
+    try {
+      return authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(email, password));
+    } catch (DisabledException exception) {
+      throw new BadCredentialsException("Email or password is incorrect");
+    }
   }
 
   private SecurityUserDetails getCurrentPrincipal() {

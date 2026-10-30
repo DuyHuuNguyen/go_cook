@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router";
 import HomeHero from '../components/home/HomeHero';
 import HomeServices from '../components/home/HomeServices';
 import HomeChefs from '../components/home/HomeChefs';
@@ -13,6 +15,13 @@ import '../styles/home.css';
 export default function Home() {
     const homeUI = useHomeUI();
     const catalog = useCatalog();
+    const { hash } = useLocation();
+
+    useEffect(() => {
+        if (!hash) return;
+        const element = document.getElementById(decodeURIComponent(hash.slice(1)));
+        element?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, [hash]);
 
     return (
         <div className="gc-home-page">

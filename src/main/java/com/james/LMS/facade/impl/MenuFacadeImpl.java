@@ -24,13 +24,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MenuFacadeImpl implements MenuFacade {
   private final MenuService menuService;
   private final MenuDishService menuDishService;
   private final UserService userService;
+  private final ChefApplicationService chefApplicationService;
   private final DishService dishService;
   private final CategoryService categoryService;
   private final CloudinaryService cloudinaryService;
@@ -45,6 +46,7 @@ public class MenuFacadeImpl implements MenuFacade {
   @Transactional
   public BaseResponse<Void> createMenu(UpsetMenuRequest request) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    chefApplicationService.requireApprovedSeller(principal.getId());
 
     User chef =
         this.userService
@@ -81,6 +83,7 @@ public class MenuFacadeImpl implements MenuFacade {
   @Transactional
   public BaseResponse<Void> addMenuAssets(UpsetMenuAssetRequest request) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    chefApplicationService.requireApprovedSeller(principal.getId());
 
     Menu menu =
         menuService

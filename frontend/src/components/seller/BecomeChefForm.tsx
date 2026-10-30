@@ -1,313 +1,297 @@
-import {useState, type FormEvent, useEffect} from "react";
-import BecomeChefProvider, {useBecomeChef} from "../../contexts/BecomeChefContext.tsx";
-import LocationProvider, {useLocation} from "../../contexts/LocationContext.tsx"
+import { useState, type FormEvent, useEffect } from "react";
+import BecomeChefProvider, {
+  useBecomeChef,
+} from "../../contexts/BecomeChefContext.tsx";
+import LocationProvider, {
+  useLocation,
+} from "../../contexts/LocationContext.tsx";
 import { Link } from "react-router";
-import {useApp} from "../../contexts/AppContext.tsx";
+import { useApp } from "../../contexts/AppContext.tsx";
 
+function BecomeChefFormChild() {
+  const {
+    provinces,
+    wards,
+    loading: loadingProvinces,
+    searchWards,
+    findAllProvinces,
+  } = useLocation();
 
+  const {
+    bio,
+    setBio,
+    experienceYears,
+    setExperienceYears,
+    wardCode,
+    setWardCode,
+    provinceCode,
+    setProvinceCode,
+    loading,
+    error,
+    success,
+    submitBecomeChef,
+  } = useBecomeChef();
 
+  const { notify } = useApp();
 
- function BecomeChefFormChild() {
-    const {
-        provinces,
-        wards,
-        loading: loadingProvinces,
-        searchWards,
-        findAllProvinces
-    } = useLocation();
+  const [phone, setPhone] = useState("");
+  const [wardKeyword, setWardKeyword] = useState("");
+  const [selectedWard, setSelectedWard] = useState<any>(null);
+  const [validationError, setValidationError] = useState("");
 
-    const {
-        bio,
-        setBio,
-        experienceYears,
-        setExperienceYears,
-        wardCode,
-        setWardCode,
-        provinceCode,
-        setProvinceCode,
-        loading,
-        error,
-        success,
-        submitBecomeChef,
-    } = useBecomeChef();
+  const normalizePhone = (value: string) => {
+    let normalized = value.replace(/[\s().-]/g, "");
 
-    const { notify } = useApp();
+    if (normalized.startsWith("+84")) {
+      normalized = "0" + normalized.slice(3);
+    } else if (normalized.startsWith("84")) {
+      normalized = "0" + normalized.slice(2);
+    }
 
-    const [phone, setPhone] = useState("");
-    const [wardKeyword, setWardKeyword] = useState("");
-    const [selectedWard, setSelectedWard] = useState<any>(null);
-    const [validationError, setValidationError] = useState("");
+    return normalized;
+  };
 
-    const normalizePhone = (value: string) => {
-        let normalized = value.replace(/[\s().-]/g, "");
+  const handleProvinceChange = (code: string) => {
+    setProvinceCode(code);
+    setWardCode("");
+    setWardKeyword("");
+    setSelectedWard(null);
+  };
 
-        if (normalized.startsWith("+84")) {
-            normalized = "0" + normalized.slice(3);
-        } else if (normalized.startsWith("84")) {
-            normalized = "0" + normalized.slice(2);
-        }
+  const handleWardSearch = (value: string) => {
+    setWardKeyword(value);
+    setWardCode("");
+    setSelectedWard(null);
 
-        return normalized;
-    };
+    if (value.trim().length >= 2) {
+      void searchWards(value.trim());
+    }
+  };
 
-    const handleProvinceChange = (code: string) => {
-        setProvinceCode(code);
-        setWardCode("");
-        setWardKeyword("");
-        setSelectedWard(null);
-    };
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    const handleWardSearch = (value: string) => {
-        setWardKeyword(value);
-        setWardCode("");
-        setSelectedWard(null);
+    const normalizedPhone = normalizePhone(phone);
+    const normalizedBio = bio.trim().replace(/\s+/g, " ");
 
-        if (value.trim().length >= 2) {
-            void searchWards(value.trim());
-        }
-    };
+    if (!/^0[35789]\d{8}$/.test(normalizedPhone)) {
+      notify("Số điện thoại Việt Nam không hợp lệ.", {
+        variant: "danger",
+        title: "Dữ liệu không hợp lệ",
+      });
+      return;
+    }
 
+    if (!provinceCode) {
+      notify("Vui lòng chọn tỉnh/thành phố.", {
+        variant: "warning",
+        title: "Thiếu thông tin",
+      });
+      return;
+    }
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    if (!wardCode || !selectedWard) {
+      notify("Vui lòng tìm và chọn phường/xã.", {
+        variant: "warning",
+        title: "Thiếu thông tin",
+      });
+      return;
+    }
 
-        const normalizedPhone = normalizePhone(phone);
-        const normalizedBio = bio.trim().replace(/\s+/g, " ");
+    if (
+      !Number.isInteger(Number(experienceYears)) ||
+      Number(experienceYears) < 0 ||
+      Number(experienceYears) > 80
+    ) {
+      notify("Số năm kinh nghiệm phải là số nguyên từ 0 đến 80.", {
+        variant: "warning",
+        title: "Dữ liệu không hợp lệ",
+      });
+      return;
+    }
 
-        if (!/^0[35789]\d{8}$/.test(normalizedPhone)) {
-            notify("Số điện thoại Việt Nam không hợp lệ.", {
-                variant: "danger",
-                title: "Dữ liệu không hợp lệ",
-            });
-            return;
-        }
+    if (normalizedBio.length < 10 || normalizedBio.length > 500) {
+      notify("Phần giới thiệu phải có từ 10 đến 500 ký tự.", {
+        variant: "warning",
+        title: "Dữ liệu không hợp lệ",
+      });
+      return;
+    }
 
-        if (!provinceCode) {
-            notify("Vui lòng chọn tỉnh/thành phố.", {
-                variant: "warning",
-                title: "Thiếu thông tin",
-            });
-            return;
-        }
+    setBio(normalizedBio);
 
-        if (!wardCode || !selectedWard) {
-            notify("Vui lòng tìm và chọn phường/xã.", {
-                variant: "warning",
-                title: "Thiếu thông tin",
-            });
-            return;
-        }
+    try {
+      await submitBecomeChef(normalizedPhone);
 
-        if (
-            !Number.isInteger(Number(experienceYears)) ||
-            Number(experienceYears) < 0 ||
-            Number(experienceYears) > 80
-        ) {
-            notify("Số năm kinh nghiệm phải là số nguyên từ 0 đến 80.", {
-                variant: "warning",
-                title: "Dữ liệu không hợp lệ",
-            });
-            return;
-        }
+      notify("Hồ sơ đã được gửi và đang chờ Admin xét duyệt.", {
+        variant: "success",
+        title: "Đang chờ xét duyệt",
+      });
+    } catch {
+      notify("Không thể gửi hồ sơ. Vui lòng thử lại.", {
+        variant: "danger",
+        title: "Đăng ký thất bại",
+      });
+    }
+  };
 
-        if (normalizedBio.length < 10 || normalizedBio.length > 1000) {
-            notify("Phần giới thiệu phải có từ 10 đến 1000 ký tự.", {
-                variant: "warning",
-                title: "Dữ liệu không hợp lệ",
-            });
-            return;
-        }
+  return (
+    <form className="card summary stack" onSubmit={handleSubmit} noValidate>
+      <h3>Đăng ký trở thành đối tác</h3>
 
-        setBio(normalizedBio);
+      <label className="field" htmlFor="chef-phone">
+        Số điện thoại
+        <input
+          id="chef-phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="VD: 0912345678 hoặc +84912345678"
+          required
+        />
+      </label>
 
-        try {
-            await submitBecomeChef();
-
-            notify("Hồ sơ đăng ký đầu bếp đã được gửi thành công!", {
-                variant: "success",
-                title: "Đăng ký thành công",
-            });
-        } catch {
-            notify("Không thể gửi hồ sơ. Vui lòng thử lại.", {
-                variant: "danger",
-                title: "Đăng ký thất bại",
-            });
-        }
-    };
-    
-
-    return (
-        <form
-            className="card summary stack"
-            onSubmit={handleSubmit}
-            noValidate
+      <label className="field" htmlFor="chef-province">
+        Tỉnh/thành phố
+        <select
+          id="chef-province"
+          name="provinceCode"
+          value={provinceCode}
+          onChange={(e) => handleProvinceChange(e.target.value)}
+          disabled={loadingProvinces}
+          required
         >
-            <h3>Đăng ký trở thành đối tác</h3>
+          <option value="">
+            {loadingProvinces
+              ? "Đang tải tỉnh/thành phố..."
+              : "Chọn tỉnh/thành phố"}
+          </option>
 
-            <label className="field" htmlFor="chef-phone">
-                Số điện thoại
+          {provinces.map((province: any) => {
+            console.log(province);
+            return (
+              <option key={province.code} value={province.code}>
+                {province.fullName}
+              </option>
+            );
+          })}
+        </select>
+      </label>
 
-                <input
-                    id="chef-phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="VD: 0912345678 hoặc +84912345678"
-                    required
-                />
-            </label>
+      <label className="field" htmlFor="chef-ward-search">
+        Tìm kiếm phường/xã
+        <input
+          id="chef-ward-search"
+          name="wardSearch"
+          type="search"
+          value={wardKeyword}
+          onChange={(e) => handleWardSearch(e.target.value)}
+          placeholder="Nhập ít nhất 2 ký tự..."
+          disabled={!provinceCode}
+          autoComplete="off"
+        />
+      </label>
 
-            <label className="field" htmlFor="chef-province">
-                Tỉnh/thành phố
+      {provinceCode && wardKeyword.trim().length >= 2 && (
+        <div className="stack">
+          <label className="field" htmlFor="chef-ward">
+            Chọn phường/xã
+          </label>
 
-                <select
-                    id="chef-province"
-                    name="provinceCode"
-                    value={provinceCode}
-                    onChange={(e) => handleProvinceChange(e.target.value)}
-                    disabled={loadingProvinces}
-                    required
-                >
-                    <option value="">
-                        {loadingProvinces
-                            ? "Đang tải tỉnh/thành phố..."
-                            : "Chọn tỉnh/thành phố"}
-                    </option>
+          <select
+            id="chef-ward"
+            name="wardCode"
+            value={wardCode}
+            onChange={(e) => {
+              const ward = wards.find(
+                (item: any) => item.code === e.target.value,
+              );
 
-                    {provinces.map((province: any) => {
-                        console.log(province)
-                        return (
-                            <option
-                            key={province.code}
-                            value={province.code}
-                            >
-                                {province.fullName}
-                            </option>
-                        )
-                    })}
-                </select>
-            </label>
+              setWardCode(e.target.value);
+              setSelectedWard(ward ?? null);
+              setWardKeyword(ward?.fullName ?? wardKeyword);
+            }}
+          >
+            <option value="">Chọn phường/xã</option>
 
-            <label className="field" htmlFor="chef-ward-search">
-                Tìm kiếm phường/xã
+            {wards.map((ward: any) => (
+              <option key={ward.code} value={ward.code}>
+                {ward.fullName}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
-                <input
-                    id="chef-ward-search"
-                    name="wardSearch"
-                    type="search"
-                    value={wardKeyword}
-                    onChange={(e) => handleWardSearch(e.target.value)}
-                    placeholder="Nhập ít nhất 2 ký tự..."
-                    disabled={!provinceCode}
-                    autoComplete="off"
-                />
-            </label>
+      <label className="field" htmlFor="chef-years">
+        Kinh nghiệm nấu ăn (năm)
+        <input
+          id="chef-years"
+          name="experienceYears"
+          type="number"
+          min={0}
+          step={1}
+          max={80}
+          value={experienceYears}
+          onChange={(e) =>
+            setExperienceYears(
+              e.target.value === "" ? 0 : Number(e.target.value),
+            )
+          }
+          required
+        />
+      </label>
 
-            {provinceCode && wardKeyword.trim().length >= 2 && (
-                <div className="stack">
-                    <label className="field" htmlFor="chef-ward">
-                        Chọn phường/xã
-                    </label>
+      <label className="field" htmlFor="chef-bio">
+        Giới thiệu bản thân
+        <textarea
+          id="chef-bio"
+          name="bio"
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          placeholder="Giới thiệu phong cách nấu ăn và các món sở trường..."
+          minLength={10}
+          maxLength={500}
+          rows={5}
+          required
+        />
+        <small>{bio.length}/500 ký tự</small>
+      </label>
 
-                    <select
-                        id="chef-ward"
-                        name="wardCode"
-                        value={wardCode}
-                        onChange={(e) => {
-                            const ward = wards.find(
-                                (item: any) => item.code === e.target.value
-                            );
+      {(validationError || error) && (
+        <p className="text-danger" role="alert">
+          {validationError || error}
+        </p>
+      )}
 
-                            setWardCode(e.target.value);
-                            setSelectedWard(ward ?? null);
-                            setWardKeyword(ward?.fullName ?? wardKeyword);
-                        }}
-                    >
-                        <option value="">Chọn phường/xã</option>
+      {success && (
+        <p className="text-success" role="status">
+          Hồ sơ đang chờ Admin xét duyệt. Bạn chưa được cấp quyền đầu bếp.
+        </p>
+      )}
 
-                        {wards.map((ward: any) => (
-                            <option key={ward.code} value={ward.code}>
-                                {ward.fullName}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
+      <button
+        className="btn"
+        type="submit"
+        disabled={loading || loadingProvinces}
+      >
+        {loading ? "Đang gửi hồ sơ..." : "Gửi hồ sơ đăng ký"}
+      </button>
 
-            <label className="field" htmlFor="chef-years">
-                Kinh nghiệm nấu ăn (năm)
-
-                <input
-                    id="chef-years"
-                    name="experienceYears"
-                    type="number"
-                    min={0}
-                    step={1}
-                    max={80}
-                    value={experienceYears}
-                    onChange={(e) =>
-                        setExperienceYears(
-                            e.target.value === ""
-                                ? 0
-                                : Number(e.target.value)
-                        )
-                    }
-                    required
-                />
-            </label>
-
-            <label className="field" htmlFor="chef-bio">
-                Giới thiệu bản thân
-
-                <textarea
-                    id="chef-bio"
-                    name="bio"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Giới thiệu phong cách nấu ăn và các món sở trường..."
-                    minLength={10}
-                    maxLength={1000}
-                    rows={5}
-                    required
-                />
-
-                <small>{bio.length}/1000 ký tự</small>
-            </label>
-
-            {(validationError || error) && (
-                <p className="text-danger" role="alert">
-                    {validationError || error}
-                </p>
-            )}
-
-            {success && (
-                <p className="text-success" role="status">
-                    Đăng ký trở thành đầu bếp thành công!
-                </p>
-            )}
-
-            <button
-                className="btn"
-                type="submit"
-                disabled={loading || loadingProvinces}
-            >
-                {loading ? "Đang gửi hồ sơ..." : "Gửi hồ sơ đăng ký"}
-            </button>
-
-            <Link className="text-link" to="/seller">
-                Xem kênh người bán mẫu
-            </Link>
-        </form>
-    );
+      <Link className="text-link" to="/seller">
+        Xem kênh người bán mẫu
+      </Link>
+    </form>
+  );
 }
 export default function BecomeChefForm() {
-     return (
-         <BecomeChefProvider >
-             <LocationProvider>
-                 <BecomeChefFormChild/>
-             </LocationProvider>
-         </BecomeChefProvider>
-     )
+  return (
+    <BecomeChefProvider>
+      <LocationProvider>
+        <BecomeChefFormChild />
+      </LocationProvider>
+    </BecomeChefProvider>
+  );
 }

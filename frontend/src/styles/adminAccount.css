@@ -1,0 +1,86 @@
+.gca-account-dropdown {
+    border-left: 1px solid #e9eee6;
+    padding-left: 16px;
+}
+
+.gca-root .gca-account-trigger,
+.gca-root .gca-account-trigger:focus,
+.gca-root .gca-account-trigger:active {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 7px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #253126;
+    box-shadow: none;
+}
+
+.gca-root .gca-account-trigger:hover,
+.gca-root .gca-account-trigger[aria-expanded="true"] {
+    background: #f2f6ee;
+}
+
+.gca-root .gca-account-trigger::after {
+    display: none;
+}
+
+.gca-account-name {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+}
+
+.gca-account-name strong {
+    font-size: 12px;
+}
+
+.gca-account-name small {
+    color: #71806b;
+    font-size: 10px;
+}
+
+.gca-root .gca-account-menu {
+    min-width: 188px;
+    padding: 5px;
+    border: 1px solid #dfe5da;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(33, 48, 30, 0.09);
+}
+
+.gca-root .gca-account-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 9px 10px;
+    border-radius: 2px;
+    color: #253126;
+    font-size: 13px;
+}
+
+.gca-root .gca-account-menu .dropdown-item:hover,
+.gca-root .gca-account-menu .dropdown-item:focus {
+    background: #edf5e7;
+    color: #315e27;
+}
+
+.gca-logout-icon {
+    margin-right: 9px;
+}
+
+.gca-logout-error {
+    color: #a43b2d;
+    font-size: 12px;
+}
+
+@media (max-width: 640px) {
+    .gca-account-dropdown {
+        padding-left: 8px;
+    }
+
+    .gca-account-name {
+        display: none;
+    }
+}
