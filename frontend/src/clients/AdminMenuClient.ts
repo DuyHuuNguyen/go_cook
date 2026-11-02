@@ -1,4 +1,3 @@
-import axios from "axios";
 import axiosClient from "./AxiosClient";
 import { ENDPOINTS } from "../config/ApiConfig";
 import type { AdminMenuFilters, AdminMenuPage, AdminMenuRow, AdminMenuUpdate } from "../types/AdminMenuTypes";
@@ -31,7 +30,7 @@ function formatPrice(value: unknown): string {
   return Number.isFinite(price) ? `${price.toLocaleString("vi-VN")} đ` : str(value);
 }
 
-function toMenuRow(value: unknown, source: "admin" | "public"): AdminMenuRow {
+function toMenuRow(value: unknown): AdminMenuRow {
   const menu = record(value);
   const category = record(menu.category);
   const seller = record(menu.seller);
@@ -50,11 +49,11 @@ function toMenuRow(value: unknown, source: "admin" | "public"): AdminMenuRow {
     category: str(category.name || menu.categoryName),
     chef: str(seller.username || menu.sellerName),
     price: formatPrice(menu.tempPrice),
-    status: source === "admin" && menu.isActive === false
+    status: menu.isActive === false
       ? (menu.moderationSource === "ADMIN" ? "ADMIN_HIDDEN" : "HIDDEN")
       : str(menu.status),
     isActive: active,
-    source,
+    source: "admin",
     moderationSource: str(menu.moderationSource),
     guests: menu.minGuests != null && menu.maxGuests != null
       ? `${menu.minGuests}–${menu.maxGuests}`
@@ -75,26 +74,16 @@ async function fetchMenuPage(
   page: number,
   size: number,
   params: Record<string, string | number | undefined>,
-): Promise<{ items: unknown[]; total: number; source: "admin" | "public" }> {
-  let response;
-  let source: "admin" | "public" = "admin";
-  try {
-    response = await axiosClient.get<unknown>(ENDPOINTS.ADMIN.MENUS, {
-      params: { ...params, page, size },
-    });
-  } catch (error) {
-    if (!axios.isAxiosError(error) || error.response?.status !== 404) throw error;
-    source = "public";
-    response = await axiosClient.get<unknown>(ENDPOINTS.MENU.LIST.V1, {
-      params: { ...params, page, size },
-    });
-  }
+): Promise<{ items: unknown[]; total: number }> {
+  const response = await axiosClient.get<unknown>(ENDPOINTS.ADMIN.MENUS, {
+    params: { ...params, page, size },
+  });
   const data = record(payload(response.data));
   const total = Number(data.totalElements);
   if (!Array.isArray(data.data) || !Number.isSafeInteger(total) || total < 0) {
     throw new Error("API trả danh sách thực đơn không đúng cấu trúc.");
   }
-  return { items: data.data, total, source };
+  return { items: data.data, total };
 }
 
 export async function getAdminMenusPage(args: {
@@ -128,7 +117,7 @@ export async function getAdminMenusPage(args: {
     });
     const start = (args.page - 1) * args.size;
     return {
-      rows: items.slice(start, start + args.size).map((item) => toMenuRow(item, first.source)),
+      rows: items.slice(start, start + args.size).map((item) => toMenuRow(item)),
       recordsTotal: first.total,
       recordsFiltered: first.total,
     };
@@ -136,7 +125,7 @@ export async function getAdminMenusPage(args: {
 
   const result = await fetchMenuPage(args.page, args.size, params);
   return {
-    rows: result.items.map((item) => toMenuRow(item, result.source)),
+    rows: result.items.map((item) => toMenuRow(item)),
     recordsTotal: result.total,
     recordsFiltered: result.total,
   };

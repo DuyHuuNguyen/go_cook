@@ -34,7 +34,6 @@ type Props = {
   onView: (row: AdminRow) => void;
   onEdit?: (row: AdminRow) => void;
   revision: number;
-  demoRows?: AdminRow[];
   statusFilter?: string;
   menuFilters?: AdminMenuFilters;
   dishFilters?: AdminDishFilters;
@@ -91,14 +90,13 @@ export default function AdminDataTable({
   onView,
   onEdit,
   revision,
-  demoRows,
   statusFilter = "",
   menuFilters,
   dishFilters,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
-  const realChefs = resource === "chefs" && demoRows === undefined;
-  const realUsers = resource === "users" && demoRows === undefined;
+  const realChefs = resource === "chefs";
+  const realUsers = resource === "users";
   const section = adminSections[resource];
   const tableKey = `${resource}-${revision}-${initialSearch}`;
 
@@ -124,12 +122,12 @@ export default function AdminDataTable({
           row: AdminRow,
         ) => {
           const label =
-            column.key === "status" && isWorkflowSection(resource) && resource !== "menus"
+            column.key === "status" && isWorkflowSection(resource)
               ? workflowLabel(resource, row)
               : value || "—";
           if (type !== "display") return label;
           if (column.key === "status") {
-            const state = isWorkflowSection(resource) && resource !== "menus"
+            const state = isWorkflowSection(resource)
               ? workflowState(resource, row)
               : String(value || "").toUpperCase();
             return (
@@ -165,8 +163,7 @@ export default function AdminDataTable({
 
   const options = useMemo<Options>(
     () => ({
-      serverSide: demoRows === undefined,
-      data: demoRows,
+      serverSide: true,
       searching: !realChefs,
       ordering: !realChefs && !realUsers,
       processing: true,
@@ -197,9 +194,7 @@ export default function AdminDataTable({
           next: "Sau",
         },
       },
-      ajax: demoRows
-        ? undefined
-        : (request: AjaxData, callback: AjaxCallback) => {
+      ajax: (request: AjaxData, callback: AjaxCallback) => {
             const pageSize =
               request.length && request.length > 0 ? request.length : 10;
             const page = Math.floor((request.start || 0) / pageSize) + 1;
@@ -266,8 +261,7 @@ export default function AdminDataTable({
       resource,
       section,
       initialSearch,
-      demoRows,
-      realChefs,
+          realChefs,
       realUsers,
       statusFilter,
       menuFilters,
