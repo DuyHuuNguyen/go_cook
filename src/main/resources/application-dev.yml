@@ -81,4 +81,4 @@ logging:
   level:
     org.springframework.security: DEBUG
 cors:
-  allowed-origins: "http://localhost:5173,http://localhost:8083"
+  allowed-origins: "http://localhost:5173,http://localhost:8083,http://localhost:5174"

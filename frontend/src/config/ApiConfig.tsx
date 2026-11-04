@@ -310,4 +310,29 @@ export const ENDPOINTS = {
       },
     },
   },
+  CHAT: {
+    CONVERSATIONS: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations"),
+    },
+    MESSAGES: {
+      V1: (conversationId: number | string) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/conversations/${conversationId}/messages`),
+      SEND: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/messages"),
+      },
+    },
+    OFFERS: {
+      CREATE: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/offers"),
+      },
+      ACCEPT: {
+        V1: (offerId: number | string) =>
+          endpoint(SERVICE.USER, VERSION.V1, `/conversations/offers/${offerId}/accept`),
+      },
+      REJECT: {
+        V1: (offerId: number | string) =>
+          endpoint(SERVICE.USER, VERSION.V1, `/conversations/offers/${offerId}/reject`),
+      },
+    },
+  },
 } as const;
