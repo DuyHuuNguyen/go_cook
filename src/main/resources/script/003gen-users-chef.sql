@@ -45,7 +45,7 @@ VALUES (
            v_name,
            pwd,
            '09' || lpad((10000000 + i)::text, 8, '0'),      -- 0910000001 ... duy nhất
-           v_name || '@gmail.com',
+           v_name || 'script@gmail.com',
            'https://i.pravatar.cc/300?img=' || (1 + (i % 70)),
            p_code,
            w_code,

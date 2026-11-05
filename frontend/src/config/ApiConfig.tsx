@@ -158,6 +158,9 @@ export const ENDPOINTS = {
       POST: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/menus"),
       },
+      CREATE: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/menus/creation"),
+      },
     },
     CATEGORY: {
       GET: {

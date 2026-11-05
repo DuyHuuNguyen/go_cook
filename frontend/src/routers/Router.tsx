@@ -32,6 +32,7 @@ import AdminResourcePage from "../components/admin/AdminResourcePage";
 import AdminReports from "../pages/admin/AdminReports";
 import AdminSettings from "../pages/admin/AdminSettings";
 import { adminSectionKeys } from "../types/AdminTypes";
+import {CustomerBookingManagement} from "../pages/CustomerBookingManagement.tsx";
 import {ChatPage} from "../pages/ChatPage.tsx";
 
 export const router = createBrowserRouter(
@@ -74,6 +75,7 @@ export const router = createBrowserRouter(
               element: <MatchingChefPage />,
             },
             { path: "/profile", element: <Profile /> },
+            { path: "/customer-booking",  element: <CustomerBookingManagement/> },
           ],
         },
       ],

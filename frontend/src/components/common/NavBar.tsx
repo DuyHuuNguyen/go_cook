@@ -111,6 +111,11 @@ function NavbarContent() {
                     Gian bếp
                   </NavDropdown.Item>
                 )}
+                {!profileData.isChef && (
+                    <NavDropdown.Item as={Link} to="/customer-booking">
+                      Đơn
+                    </NavDropdown.Item>
+                )}
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleLogout}>
                   Đăng xuất
