@@ -2,6 +2,8 @@ package com.james.LMS.entity;
 
 import com.james.LMS.enums.ChefApplicationStatus;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -39,6 +41,14 @@ public class ChefProfile extends BaseEntity {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
+
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(
+      name = "chef_dishes",
+      joinColumns = @JoinColumn(name = "chef_profile_id"),
+      inverseJoinColumns = @JoinColumn(name = "dish_id"))
+  @Builder.Default
+  private List<Dish> dishes = new ArrayList<>();
 
   public void addUser(User user) {
     this.user = user;

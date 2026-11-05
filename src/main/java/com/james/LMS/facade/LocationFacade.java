@@ -10,4 +10,6 @@ public interface LocationFacade {
   BaseResponse<List<ProvinceResponse>> findAllProvinces();
 
   BaseResponse<List<WardResponse>> findByWardName(WardCriteria criteria);
+
+  BaseResponse<List<WardResponse>> findWardsByProvinceCode(String provinceCode);
 }

@@ -1,16 +1,13 @@
 package com.james.LMS.entity;
 
+import com.james.LMS.enums.BookingRequestStatus;
 import jakarta.persistence.*;
+import java.time.Instant;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(
-    name = "booking_requests",
-    uniqueConstraints =
-        @UniqueConstraint(
-            name = "uk_booking_requests_chef_booking",
-            columnNames = {"chef_id", "booking_id"}))
+@Table(name = "booking_requests")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +22,10 @@ public class BookingRequest extends BaseEntity {
   @JoinColumn(name = "chef_id", nullable = false)
   private User chef;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 30)
-  private String status;
+  private BookingRequestStatus status;
+
+  @Column(name = "expires_at")
+  private Instant expiresAt;
 }

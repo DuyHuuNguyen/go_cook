@@ -45,4 +45,19 @@ public class LocationFacadeImpl implements LocationFacade {
             .toList();
     return BaseResponse.build(wardResponses, true);
   }
+
+  @Override
+  public BaseResponse<List<WardResponse>> findWardsByProvinceCode(String provinceCode) {
+
+    List<WardResponse> wardResponses =
+        this.wardService.findWardsByProvinceCode(provinceCode).stream()
+            .map(
+                ward ->
+                    WardResponse.builder()
+                        .fullName(ward.getFullName())
+                        .code(ward.getCode())
+                        .build())
+            .toList();
+    return BaseResponse.build(wardResponses, true);
+  }
 }

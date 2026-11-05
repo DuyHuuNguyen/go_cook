@@ -14,6 +14,7 @@ import Home from "../pages/Home";
 import MenuCatalog from "../pages/MenuCatalog";
 import MenuDetailPage from "../pages/MenuDetailPage";
 import CustomMenu from "../pages/booking/CustomMenu";
+import MatchingChefPage from "../pages/booking/MatchingChefPage";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import { useProfile } from "../contexts/ProfileContext";
@@ -68,6 +69,10 @@ export const router = createBrowserRouter(
             { path: "/menus", element: <MenuCatalog /> },
             { path: "/menus/:id", element: <MenuDetailPage /> },
             { path: "/create-menu", element: <CustomMenu /> },
+            {
+              path: "/bookings/:bookingId/matching-chefs",
+              element: <MatchingChefPage />,
+            },
             { path: "/profile", element: <Profile /> },
           ],
         },

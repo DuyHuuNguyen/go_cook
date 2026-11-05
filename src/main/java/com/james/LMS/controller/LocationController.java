@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -43,5 +40,14 @@ public class LocationController {
   @PreAuthorize("isAuthenticated()")
   public BaseResponse<List<WardResponse>> findByWardName(@Valid WardCriteria criteria) {
     return this.locationFacade.findByWardName(criteria);
+  }
+
+  @GetMapping("/provinces/{provinceCode}/wards")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(tags = {"Location APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  public BaseResponse<List<WardResponse>> findWardsByProvince(@PathVariable String provinceCode) {
+    return this.locationFacade.findWardsByProvinceCode(provinceCode);
   }
 }

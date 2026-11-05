@@ -2,17 +2,32 @@ package com.james.LMS.service.impl;
 
 import com.james.LMS.entity.Booking;
 import com.james.LMS.entity.BookingItemDish;
+import com.james.LMS.entity.ChefProfile;
 import com.james.LMS.entity.Dish;
 import com.james.LMS.entity.User;
+import com.james.LMS.config.ChefBookingProperties;
+import com.james.LMS.enums.ChefApplicationStatus;
+import com.james.LMS.enums.ChefScheduleStatus;
 import com.james.LMS.enums.ErrorCode;
 import com.james.LMS.exception.EntityNotFoundException;
 import com.james.LMS.repository.BookingRepository;
+import com.james.LMS.repository.ChefProfileRepository;
+import com.james.LMS.repository.ChefScheduleRepository;
+import com.james.LMS.repository.DishRepository;
 import com.james.LMS.request.CreateBookingRequest;
+import com.james.LMS.response.MatchingChefResponse;
 import com.james.LMS.service.BookingService;
 import com.james.LMS.service.DishService;
 import com.james.LMS.service.UserService;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -29,6 +44,10 @@ public class BookingServiceImpl implements BookingService {
   private final BookingRepository bookingRepository;
   private final DishService dishService;
   private final UserService userService;
+  private final ChefProfileRepository chefProfileRepository;
+  private final ChefScheduleRepository chefScheduleRepository;
+  private final DishRepository dishRepository;
+  private final ChefBookingProperties chefBookingProperties;
 
   @Override
   @Transactional
@@ -57,6 +76,8 @@ public class BookingServiceImpl implements BookingService {
             .chef(null)
             .scheduledAt(request.getScheduledAt())
             .serviceAddress(request.getServiceAddress())
+            .wardCode(request.getWardCode())
+            .provinceCode(request.getProvinceCode())
             .customerNote(request.getCustomerNote())
             .guestCount(request.getGuestCount())
             .totalAmount(BigDecimal.ZERO)
@@ -88,5 +109,92 @@ public class BookingServiceImpl implements BookingService {
   @Override
   public Optional<Booking> findById(Long id) {
     return bookingRepository.findById(id);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<MatchingChefResponse> findMatchingChefs(Long bookingId, Long customerId) {
+    Booking booking =
+        bookingRepository
+            .findByIdAndCustomer_IdAndIsActiveTrue(bookingId, customerId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
+
+    Map<Long, MatchingChefResponse.DishItem> requestedDishes = new LinkedHashMap<>();
+    for (BookingItemDish item : booking.getDishes()) {
+      requestedDishes.putIfAbsent(
+          item.getDish().getId(),
+          new MatchingChefResponse.DishItem(item.getDish().getId(), item.getDishName()));
+    }
+    if (requestedDishes.isEmpty() || booking.getProvinceCode() == null) {
+      return List.of();
+    }
+    Instant preparationStart =
+        booking.getScheduledAt().minus(chefBookingProperties.getPreparationDuration());
+    if (!preparationStart.isAfter(Instant.now())) {
+      return List.of();
+    }
+
+    List<ChefProfile> candidates =
+        chefProfileRepository.findMatchingAreaChefs(
+            booking.getProvinceCode(), booking.getWardCode(), ChefApplicationStatus.APPROVED);
+    if (candidates.isEmpty()) {
+      return List.of();
+    }
+
+    List<Long> dishIds = new ArrayList<>(requestedDishes.keySet());
+    List<Long> profileIds = candidates.stream().map(ChefProfile::getId).toList();
+    Map<Long, Set<Long>> matchedDishIdsByChef = new HashMap<>();
+    for (Object[] pair : chefProfileRepository.findMatchedProfileDishIds(profileIds, dishIds)) {
+      matchedDishIdsByChef
+          .computeIfAbsent((Long) pair[0], ignored -> new HashSet<>())
+          .add((Long) pair[1]);
+    }
+    // Existing chef-owned dishes use dishes.chef_id; newly linked shared dishes use chef_dishes.
+    for (Object[] pair : dishRepository.findOwnedDishChefIds(dishIds)) {
+      matchedDishIdsByChef
+          .computeIfAbsent((Long) pair[0], ignored -> new HashSet<>())
+          .add((Long) pair[1]);
+    }
+
+    List<Long> chefIds = candidates.stream().map(profile -> profile.getUser().getId()).toList();
+    Set<Long> busyChefIds =
+        new HashSet<>(
+            chefScheduleRepository.findBusyChefIdsDuring(
+                chefIds,
+                preparationStart,
+                booking.getScheduledAt(),
+                Instant.now(),
+                ChefScheduleStatus.CONFIRMED,
+                ChefScheduleStatus.HELD));
+
+    List<MatchingChefResponse> result = new ArrayList<>();
+    Set<Long> returnedChefIds = new HashSet<>();
+    for (ChefProfile profile : candidates) {
+      User chef = profile.getUser();
+      if (busyChefIds.contains(chef.getId()) || returnedChefIds.contains(chef.getId())) {
+        continue;
+      }
+      Set<Long> matchedIds = matchedDishIdsByChef.getOrDefault(chef.getId(), Set.of());
+      if (matchedIds.isEmpty()) {
+        continue;
+      }
+      List<MatchingChefResponse.DishItem> matched = new ArrayList<>();
+      List<MatchingChefResponse.DishItem> unmatched = new ArrayList<>();
+      requestedDishes.forEach(
+          (dishId, dish) -> (matchedIds.contains(dishId) ? matched : unmatched).add(dish));
+      result.add(
+          new MatchingChefResponse(
+              chef.getId(),
+              chef.getUsername(),
+              profile.getBio(),
+              String.valueOf(profile.getExperienceYears()),
+              chef.getAvatarUrl(),
+              matched.size(),
+              requestedDishes.size(),
+              matched,
+              unmatched));
+      returnedChefIds.add(chef.getId());
+    }
+    return result;
   }
 }

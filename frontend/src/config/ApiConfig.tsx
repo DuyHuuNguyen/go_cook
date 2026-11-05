@@ -56,6 +56,22 @@ export const ENDPOINTS = {
     DETAIL: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/bookings"),
     },
+    MATCHING_CHEFS: {
+      V1: (bookingId: number | string) =>
+        endpoint(
+          SERVICE.USER,
+          VERSION.V1,
+          `/bookings/${bookingId}/matching-chefs`,
+        ),
+    },
+    REQUEST: {
+      V1: (bookingId: number | string) =>
+        endpoint(
+          SERVICE.USER,
+          VERSION.V1,
+          `/bookings/${bookingId}/requests`,
+        ),
+    },
   },
   LOCATION: {
     PROVINCE: {

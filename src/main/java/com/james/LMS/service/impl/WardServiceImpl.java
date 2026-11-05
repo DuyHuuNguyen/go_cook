@@ -23,4 +23,9 @@ public class WardServiceImpl implements WardService {
   public Optional<Ward> findByCode(String code) {
     return this.wardRepository.findByCode(code);
   }
+
+  @Override
+  public List<Ward> findWardsByProvinceCode(String provinceCode) {
+    return wardRepository.findByProvinceCodeOrderByNameAsc(provinceCode);
+  }
 }

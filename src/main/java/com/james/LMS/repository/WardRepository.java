@@ -29,4 +29,6 @@ public interface WardRepository extends JpaRepository<Ward,String> {
     WHERE w.code = :code
     """)
     Optional<Ward> findByCode(@Param("code") String code);
+
+    List<Ward> findByProvinceCodeOrderByNameAsc(String provinceCode);
 }
