@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Container, Modal } from "react-bootstrap";
 import { Link, useNavigate } from "react-router";
 import {
@@ -31,6 +31,12 @@ import DishPicker from "../../components/booking/DishPicker";
 import SelectedDishList from "../../components/booking/SelectedDishList";
 import { searchDishes } from "../../clients/DishClient";
 import { bookingApi } from "../../clients/BookingClient";
+import {
+  getWardsByProvince,
+  type Province,
+  type Ward,
+} from "../../clients/LocationClient.tsx";
+import getAllProvinces from "../../clients/LocationClient.tsx";
 
 export default function CustomMenu() {
   const form = useCustomMenu();
@@ -41,6 +47,60 @@ export default function CustomMenu() {
   const [selectedDishes, setSelectedDishes] = useState<SelectedDish[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [wards, setWards] = useState<Ward[]>([]);
+  const [loadingProvinces, setLoadingProvinces] = useState(false);
+  const [loadingWards, setLoadingWards] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProvinces() {
+      try {
+        setLoadingProvinces(true);
+        const response = await getAllProvinces();
+        if (active && response.success) {
+          setProvinces(response.data);
+        }
+      } catch (error) {
+        console.error("Load provinces failed:", error);
+      } finally {
+        if (active) setLoadingProvinces(false);
+      }
+    }
+
+    void loadProvinces();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleProvinceChange(provinceCode: string) {
+    const selectedProvince = provinces.find((p) => p.code === provinceCode);
+    form.update("provinceCode", provinceCode);
+    form.update(
+      "provinceName",
+      selectedProvince ? selectedProvince.fullName : "",
+    );
+
+    form.update("wardCode", "");
+    setWards([]);
+
+    if (!provinceCode) return;
+
+    try {
+      setLoadingWards(true);
+      const response = await getWardsByProvince(provinceCode);
+      if (response.success) {
+        setWards(response.data);
+      }
+    } catch (error) {
+      console.error("Load wards failed:", error);
+      setSubmitError("Không thể tải danh sách phường/xã. Vui lòng thử lại.");
+    } finally {
+      setLoadingWards(false);
+    }
+  }
 
   const guests = draft.adults;
   const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
@@ -114,6 +174,16 @@ export default function CustomMenu() {
       return;
     }
 
+    if (!draft.provinceCode) {
+      setSubmitError("Vui lòng chọn tỉnh/thành phố.");
+      return;
+    }
+
+    if (!draft.wardCode) {
+      setSubmitError("Vui lòng chọn phường/xã.");
+      return;
+    }
+
     // Tính tổng số khách
     const guestCount = draft.adults;
     if (guestCount < 1) {
@@ -130,6 +200,8 @@ export default function CustomMenu() {
         dishId: dish.dishId,
         quantity: dish.quantity,
       })),
+      provinceCode: draft.provinceCode,
+      wardCode: draft.wardCode,
     };
 
     try {
@@ -137,7 +209,7 @@ export default function CustomMenu() {
 
       const booking = await bookingApi.createBooking(request);
 
-      navigate(`/bookings/${booking.id}/chefs`);
+      navigate(`/bookings/${booking.id}/matching-chefs`);
     } catch (error) {
       console.error("Create booking failed:", error);
       setSubmitError("Tạo booking thất bại. Vui lòng thử lại.");
@@ -320,10 +392,56 @@ export default function CustomMenu() {
                   />
                 </label>
               </div>
-              <p className="gcm-field-hint">
-                Chọn ngày và giờ phục vụ mong muốn. Bạn có thể chọn giờ và phút
-                cụ thể.
-              </p>
+
+              <div className="gcm-location-grid">
+                <label htmlFor="gcm-province">
+                  Tỉnh/thành phố
+                  <select
+                    id="gcm-province"
+                    value={draft.provinceCode}
+                    onChange={(event) =>
+                      void handleProvinceChange(event.target.value)
+                    }
+                    disabled={loadingProvinces}
+                    required
+                  >
+                    <option value="">
+                      {loadingProvinces
+                        ? "Đang tải tỉnh/thành phố..."
+                        : "Chọn tỉnh/thành phố"}
+                    </option>
+                    {provinces.map((province) => (
+                      <option key={province.code} value={province.code}>
+                        {province.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label htmlFor="gcm-ward">
+                  Phường/xã
+                  <select
+                    id="gcm-ward"
+                    value={draft.wardCode}
+                    onChange={(event) =>
+                      form.update("wardCode", event.target.value)
+                    }
+                    disabled={!draft.provinceCode || loadingWards}
+                    required
+                  >
+                    <option value="">
+                      {loadingWards
+                        ? "Đang tải phường/xã..."
+                        : "Chọn phường/xã"}
+                    </option>
+                    {wards.map((ward) => (
+                      <option key={ward.code} value={ward.code}>
+                        {ward.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
 
               <label className="gcm-field-label" htmlFor="gcm-address">
                 Địa chỉ cần nấu / nhà riêng:
@@ -340,7 +458,7 @@ export default function CustomMenu() {
                   onChange={(event) =>
                     form.update("address", event.target.value)
                   }
-                  placeholder="Số nhà, tên đường, phường/xã, quận/huyện, thành phố"
+                  placeholder="Số nhà, tên đường"
                   required
                 />
               </div>

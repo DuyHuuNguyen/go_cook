@@ -11,6 +11,7 @@ import com.james.LMS.entity.User;
 import com.james.LMS.repository.BookingRepository;
 import com.james.LMS.request.BookingDishRequest;
 import com.james.LMS.request.CreateBookingRequest;
+import com.james.LMS.response.BookingResponse;
 import com.james.LMS.service.DishService;
 import com.james.LMS.service.UserService;
 import com.james.LMS.service.impl.BookingServiceImpl;
@@ -40,6 +41,8 @@ class BookingServiceImplTest {
     CreateBookingRequest request = new CreateBookingRequest();
     request.setScheduledAt(Instant.now().plusSeconds(3600));
     request.setServiceAddress("123 Main Street");
+    request.setWardCode("WARD-1");
+    request.setProvinceCode("PROVINCE-1");
     request.setGuestCount(4);
     request.setDishes(List.of(requestedDish));
 
@@ -52,10 +55,16 @@ class BookingServiceImplTest {
 
     assertNull(booking.getChef());
     assertEquals("PENDING", booking.getBookingStatus());
+    assertEquals("WARD-1", booking.getWardCode());
+    assertEquals("PROVINCE-1", booking.getProvinceCode());
     assertEquals(0, booking.getTotalAmount().signum());
     assertEquals(1, booking.getDishes().size());
     assertEquals(booking, booking.getDishes().getFirst().getBooking());
     assertEquals("Roasted vegetables", booking.getDishes().getFirst().getDishName());
     assertEquals(2, booking.getDishes().getFirst().getQuantity());
+
+    BookingResponse response = BookingResponse.from(booking);
+    assertEquals("WARD-1", response.wardCode());
+    assertEquals("PROVINCE-1", response.provideCode());
   }
 }

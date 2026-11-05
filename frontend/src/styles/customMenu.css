@@ -494,6 +494,22 @@
   font-weight: 700;
 }
 
+.gcm-location-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 17px;
+}
+
+.gcm-location-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: #4c5548;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .gcm-address-input {
   display: flex;
   align-items: center;

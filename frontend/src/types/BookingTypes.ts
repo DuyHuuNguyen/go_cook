@@ -11,6 +11,10 @@ export interface MenuRequestDraft {
   mealDate: string;
   mealTime: string;
   address: string;
+  provinceCode: string;
+  provinceName: string;
+  wardCode: string;
+  wardName: string;
 }
 
 export interface BookingDishRequest {
@@ -24,6 +28,8 @@ export interface CreateBookingRequest {
   customerNote: string;
   guestCount: number;
   dishes: BookingDishRequest[];
+  provinceCode: string;
+  wardCode: string;
 }
 
 export interface BookingDishResponse {
@@ -39,6 +45,8 @@ export interface BookingResponse {
   chefId: number | null;
   scheduledAt: string;
   serviceAddress: string;
+  provideCode: string;
+  wardCode: string;
   customerNote: string;
   guestCount: number;
   totalAmount: number;
@@ -56,6 +64,40 @@ export interface DishSearchParams {
   keyword: string;
   page: number;
   size: number;
+}
+
+export interface MatchedDish {
+  dishId: number;
+  dishName: string;
+  quantity: number;
+}
+
+export interface MatchingChef {
+  chefId: number;
+  fullName: string;
+  bio: string;
+  experience_years: string;
+  avatar: string;
+  matchedDishCount: number;
+  totalRequestedDishCount: number;
+  matchedDishes: MatchedDish[];
+  unmatchedDishes: MatchedDish[];
+}
+
+export interface MatchingChefsResponse {
+  isSuccess: boolean;
+  data: MatchingChef[];
+}
+
+export interface BookingRequestResponse {
+  requestId: number;
+  bookingId: number;
+  chefId: number;
+  requestStatus: string;
+  bookingStatus: string;
+  expiresAt: number;
+  scheduleStartAt: number;
+  scheduleEndAt: number;
 }
 
 export interface PaginationResponse<T> {

@@ -66,8 +66,12 @@ export default function RequestSummary({
           <strong>
             <GeoAlt /> Địa điểm
           </strong>
-          <p>{draft.address || "Chưa nhập địa chỉ"}</p>
-        </div>
+          <p>
+            {[draft?.address, draft?.wardName, draft?.provinceName]
+            .filter(Boolean)
+            .join(", ") || "Chưa nhập địa chỉ"}
+          </p>
+       </div>
 
         {draft.notes.trim() && (
           <div className="gcm-summary-item">

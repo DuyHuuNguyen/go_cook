@@ -35,4 +35,47 @@ public interface ChefProfileRepository extends JpaRepository<ChefProfile, Long> 
       WHERE cp.user.id = :userId
       """)
   Optional<ChefProfileDTO> findChefProfileByUserId(@Param("userId") Long userId);
+
+  @Query("""
+      select distinct cp from ChefProfile cp join fetch cp.user u
+      where cp.isActive = true and u.isActive = true
+        and cp.reviewStatus = :approvedStatus
+        and exists (
+          select area.id from ChefServiceArea area
+          where area.chefProfile = cp and area.isActive = true
+            and area.province.code = :provinceCode
+            and (area.ward is null or area.ward.code = :wardCode)
+        )
+      """)
+  List<ChefProfile> findMatchingAreaChefs(
+      @Param("provinceCode") String provinceCode,
+      @Param("wardCode") String wardCode,
+      @Param("approvedStatus") ChefApplicationStatus approvedStatus);
+
+  @Query("""
+      select cp.user.id, d.id from ChefProfile cp join cp.dishes d
+      where cp.id in :profileIds and d.id in :dishIds and d.isActive = true
+      """)
+  List<Object[]> findMatchedProfileDishIds(
+      @Param("profileIds") List<Long> profileIds, @Param("dishIds") List<Long> dishIds);
+
+  @Query(value = """
+      select exists (
+        select 1 from user_roles ur join roles r on r.id = ur.role_id
+        where ur.user_id = :userId and ur.is_active = true
+          and r.is_active = true and r.role_name = 'ROLE_CHEF'
+      )
+      """, nativeQuery = true)
+  boolean hasActiveChefRole(@Param("userId") Long userId);
+
+  @Query("""
+      select count(area.id) from ChefServiceArea area
+      where area.chefProfile.id = :profileId and area.isActive = true
+        and area.province.code = :provinceCode
+        and (area.ward is null or area.ward.code = :wardCode)
+      """)
+  long countMatchingServiceAreas(
+      @Param("profileId") Long profileId,
+      @Param("provinceCode") String provinceCode,
+      @Param("wardCode") String wardCode);
 }

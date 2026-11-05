@@ -18,6 +18,13 @@ server:
       enabled: true
       force: true
 
+booking:
+  chef:
+    preparation-duration: PT2H
+    response-hold: PT30M
+    negotiation-hold: PT2H
+    payment-hold: PT30M
+
 logging:
   pattern:
     console: ${LOG_PATTERN:%d{yyyy-MM-dd HH:mm:ss.SSS} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{1}){cyan} %clr(%X{requestId}){yellow} - %clr(%X{email}){green} - %msg%n}

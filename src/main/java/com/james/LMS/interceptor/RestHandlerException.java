@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,6 +16,28 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class RestHandlerException {
+
+  @ExceptionHandler(BookingRequestException.class)
+  public ResponseEntity<BaseResponse<ExceptionResponse>> handleBookingRequestException(
+      BookingRequestException exception) {
+    return new ResponseEntity<>(
+        BaseResponse.build(
+            new ExceptionResponse(exception.getErrorCode(), exception.getMessage()), false),
+        exception.getStatus());
+  }
+
+  @ExceptionHandler({
+      PessimisticLockingFailureException.class,
+      ObjectOptimisticLockingFailureException.class
+  })
+  public ResponseEntity<BaseResponse<ExceptionResponse>> handleConcurrentBookingChange(
+      RuntimeException exception) {
+    return new ResponseEntity<>(
+        BaseResponse.build(new ExceptionResponse(
+            "BOOKING_CONCURRENT_MODIFICATION", "Booking or chef schedule changed concurrently"),
+            false),
+        HttpStatus.CONFLICT);
+  }
 
   @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<BaseResponse<ExceptionResponse>> handleEntityNotFoundException(

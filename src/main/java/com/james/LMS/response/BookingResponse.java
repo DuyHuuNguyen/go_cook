@@ -1,5 +1,6 @@
 package com.james.LMS.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.james.LMS.entity.Booking;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -12,6 +13,8 @@ public record BookingResponse(
     Long chefId,
     Instant scheduledAt,
     String serviceAddress,
+    String wardCode,
+    String provideCode,
     String customerNote,
     Integer guestCount,
     BigDecimal totalAmount,
@@ -26,6 +29,8 @@ public record BookingResponse(
         booking.getChef() == null ? null : booking.getChef().getId(),
         booking.getScheduledAt(),
         booking.getServiceAddress(),
+        booking.getWardCode(),
+        booking.getProvinceCode(),
         booking.getCustomerNote(),
         booking.getGuestCount(),
         booking.getTotalAmount(),

@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,4 +25,10 @@ public interface DishRepository extends JpaRepository<Dish, Long>, JpaSpecificat
 
   Page<Dish> findByNameContainingIgnoreCaseAndIsActiveTrueOrderByNameAscIdAsc(
       String name, Pageable pageable);
+
+  @Query("""
+      select d.chef.id, d.id from Dish d
+      where d.id in :dishIds and d.chef is not null and d.isActive = true
+      """)
+  List<Object[]> findOwnedDishChefIds(@Param("dishIds") List<Long> dishIds);
 }
