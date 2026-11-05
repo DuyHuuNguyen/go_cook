@@ -562,8 +562,25 @@ export function MenuManagementPage() {
                                     style={{width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 8}}
                                 />
                             )}
-                            <h4 className="mt-3">{selectedMenu.name}</h4>
-                            <p className="text-muted">{selectedMenu.description}</p>
+                            <h4 className="mt-3 mb-2">{selectedMenu.name}</h4>
+                            {selectedMenu.description && (
+                                <div
+                                    style={{
+                                        background: '#f8f7f2',
+                                        border: '1px solid #e5e6dc',
+                                        borderRadius: 10,
+                                        padding: '12px 14px',
+                                        fontSize: 15,
+                                        lineHeight: 1.65,
+                                        color: '#2c3028',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                        marginBottom: 16,
+                                    }}
+                                >
+                                    {selectedMenu.description}
+                                </div>
+                            )}
 
                             <table className="table table-sm">
                                 <tbody>
