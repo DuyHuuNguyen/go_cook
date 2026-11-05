@@ -1,6 +1,6 @@
 import type { AdminRow, AdminSection } from "../../types/AdminTypes";
 
-export type WorkflowSection = "users" | "chefs" | "menus";
+export type WorkflowSection = "users" | "chefs";
 export type WorkflowAction = {
   id: string;
   label: string;
@@ -9,7 +9,7 @@ export type WorkflowAction = {
 };
 export const isWorkflowSection = (
   section: AdminSection,
-): section is WorkflowSection => ["users", "chefs", "menus"].includes(section);
+): section is WorkflowSection => ["users", "chefs"].includes(section);
 
 export const workflowFilters: Record<
   WorkflowSection,
@@ -21,11 +21,6 @@ export const workflowFilters: Record<
     APPROVED: "Đã duyệt · đang hoạt động",
     REJECTED: "Bị từ chối",
     SUSPENDED: "Đã duyệt · tạm ngừng",
-  },
-  menus: {
-    PUBLIC: "Công khai",
-    CHEF_HIDDEN: "Đầu bếp tự ẩn",
-    ADMIN_HIDDEN: "Admin ẩn vi phạm",
   },
 };
 // These are UI labels, never payloads or a replacement for backend status conventions.
@@ -45,12 +40,7 @@ export function workflowState(section: WorkflowSection, row: AdminRow): string {
       ? row.reviewStatus || row.status || ""
       : "";
   }
-  // ACTIVE/INACTIVE alone cannot tell who hid a menu. Preserve unknown visibility.
-  return ["PUBLIC", "CHEF_HIDDEN", "ADMIN_HIDDEN"].includes(
-    row.visibility || "",
-  )
-    ? row.visibility!
-    : "";
+  return "";
 }
 export function workflowLabel(section: WorkflowSection, row: AdminRow): string {
   return (
@@ -123,34 +113,8 @@ export function workflowActions(
         },
       ];
   }
-  if (section === "menus") {
-    if (state === "PUBLIC" || state === "CHEF_HIDDEN")
-      return [
-        {
-          id: "hide",
-          label: "Ẩn thực đơn vi phạm",
-          description:
-            "Ghi nhận lý do vi phạm và nguồn ẩn là Admin. Không chỉnh sửa nội dung hoặc yêu cầu duyệt từng thực đơn.",
-          reasonRequired: true,
-        },
-      ];
-    if (state === "ADMIN_HIDDEN")
-      return [
-        {
-          id: "restore",
-          label: "Gỡ ẩn do Admin",
-          description:
-            "Chỉ Admin được gỡ hạn chế này. Nếu đầu bếp đã tự ẩn trước đó, giữ trạng thái tự ẩn; không tự công khai thay đầu bếp.",
-          reasonRequired: false,
-        },
-      ];
-  }
   return [];
 }
-export const workflowNotes: Record<"menus", string> = {
-  menus:
-    "Đầu bếp đã được duyệt tự công khai thực đơn, không cần duyệt từng thực đơn. Phân biệt đầu bếp tự ẩn và Admin ẩn vi phạm; chỉ Admin gỡ ẩn do Admin. Nội dung thực đơn luôn chỉ đọc tại đây.",
-};
 export const workflowDetails: Record<
   WorkflowSection,
   Array<{ key: string; label: string }>
@@ -169,13 +133,5 @@ export const workflowDetails: Record<
     { key: "reason", label: "Lý do xử lý gần nhất" },
     { key: "statusChangedAt", label: "Thời gian xử lý gần nhất" },
     { key: "statusChangedBy", label: "Mã người thực hiện" },
-  ],
-  menus: [
-    { key: "dishes", label: "Danh sách món" },
-    { key: "guests", label: "Số khách" },
-    { key: "chefApproval", label: "Tình trạng duyệt đầu bếp" },
-    { key: "visibilitySource", label: "Người ẩn" },
-    { key: "reason", label: "Lý do ẩn" },
-    { key: "priorVisibility", label: "Trạng thái trước khi Admin ẩn" },
   ],
 };

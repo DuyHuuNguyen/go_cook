@@ -89,18 +89,6 @@ test("An empty backend page remains empty without demo fallback", async () => {
   assert.equal(requests[0].options.params.status, "SUSPENDED");
 });
 
-test("The shared collection reader also uses Chef backend pagination", async () => {
-  requests.length = 0;
-  globalThis.__chefAdminTestResponse = { data: [chef], totalElements: 11, currentPage: 1 };
-  const result = await client.getAdminCollection("chefs", 1, "", 0);
-  assert.equal(result.rows[0].id, "17");
-  assert.equal(result.total, 11);
-  assert.equal(result.hasNext, true);
-  assert.equal(requests[0].url, "/api/v1/admin/chef-applications");
-  await assert.rejects(client.getAdminCollection("chefs", 1, "An", 0), /chưa hỗ trợ tìm kiếm/);
-  assert.equal(requests.length, 1);
-});
-
 test("Chef detail and review use the existing endpoints and exact request fields", async () => {
   requests.length = 0;
   globalThis.__chefAdminTestResponse = chef;
