@@ -17,6 +17,12 @@ public class DishServiceImpl implements DishService {
   private final DishRepository dishRepository;
   private static final int LIMIT_DEFAULT = 20;
 
+  //  @Override
+  //  public List<Dish> findByIdGreaterThanOrderById(Long id, Long chefId) {
+  //    return this.dishRepository.findByIdGreaterThanAndIsActiveTrueOrderByIdAsc(
+  //        id, Limit.of(LIMIT_DEFAULT));
+  //  }
+
   @Override
   public List<Dish> findByIdGreaterThanOrderById(Long id, Long chefId, String name) {
     if (name != null && !name.isBlank()) {

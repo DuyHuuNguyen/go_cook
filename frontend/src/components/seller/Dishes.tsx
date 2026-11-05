@@ -1,5 +1,6 @@
 import {useEffect} from "react";
 import DishProvider, {useDish} from "../../contexts/DishContext";
+import {getDishes} from "../../clients/DishClient.tsx";
 
 function DishesChild() {
     const {
@@ -15,6 +16,11 @@ function DishesChild() {
     useEffect(() => {
         void loadMoreDishes();
     }, []);
+
+    useEffect(()=>{
+        console.log("update dishes")
+        console.log(selectedDishes)
+    },[selectedDishes])
 
 
     return (
@@ -61,6 +67,11 @@ function DishesChild() {
                 </button>
             )}
         </div>
+    );
+}
+export  function UnProviderDishes(){
+    return(
+        <DishesChild></DishesChild>
     );
 }
 

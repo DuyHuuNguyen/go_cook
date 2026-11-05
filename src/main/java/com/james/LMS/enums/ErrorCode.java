@@ -31,7 +31,15 @@ public enum ErrorCode {
   CATEGORY_NOT_FOUND("1022", "Category not found"),
   CHEF_PROFILE_NOT_FOUND("1023", "Chef application not found"),
   BOOKING_NOT_FOUND("1024", "Booking not found"),
-  DISH_NOT_FOUND("1025", "One or more dishes were not found");
+  DISH_NOT_FOUND("1025", "One or more dishes were not found"),
+  CONVERSATION_NOT_FOUND("1026", "Conversation not found"),
+  CONVERSATION_ACCESS_DENIED("1027", "You are not authorized to access this conversation"),
+  BOOKING_CONVERSATION_MISMATCH("1028", "Booking does not belong to this conversation"),
+  BOOKING_PRICE_OFFER_NOT_FOUND("1029", "Booking price offer not found"),
+  ONLY_RECEIVER_CAN_ACCEPT_OFFER("1030", "Only the receiver can accept this offer"),
+  ONLY_RECEIVER_CAN_REJECT_OFFER("1033", "Only the receiver can reject this offer"),
+  OFFER_ALREADY_PROCESSED("1031", "This offer has already been processed"),
+  MESSAGE_NOT_FOUND("1032", "Message not found");
 
   private final String code;
   private final String message;

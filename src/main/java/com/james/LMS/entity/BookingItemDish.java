@@ -1,7 +1,6 @@
 package com.james.LMS.entity;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -26,5 +25,4 @@ public class BookingItemDish extends BaseEntity {
 
   @Column(name = "quantity", nullable = false)
   private Integer quantity;
-
 }
