@@ -37,10 +37,7 @@ export function SellerDashboardPage() {
     )
     .sort((a, b) => a.time.localeCompare(b.time));
   return (
-    <SellerWorkspace
-      title="Một ngày ngon lành, Cô Mai!"
-      description="Chăm chút từng bữa ăn, quản lý công việc ngay tại đây."
-    >
+    <SellerWorkspace>
       <div className="chef-demo-banner">
         <span>
           <strong>Dữ liệu mẫu</strong> · Thứ Tư, 14/10/2026
