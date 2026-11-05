@@ -14,19 +14,14 @@ import {
 } from "../../types/AdminTypes";
 import { useApp } from "../../contexts/AppContext";
 
-import {
-  isWorkflowSection,
-  workflowActions,
-  workflowLabel,
-  type WorkflowSection,
-} from "./adminWorkflow";
+import { workflowActions, workflowLabel } from "./adminWorkflow";
 
+type SharedAdminSection = Exclude<AdminSection, "menus" | "dishes">;
 type Props = {
-  resource: AdminSection;
+  resource: SharedAdminSection;
   record: AdminRow | null;
   onClose: () => void;
   onSaved: () => void;
-  demo: boolean;
 };
 
 type ActionInfo = {
@@ -35,7 +30,7 @@ type ActionInfo = {
   key: string;
   options?: string[];
 };
-const actions: Record<AdminSection, ActionInfo> = {
+const actions: Record<SharedAdminSection, ActionInfo> = {
   users: { title: "Hoạt động tài khoản", field: "Trạng thái", key: "status" },
   chefs: {
     title: "Duyệt đầu bếp",
@@ -43,8 +38,6 @@ const actions: Record<AdminSection, ActionInfo> = {
     key: "status",
     options: ["PENDING", "APPROVED", "REJECTED"],
   },
-  menus: { title: "Kiểm soát hiển thị", field: "Trạng thái", key: "status" },
-  dishes: { title: "Món ăn", field: "Tên món", key: "name" },
   categories: { title: "Danh mục", field: "Tên danh mục", key: "name" },
   bookings: {
     title: "Cập nhật đơn",
@@ -77,7 +70,6 @@ export default function AdminActionPanel({
   record,
   onClose,
   onSaved,
-  demo,
 }: Props) {
   const info = actions[resource];
   const [value, setValue] = useState(record?.[info.key] || "");
@@ -112,23 +104,14 @@ export default function AdminActionPanel({
     }
   }
 
-  if (resource === "users" && record && !demo)
+  if (resource === "users" && record)
     return (
       <UserActionPanel record={record} onClose={onClose} onSaved={onSaved} />
     );
 
-  if (resource === "chefs" && record && !demo)
+  if (resource === "chefs" && record)
     return (
       <ChefActionPanel record={record} onClose={onClose} onSaved={onSaved} />
-    );
-
-  if (isWorkflowSection(resource) && record)
-    return (
-      <WorkflowActionPanel
-        resource={resource}
-        record={record}
-        onClose={onClose}
-      />
     );
 
   return (
@@ -481,140 +464,6 @@ function ChefActionPanel({
               disabled={saving || !action}
             >
               {saving ? "Đang xử lý..." : "Xác nhận"}
-            </button>
-          </div>
-        </form>
-      </section>
-    </div>
-  );
-}
-
-function WorkflowActionPanel({
-  resource,
-  record,
-  onClose,
-}: {
-  resource: WorkflowSection;
-  record: AdminRow;
-  onClose: () => void;
-}) {
-  const available = workflowActions(resource, record);
-  const [actionId, setActionId] = useState(available[0]?.id || "");
-  const [reason, setReason] = useState("");
-  const [error, setError] = useState("");
-  const [checked, setChecked] = useState(false);
-  const action = available.find((item) => item.id === actionId);
-  function check(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setChecked(false);
-    if (!action) {
-      setError("Chưa có hành động phù hợp với dữ liệu trạng thái này.");
-      return;
-    }
-    if (action.reasonRequired && !reason.trim()) {
-      setError("Vui lòng nhập lý do, không chỉ khoảng trắng.");
-      return;
-    }
-    setError("");
-    setChecked(true);
-  }
-  return (
-    <div className="gca-dialog-backdrop" role="presentation" onClick={onClose}>
-      <section
-        className="gca-detail-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Xem xét thao tác quản trị"
-        onClick={(event) => event.stopPropagation()}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") onClose();
-        }}
-      >
-        <div className="gca-drawer-head">
-          <h2>Xem xét thao tác</h2>
-          <button type="button" aria-label="Đóng" onClick={onClose}>
-            <XLg size={20} />
-          </button>
-        </div>
-        <p className="gca-action-record">
-          {record.name} · #{record.id}
-          <br />
-          {workflowLabel(resource, record)}
-        </p>
-        <p className="gca-workflow-notice" role="note">
-          Chưa khả dụng: backend chưa có API cho quy trình này. Biểu mẫu chỉ
-          kiểm tra giao diện, không gửi yêu cầu, lưu dữ liệu hay thay đổi quyền.
-        </p>
-        <form className="gca-action-form" onSubmit={check}>
-          <label>
-            Hành động
-            <select
-              autoFocus
-              required
-              value={actionId}
-              onChange={(event) => {
-                setActionId(event.target.value);
-                setChecked(false);
-                setError("");
-              }}
-            >
-              <option value="" disabled>
-                Chọn hành động
-              </option>
-              {available.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          {action && <p>{action.description}</p>}
-          <label>
-            Lý do {action?.reasonRequired ? "(bắt buộc)" : "(không bắt buộc)"}
-            <textarea
-              required={action?.reasonRequired}
-              rows={4}
-              maxLength={1000}
-              value={reason}
-              onChange={(event) => {
-                setReason(event.target.value);
-                setChecked(false);
-                setError("");
-              }}
-            />
-          </label>
-          {error && (
-            <p role="alert" className="gca-form-error">
-              {error}
-            </p>
-          )}
-          {checked && (
-            <p role="status" className="gca-workflow-notice">
-              Biểu mẫu hợp lệ. Chưa gửi hoặc lưu: cần kết nối API backend.
-            </p>
-          )}
-          <div className="gca-action-controls">
-            <button
-              className="gca-btn gca-btn-outline"
-              type="button"
-              onClick={onClose}
-            >
-              Đóng
-            </button>
-            <button
-              className="gca-btn gca-btn-outline"
-              type="submit"
-              disabled={!action}
-            >
-              Kiểm tra biểu mẫu
-            </button>
-            <button
-              className="gca-btn gca-btn-primary"
-              type="button"
-              disabled
-              title="Chưa có API backend"
-            >
-              Áp dụng · Chưa khả dụng
             </button>
           </div>
         </form>
