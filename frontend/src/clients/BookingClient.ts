@@ -5,9 +5,24 @@ import {
   CreateBookingRequest,
   MatchingChef,
   BookingRequestResponse,
+  PaginationResponse,
 } from "../types/BookingTypes";
 
 export const bookingApi = {
+  getBookings: async (
+    page = 1,
+    size = 10,
+  ): Promise<PaginationResponse<BookingResponse>> => {
+    const response = await axiosClient.get<{
+      data: PaginationResponse<BookingResponse>;
+      success: boolean;
+    }>(ENDPOINTS.BOOKINGS.LIST.V1, {
+      params: { page, size },
+    });
+
+    return response.data.data;
+  },
+
   createBooking: async (
     request: CreateBookingRequest,
   ): Promise<BookingResponse> => {
@@ -42,3 +57,5 @@ export const bookingApi = {
     return response.data.data;
   },
 };
+
+export const getBookings = bookingApi.getBookings;
