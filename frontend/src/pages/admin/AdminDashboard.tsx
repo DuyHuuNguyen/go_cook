@@ -3,7 +3,7 @@ import axios from "axios";
 import { ArrowRight, CalendarCheck, Collection, People, PersonBadge } from "react-bootstrap-icons";
 import { Link } from "react-router";
 import { getAdminDashboard } from "../../clients/AdminClient";
-import { useAdminCollection } from "../../hooks/useAdminCollection";
+import { getAdminMenusPage } from "../../clients/AdminMenuClient";
 
 const shortcuts = [
     { to: "/admin/users", title: "Tài khoản" },
@@ -22,9 +22,17 @@ function count(value: unknown): string {
 }
 
 export default function AdminDashboard() {
-    const { collection, loading: menusLoading, error: menusError } = useAdminCollection("menus", 1, "", 0);
+    const [menuCount, setMenuCount] = useState<number | undefined>();
     const [stats, setStats] = useState<Dashboard>({});
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let active = true;
+        void getAdminMenusPage({ page: 1, size: 1, keyword: "", sortBy: "", sortDirection: "asc" })
+            .then((result) => { if (active) setMenuCount(result.recordsTotal); })
+            .catch(() => { if (active) setMenuCount(undefined); });
+        return () => { active = false; };
+    }, []);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -41,7 +49,7 @@ export default function AdminDashboard() {
     const metrics = [
         { title: "Người dùng", value: stats.userCount, icon: People },
         { title: "Đầu bếp", value: stats.chefCount, icon: PersonBadge },
-        { title: "Thực đơn", value: stats.menuCount ?? (!menusLoading && !menusError ? collection.total ?? undefined : undefined), icon: Collection },
+        { title: "Thực đơn", value: stats.menuCount ?? menuCount, icon: Collection },
         { title: "Đơn đặt", value: stats.bookingCount, icon: CalendarCheck },
     ];
 

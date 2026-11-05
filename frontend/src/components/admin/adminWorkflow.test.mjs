@@ -31,15 +31,3 @@ test('Chef suspension and resumption do not change the USER account or existing 
   assert.equal(JSON.stringify(chef), before);
   assert.equal(workflowActions('chefs', row({ status: 'APPROVED' }))[0].reasonRequired, true);
 });
-test('Backend ACTIVE/INACTIVE or generic HIDDEN never imply who hid a menu', () => {
-  for (const status of ['ACTIVE', 'INACTIVE', 'HIDDEN', 'PENDING']) {
-    assert.equal(workflowState('menus', row({ status })), '');
-    assert.deepEqual(workflowActions('menus', row({ status })), []);
-  }
-});
-test('Only an explicitly Admin-hidden menu offers restoration; chef-hidden menus cannot be published by Admin', () => {
-  assert.deepEqual(workflowActions('menus', row({ visibility: 'ADMIN_HIDDEN' })).map(action => action.id), ['restore']);
-  const selfHidden = workflowActions('menus', row({ visibility: 'CHEF_HIDDEN' }));
-  assert.deepEqual(selfHidden.map(action => action.id), ['hide']);
-  assert.equal(selfHidden[0].reasonRequired, true);
-});

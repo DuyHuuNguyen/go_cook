@@ -13,7 +13,7 @@ import {
   getChefApplication,
 } from "../../clients/AdminClient";
 import AdminDataTable from "./AdminDataTable";
-import AdminMenusPage from "./AdminMenusPage";
+import AdminMenusPage from "../../pages/admin/AdminMenusPage";
 import AdminDishesPage from "../../pages/admin/AdminDishesPage";
 import AdminActionPanel from "./AdminActionPanel";
 
@@ -27,6 +27,7 @@ import {
 } from "./adminWorkflow";
 
 type Props = { resource: AdminSection };
+type OtherResource = Exclude<AdminSection, "menus" | "dishes">;
 
 export default function AdminResourcePage({ resource }: Props) {
   if (resource === "menus") return <AdminMenusPage />;
@@ -34,7 +35,7 @@ export default function AdminResourcePage({ resource }: Props) {
   return <AdminOtherResourcePage resource={resource} />;
 }
 
-function AdminOtherResourcePage({ resource }: Props) {
+function AdminOtherResourcePage({ resource }: { resource: OtherResource }) {
   const section = adminSections[resource];
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
@@ -98,7 +99,7 @@ function AdminOtherResourcePage({ resource }: Props) {
           >
             <ArrowClockwise size={15} /> Làm mới
           </button>
-          {(resource === "categories" || resource === "dishes") && (
+          {resource === "categories" && (
             <button
               type="button"
               className="gca-btn gca-btn-primary"
@@ -267,7 +268,6 @@ function AdminOtherResourcePage({ resource }: Props) {
           key={`${resource}-${editing === "new" ? "new" : editing.id}`}
           resource={resource}
           record={editing === "new" ? null : editing}
-          demo={false}
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);

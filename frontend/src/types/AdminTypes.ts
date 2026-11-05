@@ -39,13 +39,6 @@ export type ChefApplication = {
   statusChangedBy: number | null;
 };
 
-export type AdminCollection = {
-  rows: AdminRow[];
-  total: number | null;
-  hasNext: boolean;
-  nextCursor: number | null;
-};
-
 export type AdminColumn = { key: string; label: string };
 
 export type AdminSectionInfo = {
