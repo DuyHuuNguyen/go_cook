@@ -4,8 +4,11 @@ import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.facade.BookingFacade;
 import com.james.LMS.request.BookingSearchRequest;
 import com.james.LMS.request.CreateBookingRequest;
+import com.james.LMS.request.CreateBookingChefRequest;
 import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.BookingResponse;
+import com.james.LMS.response.BookingChefRequestResponse;
+import com.james.LMS.response.MatchingChefsResponse;
 import com.james.LMS.response.PaginationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,7 +32,7 @@ public class BookingController {
       description = "Dish prices remain provisional until a chef sends a price offer.",
       tags = {"Booking APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
-  //  @PreAuthorize("hasAuthority('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
   public BaseResponse<BookingResponse> createBooking(
       @Valid @RequestBody CreateBookingRequest request) {
     return bookingFacade.createBooking(request);
@@ -41,9 +44,29 @@ public class BookingController {
       description = "Page is one-based; size must be between 1 and 100.",
       tags = {"Booking APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
-  @PreAuthorize("hasAuthority('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
   public BaseResponse<PaginationResponse<BookingResponse>> findBookings(
       @Valid @ParameterObject BookingSearchRequest request) {
     return bookingFacade.findBookings(request);
+  }
+
+  @GetMapping("/{bookingId}/matching-chefs")
+  @Operation(
+      summary = "Find available chefs matching a customer's booking",
+      tags = {"Booking APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
+  public MatchingChefsResponse findMatchingChefs(@PathVariable Long bookingId) {
+    return bookingFacade.findMatchingChefs(bookingId);
+  }
+
+  @PostMapping("/{bookingId}/requests")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(summary = "Request a chef for a booking", tags = {"Booking APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
+  public BaseResponse<BookingChefRequestResponse> requestChef(
+      @PathVariable Long bookingId, @Valid @RequestBody CreateBookingChefRequest request) {
+    return bookingFacade.requestChef(bookingId, request);
   }
 }

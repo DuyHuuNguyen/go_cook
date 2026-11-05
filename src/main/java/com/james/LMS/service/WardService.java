@@ -8,4 +8,6 @@ public interface WardService {
   List<Ward> findByFullNameLike(String fullName);
 
   Optional<Ward> findByCode(String code);
+
+  List<Ward> findWardsByProvinceCode(String provinceCode);
 }

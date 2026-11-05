@@ -33,6 +33,12 @@ public class Booking extends BaseEntity {
   @Column(name = "service_address", nullable = false, length = 500)
   private String serviceAddress;
 
+  @Column(name = "ward_code", length = 255)
+  private String wardCode;
+
+  @Column(name = "province_code", length = 255)
+  private String provinceCode;
+
   @Column(name = "customer_note", columnDefinition = "VARCHAR(500)")
   private String customerNote;
 

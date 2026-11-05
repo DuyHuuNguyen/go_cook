@@ -11,6 +11,10 @@ const initialDraft: MenuRequestDraft = {
   mealDate: "",
   mealTime: "18:30",
   address: "",
+  provinceCode: "",
+  provinceName:"",
+  wardCode: "",
+  wardName:"",
 };
 
 export function useCustomMenu() {
