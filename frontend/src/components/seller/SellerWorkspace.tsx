@@ -14,6 +14,11 @@ const links = [
     "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
   ],
   [
+    "/seller/booking-management",
+    "Quản lý bookings",
+    "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
+  ],
+  [
     "/seller/products",
     "Thực đơn của tôi",
     "M3 17h18 M5 17a7 7 0 0 1 14 0 M12 8V4 M4 21h16",

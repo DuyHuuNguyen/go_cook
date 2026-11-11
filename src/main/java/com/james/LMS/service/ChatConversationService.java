@@ -10,4 +10,8 @@ public interface ChatConversationService {
   Optional<ChatConversation> findById(Long id);
 
   List<ChatConversation> findByUserId(Long userId);
+
+  Optional<ChatConversation> findByBookingId(Long bookingId);
+
+  List<ChatConversation> findByCustomerIdAndChefId(Long customerId, Long chefId);
 }

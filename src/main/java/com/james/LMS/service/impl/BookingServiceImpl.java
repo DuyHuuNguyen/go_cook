@@ -1,11 +1,11 @@
 package com.james.LMS.service.impl;
 
+import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.entity.Booking;
 import com.james.LMS.entity.BookingItemDish;
 import com.james.LMS.entity.ChefProfile;
 import com.james.LMS.entity.Dish;
 import com.james.LMS.entity.User;
-import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.enums.ChefApplicationStatus;
 import com.james.LMS.enums.ChefScheduleStatus;
 import com.james.LMS.enums.ErrorCode;
@@ -27,12 +27,13 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -196,5 +197,28 @@ public class BookingServiceImpl implements BookingService {
       returnedChefIds.add(chef.getId());
     }
     return result;
+  }
+
+  private static final int LIMIT_DEFAULT = 20;
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Booking> findByLastIdAndChefIdOrderByIdDesc(Long lastId, Long chefId) {
+    if (lastId == null || lastId <= 0) {
+      return this.bookingRepository.findByChef_IdAndIsActiveTrueOrderByIdDesc(
+          chefId, Limit.of(LIMIT_DEFAULT));
+    }
+    return this.bookingRepository.findByIdGreaterThanAndChef_IdAndIsActiveTrueOrderByIdDesc(
+        lastId, chefId, Limit.of(LIMIT_DEFAULT));
+  }
+
+  @Override
+  public Optional<Booking> findBookingByIdAndChefIdAndIsActiveTrue(Long id, Long chefId) {
+    return this.bookingRepository.findBookingByIdAndChef_IdAndIsActiveTrue(id, chefId);
+  }
+
+  @Override
+  public void save(Booking booking) {
+    this.bookingRepository.save(booking);
   }
 }

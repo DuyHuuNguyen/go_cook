@@ -72,6 +72,22 @@ export const ENDPOINTS = {
           `/bookings/${bookingId}/requests`,
         ),
     },
+    CHEF_BOOKINGS: {
+      V1: (lastId: number | string) =>
+        endpoint(
+          SERVICE.USER,
+          VERSION.V1,
+          `/bookings/chef/bookings/${lastId}`,
+        ),
+    },
+    CHEF_BOOKING_STATUS: {
+      V1: (id: number | string) =>
+        endpoint(
+          SERVICE.USER,
+          VERSION.V1,
+          `/bookings/chef/bookings/${id}/booking-status`,
+        ),
+    },
   },
   LOCATION: {
     PROVINCE: {
@@ -332,6 +348,14 @@ export const ENDPOINTS = {
   CHAT: {
     CONVERSATIONS: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations"),
+      BOOKING: {
+        V1: (bookingId: number | string) =>
+          endpoint(
+            SERVICE.USER,
+            VERSION.V1,
+            `/conversations/booking/${bookingId}`,
+          ),
+      },
     },
     MESSAGES: {
       V1: (conversationId: number | string) =>

@@ -1,7 +1,6 @@
 package com.james.LMS.service;
 
 import com.james.LMS.entity.BookingPriceOffer;
-import com.james.LMS.enums.BookingPriceOfferStatus;
 import java.util.Optional;
 
 public interface BookingPriceOfferService {

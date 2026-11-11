@@ -25,12 +25,10 @@ import com.james.LMS.service.ChatConversationService;
 import com.james.LMS.service.ChatMessageAttachmentService;
 import com.james.LMS.service.ChatMessageService;
 import com.james.LMS.service.UserService;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -173,7 +171,8 @@ public class ConversationFacadeImpl implements ConversationFacade {
     BookingPriceOffer offer =
         bookingPriceOfferService
             .findById(bookingPriceOfferId)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_PRICE_OFFER_NOT_FOUND));
+            .orElseThrow(
+                () -> new EntityNotFoundException(ErrorCode.BOOKING_PRICE_OFFER_NOT_FOUND));
 
     if (offer.getStatus() != BookingPriceOfferStatus.PENDING) {
       throw new ForbiddenException(ErrorCode.OFFER_ALREADY_PROCESSED);
@@ -219,7 +218,8 @@ public class ConversationFacadeImpl implements ConversationFacade {
     BookingPriceOffer offer =
         bookingPriceOfferService
             .findById(bookingPriceOfferId)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_PRICE_OFFER_NOT_FOUND));
+            .orElseThrow(
+                () -> new EntityNotFoundException(ErrorCode.BOOKING_PRICE_OFFER_NOT_FOUND));
 
     if (offer.getStatus() != BookingPriceOfferStatus.PENDING) {
       throw new ForbiddenException(ErrorCode.OFFER_ALREADY_PROCESSED);
@@ -369,52 +369,109 @@ public class ConversationFacadeImpl implements ConversationFacade {
     List<ChatConversation> conversations = chatConversationService.findByUserId(currentUserId);
 
     List<ChatConversationResponse> responses =
-        conversations.stream()
-            .map(
-                conv -> {
-                  ChatConversationResponse.BookingInfo bookingInfo = null;
-                  if (conv.getBooking() != null) {
-                    Booking booking = conv.getBooking();
-                    BigDecimal displayAmount = booking.getTotalAmount();
-
-                    // Override with latest accepted offer price if exists
-                    Optional<BookingPriceOffer> latestAccepted =
-                        bookingPriceOfferService.findLatestAcceptedByConversationId(conv.getId());
-                    if (latestAccepted.isPresent()) {
-                      displayAmount = latestAccepted.get().getTotalAmount();
-                    }
-
-                    bookingInfo =
-                        ChatConversationResponse.BookingInfo.builder()
-                            .id(booking.getId())
-                            .bookingCode(booking.getBookingCode())
-                            .totalAmount(displayAmount)
-                            .build();
-                  }
-
-                  return ChatConversationResponse.builder()
-                      .id(conv.getId())
-                      .booking(bookingInfo)
-                      .customer(
-                          ChatConversationResponse.UserInfo.builder()
-                              .id(conv.getCustomer().getId())
-                              .name(conv.getCustomer().getUsername())
-                              .avatar(conv.getCustomer().getAvatarUrl())
-                              .build())
-                      .chef(
-                          ChatConversationResponse.UserInfo.builder()
-                              .id(conv.getChef().getId())
-                              .name(conv.getChef().getUsername())
-                              .avatar(conv.getChef().getAvatarUrl())
-                              .build())
-                      .status(conv.getStatus())
-                      .lastMessageAt(conv.getLastMessageAt())
-                      .unreadCount(0) // ponytail: calculate unread count from messages
-                      .build();
-                })
-            .toList();
+        conversations.stream().map(this::mapToResponse).toList();
 
     return BaseResponse.build(responses, true);
+  }
+
+  @Override
+  @Transactional
+  public BaseResponse<ChatConversationResponse> getOrCreateConversationForBooking(Long bookingId) {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long currentUserId = principal.getId();
+
+    Booking booking =
+        bookingService
+            .findById(bookingId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
+
+    Long customerId = booking.getCustomer().getId();
+    Long chefId = booking.getChef() != null ? booking.getChef().getId() : null;
+
+    if (chefId == null) {
+      throw new ForbiddenException(ErrorCode.CHEF_PROFILE_NOT_FOUND);
+    }
+
+    boolean isParticipant = currentUserId.equals(customerId) || currentUserId.equals(chefId);
+    if (!isParticipant) {
+      throw new ForbiddenException(ErrorCode.CONVERSATION_ACCESS_DENIED);
+    }
+
+    // 1. Try finding conversation already linked to this booking
+    Optional<ChatConversation> existingByBooking =
+        chatConversationService.findByBookingId(bookingId);
+    ChatConversation conversation;
+
+    if (existingByBooking.isPresent()) {
+      conversation = existingByBooking.get();
+    } else {
+      // 2. Check if there is an existing conversation between customer and chef
+      List<ChatConversation> existingPair =
+          chatConversationService.findByCustomerIdAndChefId(customerId, chefId);
+      if (!existingPair.isEmpty()) {
+        conversation = existingPair.get(0);
+        if (conversation.getBooking() == null) {
+          conversation.setBooking(booking);
+          conversation = chatConversationService.save(conversation);
+        }
+      } else {
+        // 3. Create new conversation strictly between this customer and this chef for this booking
+        ChatConversation newConv =
+            ChatConversation.builder()
+                .customer(booking.getCustomer())
+                .chef(booking.getChef())
+                .booking(booking)
+                .status(com.james.LMS.entity.ChatConversationStatus.ACTIVE)
+                .lastMessageAt(System.currentTimeMillis())
+                .build();
+        conversation = chatConversationService.save(newConv);
+      }
+    }
+
+    ChatConversationResponse response = mapToResponse(conversation);
+    return BaseResponse.build(response, true);
+  }
+
+  private ChatConversationResponse mapToResponse(ChatConversation conv) {
+    ChatConversationResponse.BookingInfo bookingInfo = null;
+    if (conv.getBooking() != null) {
+      Booking booking = conv.getBooking();
+      BigDecimal displayAmount = booking.getTotalAmount();
+
+      // Override with latest accepted offer price if exists
+      Optional<BookingPriceOffer> latestAccepted =
+          bookingPriceOfferService.findLatestAcceptedByConversationId(conv.getId());
+      if (latestAccepted.isPresent()) {
+        displayAmount = latestAccepted.get().getTotalAmount();
+      }
+
+      bookingInfo =
+          ChatConversationResponse.BookingInfo.builder()
+              .id(booking.getId())
+              .bookingCode(booking.getBookingCode())
+              .totalAmount(displayAmount)
+              .build();
+    }
+
+    return ChatConversationResponse.builder()
+        .id(conv.getId())
+        .booking(bookingInfo)
+        .customer(
+            ChatConversationResponse.UserInfo.builder()
+                .id(conv.getCustomer().getId())
+                .name(conv.getCustomer().getUsername())
+                .avatar(conv.getCustomer().getAvatarUrl())
+                .build())
+        .chef(
+            ChatConversationResponse.UserInfo.builder()
+                .id(conv.getChef().getId())
+                .name(conv.getChef().getUsername())
+                .avatar(conv.getChef().getAvatarUrl())
+                .build())
+        .status(conv.getStatus())
+        .lastMessageAt(conv.getLastMessageAt())
+        .unreadCount(0) // ponytail: calculate unread count from messages
+        .build();
   }
 
   @Override
@@ -454,7 +511,9 @@ public class ConversationFacadeImpl implements ConversationFacade {
                         .read(msg.isRead())
                         .readAt(msg.getReadAt())
                         .replyToMessageId(
-                            msg.getReplyToMessage() != null ? msg.getReplyToMessage().getId() : null)
+                            msg.getReplyToMessage() != null
+                                ? msg.getReplyToMessage().getId()
+                                : null)
                         .attachments(List.of()) // ponytail: fetch attachments from service
                         .build())
             .toList();

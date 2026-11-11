@@ -27,4 +27,14 @@ public class ChatConversationServiceImpl implements ChatConversationService {
   public List<ChatConversation> findByUserId(Long userId) {
     return chatConversationRepository.findByUserId(userId);
   }
+
+  @Override
+  public Optional<ChatConversation> findByBookingId(Long bookingId) {
+    return chatConversationRepository.findByBookingId(bookingId);
+  }
+
+  @Override
+  public List<ChatConversation> findByCustomerIdAndChefId(Long customerId, Long chefId) {
+    return chatConversationRepository.findByCustomerIdAndChefId(customerId, chefId);
+  }
 }

@@ -25,7 +25,9 @@ public class ConversationController {
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  @Operation(summary = "Get all conversations for current user", tags = {"Conversation APIs"})
+  @Operation(
+      summary = "Get all conversations for current user",
+      tags = {"Conversation APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
   public BaseResponse<List<ChatConversationResponse>> getConversations() {
@@ -34,7 +36,9 @@ public class ConversationController {
 
   @GetMapping("/{conversationId}/messages")
   @ResponseStatus(HttpStatus.OK)
-  @Operation(summary = "Get all messages in a conversation", tags = {"Conversation APIs"})
+  @Operation(
+      summary = "Get all messages in a conversation",
+      tags = {"Conversation APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
   public BaseResponse<List<ChatMessageResponse>> getConversationMessages(
@@ -42,9 +46,23 @@ public class ConversationController {
     return conversationFacade.getConversationMessages(conversationId);
   }
 
+  @GetMapping("/booking/{bookingId}")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      summary = "Get or create conversation strictly for a booking between its customer and chef",
+      tags = {"Conversation APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  public BaseResponse<ChatConversationResponse> getOrCreateConversationForBooking(
+      @PathVariable Long bookingId) {
+    return conversationFacade.getOrCreateConversationForBooking(bookingId);
+  }
+
   @PostMapping("/{guestId}")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Create conversation between current user and guest", tags = {"Conversation APIs"})
+  @Operation(
+      summary = "Create conversation between current user and guest",
+      tags = {"Conversation APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
   public BaseResponse<Void> createConversation(@PathVariable Long guestId) {
@@ -53,7 +71,9 @@ public class ConversationController {
 
   @PostMapping("/offers")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Create booking offer price in conversation", tags = {"Conversation APIs"})
+  @Operation(
+      summary = "Create booking offer price in conversation",
+      tags = {"Conversation APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
   public BaseResponse<BookingPriceOfferResponse> createBookingOfferPrice(
@@ -63,19 +83,25 @@ public class ConversationController {
 
   @PatchMapping("/offers/{offerId}/accept")
   @ResponseStatus(HttpStatus.OK)
-  @Operation(summary = "Accept booking offer price (receiver only)", tags = {"Conversation APIs"})
+  @Operation(
+      summary = "Accept booking offer price (receiver only)",
+      tags = {"Conversation APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
-  public BaseResponse<BookingPriceOfferResponse> acceptBookingOfferPrice(@PathVariable Long offerId) {
+  public BaseResponse<BookingPriceOfferResponse> acceptBookingOfferPrice(
+      @PathVariable Long offerId) {
     return conversationFacade.acceptBookingOfferPrice(offerId);
   }
 
   @PatchMapping("/offers/{offerId}/reject")
   @ResponseStatus(HttpStatus.OK)
-  @Operation(summary = "Reject booking offer price (receiver only)", tags = {"Conversation APIs"})
+  @Operation(
+      summary = "Reject booking offer price (receiver only)",
+      tags = {"Conversation APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
-  public BaseResponse<BookingPriceOfferResponse> rejectBookingOfferPrice(@PathVariable Long offerId) {
+  public BaseResponse<BookingPriceOfferResponse> rejectBookingOfferPrice(
+      @PathVariable Long offerId) {
     return conversationFacade.rejectBookingOfferPrice(offerId);
   }
 }

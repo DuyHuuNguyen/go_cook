@@ -20,10 +20,14 @@ public class BookingRequestExpirationJob {
 
   @Scheduled(fixedDelayString = "${booking.chef.expiry-scan-delay-ms:60000}")
   public void expireDueRequests() {
-    List<Long> ids = requests.findDueIds(
-        List.of(BookingRequestStatus.PENDING, BookingRequestStatus.ACCEPTED,
-            BookingRequestStatus.AWAITING_PAYMENT),
-        Instant.now(), PageRequest.of(0, 100));
+    List<Long> ids =
+        requests.findDueIds(
+            List.of(
+                BookingRequestStatus.PENDING,
+                BookingRequestStatus.ACCEPTED,
+                BookingRequestStatus.AWAITING_PAYMENT),
+            Instant.now(),
+            PageRequest.of(0, 100));
     for (Long id : ids) {
       try {
         bookingRequestService.expireDueRequest(id);

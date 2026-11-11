@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosClient from './AxiosClient';
 import { ENDPOINTS } from '../config/ApiConfig';
 
 export interface SendMessageRequest {
@@ -46,19 +46,38 @@ export interface ChatConversationResponse {
 export const sendMessage = async (
   request: SendMessageRequest
 ): Promise<ChatMessageResponse> => {
-  const response = await axios.post(ENDPOINTS.CHAT.MESSAGES.SEND.V1, request);
+  const response = await axiosClient.post<{
+    data: ChatMessageResponse;
+    success: boolean;
+  }>(ENDPOINTS.CHAT.MESSAGES.SEND.V1, request);
   return response.data.data;
 };
 
 export const getConversations = async (): Promise<ChatConversationResponse[]> => {
-  const response = await axios.get(ENDPOINTS.CHAT.CONVERSATIONS.V1);
+  const response = await axiosClient.get<{
+    data: ChatConversationResponse[];
+    success: boolean;
+  }>(ENDPOINTS.CHAT.CONVERSATIONS.V1);
+  return response.data.data;
+};
+
+export const getBookingConversation = async (
+  bookingId: number | string
+): Promise<ChatConversationResponse> => {
+  const response = await axiosClient.get<{
+    data: ChatConversationResponse;
+    success: boolean;
+  }>(ENDPOINTS.CHAT.CONVERSATIONS.BOOKING.V1(bookingId));
   return response.data.data;
 };
 
 export const getConversationMessages = async (
   conversationId: number
 ): Promise<ChatMessageResponse[]> => {
-  const response = await axios.get(ENDPOINTS.CHAT.MESSAGES.V1(conversationId));
+  const response = await axiosClient.get<{
+    data: ChatMessageResponse[];
+    success: boolean;
+  }>(ENDPOINTS.CHAT.MESSAGES.V1(conversationId));
   return response.data.data;
 };
 

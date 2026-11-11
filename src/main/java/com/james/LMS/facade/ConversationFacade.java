@@ -22,5 +22,7 @@ public interface ConversationFacade {
 
   BaseResponse<List<ChatConversationResponse>> getConversations();
 
+  BaseResponse<ChatConversationResponse> getOrCreateConversationForBooking(Long bookingId);
+
   BaseResponse<List<ChatMessageResponse>> getConversationMessages(Long conversationId);
 }

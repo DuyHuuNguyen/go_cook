@@ -40,9 +40,7 @@ public class DevDataSeeder {
           roleRepository
               .findRoleByRoleName(RoleEnum.ROLE_USER)
               .orElseGet(
-                  () ->
-                      roleRepository.save(
-                          Role.builder().roleName(RoleEnum.ROLE_USER).build()));
+                  () -> roleRepository.save(Role.builder().roleName(RoleEnum.ROLE_USER).build()));
       Role chefRole =
           roleRepository
               .findRoleByRoleName(RoleEnum.ROLE_CHEF)

@@ -148,15 +148,17 @@ function CustomerBookingChild() {
                     )}
 
                     <div className="d-flex justify-content-end gap-2">
-                      <Button
-                        as={Link as any}
-                        to={`/chat?bookingId=${booking.id}`}
-                        state={{ bookingId: booking.id, chefId: booking.chefId }}
-                        variant="outline-primary"
-                        size="sm"
-                      >
-                        Nhắn tin
-                      </Button>
+                      {booking.chefId && (
+                        <Button
+                          as={Link as any}
+                          to={`/chat?bookingId=${booking.id}`}
+                          state={{ bookingId: booking.id, chefId: booking.chefId }}
+                          variant="outline-primary"
+                          size="sm"
+                        >
+                          Nhắn tin đầu bếp
+                        </Button>
+                      )}
                       <Button
                         as={Link as any}
                         to={`/bookings/${booking.id}/matching-chefs`}

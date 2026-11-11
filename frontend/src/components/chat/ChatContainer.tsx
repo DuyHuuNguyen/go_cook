@@ -14,12 +14,16 @@ interface ChatContainerProps {
   conversationId: number;
   currentUserId: number;
   currentBookingPrice?: number;
+  partnerName?: string;
+  bookingCode?: string;
 }
 
 export const ChatContainer = ({
   conversationId,
   currentUserId,
   currentBookingPrice,
+  partnerName,
+  bookingCode,
 }: ChatContainerProps) => {
   const [messages, setMessages] = useState<ChatMessageResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,7 +97,20 @@ export const ChatContainer = ({
   return (
     <Container fluid className="d-flex flex-column" style={{ height: '70vh' }}>
       <div className="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
-        <small className="text-muted">Conversation #{conversationId}</small>
+        <div>
+          {partnerName ? (
+            <div className="d-flex align-items-center gap-2">
+              <strong className="text-dark">{partnerName}</strong>
+              {bookingCode && (
+                <span className="badge bg-light text-dark border">
+                  Đơn #{bookingCode}
+                </span>
+              )}
+            </div>
+          ) : (
+            <small className="text-muted">Cuộc trò chuyện #{conversationId}</small>
+          )}
+        </div>
         <div className="d-flex align-items-center gap-3">
           {currentBookingPrice && (
             <div className="text-end">

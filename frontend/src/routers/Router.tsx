@@ -34,6 +34,7 @@ import AdminSettings from "../pages/admin/AdminSettings";
 import { adminSectionKeys } from "../types/AdminTypes";
 import {CustomerBookingManagement} from "../pages/CustomerBookingManagement.tsx";
 import {ChatPage} from "../pages/ChatPage.tsx";
+import {BookingChefManagement} from "../pages/seller/BookingManagement.tsx";
 
 export const router = createBrowserRouter(
   [
@@ -58,6 +59,8 @@ export const router = createBrowserRouter(
             { path: "order-detail", element: <SellerOrderDetailPage /> },
             { path: "revenue", element: <SellerRevenuePage /> },
             { path: "schedule", element: <SellerSchedulePage /> },
+            { path: "booking-management", element: <BookingChefManagement/>},
+
           ],
         },
         // Preserve main: Home and Profile require authentication.

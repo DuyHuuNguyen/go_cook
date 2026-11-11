@@ -6,6 +6,7 @@ import {
   MatchingChef,
   BookingRequestResponse,
   PaginationResponse,
+  KeySetPaginationResponse,
 } from "../types/BookingTypes";
 
 export const bookingApi = {
@@ -56,6 +57,52 @@ export const bookingApi = {
 
     return response.data.data;
   },
+
+  getChefBookings: async (
+    lastId = 0,
+  ): Promise<KeySetPaginationResponse<BookingResponse>> => {
+    const response = await axiosClient.get<{
+      data: KeySetPaginationResponse<BookingResponse>;
+      success: boolean;
+    }>(ENDPOINTS.BOOKINGS.CHEF_BOOKINGS.V1(lastId));
+
+    return response.data.data;
+  },
+
+  updateChefBookingStatus: async (
+    bookingId: number,
+    status: "CHEF_ACCEPT" | "CHEF_REJECT",
+  ): Promise<void> => {
+    await axiosClient.patch(
+      ENDPOINTS.BOOKINGS.CHEF_BOOKING_STATUS.V1(bookingId),
+      { status },
+    );
+  },
+
+  acceptChefBooking: async (
+    bookingId: number,
+  ): Promise<{ success: boolean; message: string }> => {
+    await bookingApi.updateChefBookingStatus(bookingId, "CHEF_ACCEPT");
+    return {
+      success: true,
+      message: `Đã chấp nhận đơn đặt bếp #${bookingId} thành công.`,
+    };
+  },
+
+  rejectChefBooking: async (
+    bookingId: number,
+    _reason?: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    await bookingApi.updateChefBookingStatus(bookingId, "CHEF_REJECT");
+    return {
+      success: true,
+      message: `Đã từ chối đơn đặt bếp #${bookingId}.`,
+    };
+  },
 };
 
 export const getBookings = bookingApi.getBookings;
+export const getChefBookings = bookingApi.getChefBookings;
+export const updateChefBookingStatus = bookingApi.updateChefBookingStatus;
+export const acceptChefBooking = bookingApi.acceptChefBooking;
+export const rejectChefBooking = bookingApi.rejectChefBooking;
