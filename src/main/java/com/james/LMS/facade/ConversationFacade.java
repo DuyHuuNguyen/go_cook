@@ -18,6 +18,8 @@ public interface ConversationFacade {
 
   BaseResponse<BookingPriceOfferResponse> rejectBookingOfferPrice(Long bookingPriceOfferId);
 
+  BaseResponse<List<BookingPriceOfferResponse>> getConversationOffers(Long conversationId);
+
   BaseResponse<ChatMessageResponse> sendMessage(ChatMessageRequest request);
 
   BaseResponse<List<ChatConversationResponse>> getConversations();

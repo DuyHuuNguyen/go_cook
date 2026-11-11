@@ -69,6 +69,18 @@ public class ConversationController {
     return conversationFacade.createConversation(guestId);
   }
 
+  @GetMapping("/{conversationId}/offers")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      summary = "Get all price offers in a conversation",
+      tags = {"Conversation APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  public BaseResponse<List<BookingPriceOfferResponse>> getConversationOffers(
+      @PathVariable Long conversationId) {
+    return conversationFacade.getConversationOffers(conversationId);
+  }
+
   @PostMapping("/offers")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(

@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Alert } from 'react-bootstrap';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import { useSearchParams } from 'react-router';
 import {
   getConversations,
   getBookingConversation,
   ChatConversationResponse,
 } from '../clients/ChatClient';
+import { WS_CHAT_URL } from '../config/ApiConfig';
 import { ConversationList } from '../components/chat/ConversationList';
 import { ChatContainer } from '../components/chat/ChatContainer';
 import { PriceNegotiationPanel } from '../components/chat/PriceNegotiationPanel';
@@ -21,7 +24,7 @@ export const ChatPage = () => {
   const [accessError, setAccessError] = useState<string | null>(null);
 
   const { profileData } = useProfile();
-  const currentUserId = profileData?.id ? parseInt(profileData.id) : 0;
+  const currentUserId = profileData?.id ? parseInt(profileData.id, 10) : 0;
 
   useEffect(() => {
     let isMounted = true;
@@ -96,6 +99,50 @@ export const ChatPage = () => {
     };
   }, [bookingIdParam]);
 
+  // Subscribe to real-time conversation updates (new conversation, offer accepted price change, lastMessageAt)
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS(WS_CHAT_URL),
+      reconnectDelay: 3000,
+      onConnect: () => {
+        client.subscribe(`/topic/users/${currentUserId}/conversations`, (message) => {
+          const updatedConv = JSON.parse(message.body) as ChatConversationResponse;
+          setConversations((prev) => {
+            const exists = prev.some((c) => c.id === updatedConv.id);
+            const next = exists
+              ? prev.map((c) => (c.id === updatedConv.id ? updatedConv : c))
+              : [updatedConv, ...prev];
+            return [...next].sort((a, b) => b.lastMessageAt - a.lastMessageAt);
+          });
+        });
+      },
+    });
+
+    client.activate();
+
+    return () => {
+      void client.deactivate();
+    };
+  }, [currentUserId]);
+
+  const handleOfferAccepted = useCallback((bookingId: number, newTotalAmount: number) => {
+    setConversations((prev) =>
+      prev.map((conv) =>
+        conv.booking?.id === bookingId
+          ? {
+              ...conv,
+              booking: {
+                ...conv.booking,
+                totalAmount: newTotalAmount,
+              },
+            }
+          : conv
+      )
+    );
+  }, []);
+
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
   );
@@ -148,6 +195,7 @@ export const ChatPage = () => {
                     bookingId={activeConversation.booking.id}
                     currentBookingPrice={activeConversation.booking.totalAmount}
                     currentUserId={currentUserId}
+                    onOfferAccepted={handleOfferAccepted}
                   />
                 </div>
               )}

@@ -43,4 +43,3 @@ public class ExploreChefDetailResponse {
     private String wardName;
   }
 }
-

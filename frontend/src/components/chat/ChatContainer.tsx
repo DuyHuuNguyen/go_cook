@@ -7,6 +7,7 @@ import {
   sendMessage,
   ChatMessageResponse,
 } from '../../clients/ChatClient';
+import { WS_CHAT_URL } from '../../config/ApiConfig';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 
@@ -53,7 +54,8 @@ export const ChatContainer = ({
   // WebSocket connection for real-time updates
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8083/ws-chat'),
+      webSocketFactory: () => new SockJS(WS_CHAT_URL),
+      reconnectDelay: 3000,
       onConnect: () => {
         setConnected(true);
         // Subscribe to messages topic

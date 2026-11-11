@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosClient from './AxiosClient';
 import { ENDPOINTS } from '../config/ApiConfig';
 
 export interface CreatePriceOfferRequest {
@@ -21,25 +21,36 @@ export interface PriceOfferResponse {
 export const createPriceOffer = async (
   request: CreatePriceOfferRequest
 ): Promise<PriceOfferResponse> => {
-  const response = await axios.post(ENDPOINTS.CHAT.OFFERS.CREATE.V1, request);
+  const response = await axiosClient.post<{
+    data: PriceOfferResponse;
+    success: boolean;
+  }>(ENDPOINTS.CHAT.OFFERS.CREATE.V1, request);
   return response.data.data;
 };
 
 export const acceptPriceOffer = async (offerId: number): Promise<PriceOfferResponse> => {
-  const response = await axios.patch(ENDPOINTS.CHAT.OFFERS.ACCEPT.V1(offerId));
+  const response = await axiosClient.patch<{
+    data: PriceOfferResponse;
+    success: boolean;
+  }>(ENDPOINTS.CHAT.OFFERS.ACCEPT.V1(offerId));
   return response.data.data;
 };
 
 export const rejectPriceOffer = async (offerId: number): Promise<PriceOfferResponse> => {
-  const response = await axios.patch(ENDPOINTS.CHAT.OFFERS.REJECT.V1(offerId));
+  const response = await axiosClient.patch<{
+    data: PriceOfferResponse;
+    success: boolean;
+  }>(ENDPOINTS.CHAT.OFFERS.REJECT.V1(offerId));
   return response.data.data;
 };
 
 export const getPriceOffers = async (
   conversationId: number
 ): Promise<PriceOfferResponse[]> => {
-  // ponytail: implement list offers endpoint in backend
-  console.log('List offers not yet implemented:', conversationId);
-  return Promise.resolve([]);
+  const response = await axiosClient.get<{
+    data: PriceOfferResponse[];
+    success: boolean;
+  }>(ENDPOINTS.CHAT.OFFERS.LIST.V1(conversationId));
+  return response.data.data ?? [];
 };
 

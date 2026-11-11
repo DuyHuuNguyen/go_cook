@@ -16,6 +16,8 @@ const endpoint = (service: string, version: string, path: string) => {
   return `${service}${version}${path}`;
 };
 
+export const WS_CHAT_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/ws-chat`;
+
 export const ENDPOINTS = {
   ADMIN: {
     DASHBOARD: "/api/v1/admin/dashboard",
@@ -365,6 +367,14 @@ export const ENDPOINTS = {
       },
     },
     OFFERS: {
+      LIST: {
+        V1: (conversationId: number | string) =>
+          endpoint(
+            SERVICE.USER,
+            VERSION.V1,
+            `/conversations/${conversationId}/offers`,
+          ),
+      },
       CREATE: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/offers"),
       },

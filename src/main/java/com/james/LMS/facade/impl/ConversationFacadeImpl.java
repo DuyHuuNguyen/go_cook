@@ -33,6 +33,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
@@ -144,20 +146,14 @@ public class ConversationFacadeImpl implements ConversationFacade {
             .build();
 
     BookingPriceOffer savedOffer = bookingPriceOfferService.save(offer);
+    conversation.setLastMessageAt(System.currentTimeMillis());
+    ChatConversation savedConversation = chatConversationService.save(conversation);
 
-    BookingPriceOfferResponse response =
-        BookingPriceOfferResponse.builder()
-            .id(savedOffer.getId())
-            .bookingId(booking.getId())
-            .senderId(sender.getId())
-            .totalAmount(savedOffer.getTotalAmount().doubleValue())
-            .status(savedOffer.getStatus())
-            .message(savedOffer.getMessage())
-            .createdAt(savedOffer.getCreatedAt())
-            .build();
+    BookingPriceOfferResponse response = mapOfferToResponse(savedOffer);
 
-    // Broadcast price offer to WebSocket
-    messagingTemplate.convertAndSend("/topic/offers/" + conversation.getId(), response);
+    // Broadcast price offer and updated conversation after commit
+    sendAfterCommit("/topic/offers/" + savedConversation.getId(), response);
+    broadcastConversationUpdate(savedConversation);
 
     return BaseResponse.build(response, true);
   }
@@ -191,20 +187,14 @@ public class ConversationFacadeImpl implements ConversationFacade {
 
     offer.setStatus(BookingPriceOfferStatus.ACCEPTED);
     BookingPriceOffer savedOffer = bookingPriceOfferService.save(offer);
+    conversation.setLastMessageAt(System.currentTimeMillis());
+    ChatConversation savedConversation = chatConversationService.save(conversation);
 
-    BookingPriceOfferResponse response =
-        BookingPriceOfferResponse.builder()
-            .id(savedOffer.getId())
-            .bookingId(savedOffer.getBooking().getId())
-            .senderId(savedOffer.getSender().getId())
-            .totalAmount(savedOffer.getTotalAmount().doubleValue())
-            .status(savedOffer.getStatus())
-            .message(savedOffer.getMessage())
-            .createdAt(savedOffer.getCreatedAt())
-            .build();
+    BookingPriceOfferResponse response = mapOfferToResponse(savedOffer);
 
-    // Broadcast acceptance to WebSocket
-    messagingTemplate.convertAndSend("/topic/offers/" + conversation.getId(), response);
+    // Broadcast acceptance and updated conversation price after commit
+    sendAfterCommit("/topic/offers/" + savedConversation.getId(), response);
+    broadcastConversationUpdate(savedConversation);
 
     return BaseResponse.build(response, true);
   }
@@ -239,21 +229,39 @@ public class ConversationFacadeImpl implements ConversationFacade {
     offer.setStatus(BookingPriceOfferStatus.REJECTED);
     BookingPriceOffer savedOffer = bookingPriceOfferService.save(offer);
 
-    BookingPriceOfferResponse response =
-        BookingPriceOfferResponse.builder()
-            .id(savedOffer.getId())
-            .bookingId(savedOffer.getBooking().getId())
-            .senderId(savedOffer.getSender().getId())
-            .totalAmount(savedOffer.getTotalAmount().doubleValue())
-            .status(savedOffer.getStatus())
-            .message(savedOffer.getMessage())
-            .createdAt(savedOffer.getCreatedAt())
-            .build();
+    BookingPriceOfferResponse response = mapOfferToResponse(savedOffer);
 
-    // Broadcast rejection to WebSocket
-    messagingTemplate.convertAndSend("/topic/offers/" + conversation.getId(), response);
+    // Broadcast rejection after commit
+    sendAfterCommit("/topic/offers/" + conversation.getId(), response);
 
     return BaseResponse.build(response, true);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BaseResponse<List<BookingPriceOfferResponse>> getConversationOffers(Long conversationId) {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long currentUserId = principal.getId();
+
+    ChatConversation conversation =
+        chatConversationService
+            .findById(conversationId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+    Long customerId = conversation.getCustomer().getId();
+    Long chefId = conversation.getChef().getId();
+    boolean isParticipant = currentUserId.equals(customerId) || currentUserId.equals(chefId);
+
+    if (!isParticipant) {
+      throw new ForbiddenException(ErrorCode.CONVERSATION_ACCESS_DENIED);
+    }
+
+    List<BookingPriceOfferResponse> responses =
+        bookingPriceOfferService.findByConversationId(conversationId).stream()
+            .map(this::mapOfferToResponse)
+            .toList();
+
+    return BaseResponse.build(responses, true);
   }
 
   @Override
@@ -354,8 +362,9 @@ public class ConversationFacadeImpl implements ConversationFacade {
             .attachments(attachmentResponses)
             .build();
 
-    // Broadcast to WebSocket subscribers
-    messagingTemplate.convertAndSend("/topic/messages", response);
+    // Broadcast to WebSocket subscribers after commit
+    sendAfterCommit("/topic/messages", response);
+    broadcastConversationUpdate(conversation);
 
     return BaseResponse.build(response, true);
   }
@@ -405,15 +414,16 @@ public class ConversationFacadeImpl implements ConversationFacade {
     if (existingByBooking.isPresent()) {
       conversation = existingByBooking.get();
     } else {
-      // 2. Check if there is an existing conversation between customer and chef
-      List<ChatConversation> existingPair =
-          chatConversationService.findByCustomerIdAndChefId(customerId, chefId);
-      if (!existingPair.isEmpty()) {
-        conversation = existingPair.get(0);
-        if (conversation.getBooking() == null) {
-          conversation.setBooking(booking);
-          conversation = chatConversationService.save(conversation);
-        }
+      // 2. Reuse a bookingless conversation between customer and chef if present
+      Optional<ChatConversation> existingUnbound =
+          chatConversationService.findByCustomerIdAndChefId(customerId, chefId).stream()
+              .filter(c -> c.getBooking() == null)
+              .findFirst();
+      if (existingUnbound.isPresent()) {
+        conversation = existingUnbound.get();
+        conversation.setBooking(booking);
+        conversation = chatConversationService.save(conversation);
+        broadcastConversationUpdate(conversation);
       } else {
         // 3. Create new conversation strictly between this customer and this chef for this booking
         ChatConversation newConv =
@@ -425,11 +435,46 @@ public class ConversationFacadeImpl implements ConversationFacade {
                 .lastMessageAt(System.currentTimeMillis())
                 .build();
         conversation = chatConversationService.save(newConv);
+        broadcastConversationUpdate(conversation);
       }
     }
 
     ChatConversationResponse response = mapToResponse(conversation);
     return BaseResponse.build(response, true);
+  }
+
+  private BookingPriceOfferResponse mapOfferToResponse(BookingPriceOffer offer) {
+    return BookingPriceOfferResponse.builder()
+        .id(offer.getId())
+        .bookingId(offer.getBooking().getId())
+        .senderId(offer.getSender().getId())
+        .totalAmount(offer.getTotalAmount().doubleValue())
+        .status(offer.getStatus())
+        .message(offer.getMessage())
+        .createdAt(offer.getCreatedAt())
+        .build();
+  }
+
+  private void sendAfterCommit(String destination, Object payload) {
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(
+          new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+              messagingTemplate.convertAndSend(destination, payload);
+            }
+          });
+      return;
+    }
+    messagingTemplate.convertAndSend(destination, payload);
+  }
+
+  private void broadcastConversationUpdate(ChatConversation conversation) {
+    ChatConversationResponse convResponse = mapToResponse(conversation);
+    sendAfterCommit(
+        "/topic/users/" + conversation.getCustomer().getId() + "/conversations", convResponse);
+    sendAfterCommit(
+        "/topic/users/" + conversation.getChef().getId() + "/conversations", convResponse);
   }
 
   private ChatConversationResponse mapToResponse(ChatConversation conv) {
