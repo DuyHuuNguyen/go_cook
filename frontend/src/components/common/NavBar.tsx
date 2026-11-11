@@ -62,7 +62,7 @@ function NavbarContent() {
 
         <BsNavbar.Collapse id="gc-main-nav" className="gc-navbar-collapse">
           <Nav className="gc-nav-links">
-            <Nav.Link as={Link} to="/#dau-bep">
+            <Nav.Link as={Link} to="/explore-chefs">
               Khám phá đầu bếp
             </Nav.Link>
             <Nav.Link as={NavLink} to="/menus">

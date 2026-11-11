@@ -22,4 +22,6 @@ public interface MenuService {
   List<MenuResponse> findByIdGreaterThanOrderByChefId(Long lastMenuId, Long chefId);
 
   Optional<Boolean> hasMenuByChefId(Long chefId, Long menuId);
+
+  List<MenuResponse> findPublicMenusByChefId(Long chefId);
 }

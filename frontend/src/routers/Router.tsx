@@ -35,6 +35,8 @@ import { adminSectionKeys } from "../types/AdminTypes";
 import {CustomerBookingManagement} from "../pages/CustomerBookingManagement.tsx";
 import {ChatPage} from "../pages/ChatPage.tsx";
 import {BookingChefManagement} from "../pages/seller/BookingManagement.tsx";
+import {ExploreChefs} from "../pages/ExporeChefs.tsx";
+import ExploreChefDetailPage from "../pages/ExploreChefDetailPage.tsx";
 
 export const router = createBrowserRouter(
   [
@@ -79,6 +81,8 @@ export const router = createBrowserRouter(
             },
             { path: "/profile", element: <Profile /> },
             { path: "/customer-booking",  element: <CustomerBookingManagement/> },
+            { path: "/explore-chefs", element: <ExploreChefs/>},
+            { path: "/explore-chefs/:chefId", element: <ExploreChefDetailPage /> }
           ],
         },
       ],

@@ -233,4 +233,57 @@ public class MenuServiceImpl implements MenuService {
     public Optional<Menu> findByIdAndChefId(Long id, Long chefId) {
         return this.menuRepository.findByIdAndSeller_idAndIsActiveTrue(id, chefId);
     }
+
+    @Override
+    public List<MenuResponse> findPublicMenusByChefId(Long chefId) {
+        if (chefId == null) {
+            return List.of();
+        }
+        List<Menu> menus = this.menuRepository.findPublicMenusByChefId(chefId);
+        if (menus.isEmpty()) {
+            return List.of();
+        }
+        return toMenuResponses(menus);
+    }
+
+    private List<MenuResponse> toMenuResponses(List<Menu> menus) {
+        var ids = menus.stream().map(Menu::getId).toList();
+        var dishes =
+                menuDishRepository.findListedDishes(ids).stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        md -> md.getMenu().getId(),
+                                        Collectors.mapping(
+                                                md ->
+                                                        new MenuResponse.DishSummary(
+                                                                md.getDish().getId(), md.getDish().getName()),
+                                                Collectors.toList())));
+        var images =
+                menuAssetRepository.findByMenuIdInAndIsActiveTrueOrderByIdAsc(ids).stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        asset -> asset.getMenu().getId(),
+                                        Collectors.mapping(MenuAsset::getUrl, Collectors.toList())));
+        return menus.stream()
+                .map(
+                        menu ->
+                                new MenuResponse(
+                                        menu.getId(),
+                                        menu.getName(),
+                                        menu.getDescription(),
+                                        menu.getTempPrice(),
+                                        menu.getMinGuests(),
+                                        menu.getMaxGuests(),
+                                        menu.getStatus(),
+                                        menu.getCreatedAt(),
+                                        new MenuResponse.CategorySummary(
+                                                menu.getCategory().getId(), menu.getCategory().getName()),
+                                        new MenuResponse.SellerSummary(
+                                                menu.getSeller().getId(),
+                                                menu.getSeller().getUsername(),
+                                                menu.getSeller().getAvatarUrl()),
+                                        dishes.getOrDefault(menu.getId(), List.of()),
+                                        images.getOrDefault(menu.getId(), List.of())))
+                .toList();
+    }
 }

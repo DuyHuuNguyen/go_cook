@@ -39,4 +39,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
   Optional<Booking> findBookingByIdAndChef_IdAndIsActiveTrue(
       @Param("id") Long id, @Param("chefId") Long chefId);
+
+  @Query("""
+      select b.chef.id,
+             count(b.id),
+             sum(case when b.bookingStatus in :successStatuses then 1 else 0 end)
+      from Booking b
+      where b.chef.id in :chefIds and b.isActive = true
+      group by b.chef.id
+      """)
+  List<Object[]> countChefBookingStats(
+      @Param("chefIds") List<Long> chefIds, @Param("successStatuses") List<String> successStatuses);
 }

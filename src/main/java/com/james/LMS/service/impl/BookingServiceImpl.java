@@ -221,4 +221,24 @@ public class BookingServiceImpl implements BookingService {
   public void save(Booking booking) {
     this.bookingRepository.save(booking);
   }
+
+  private static final List<String> SUCCESS_BOOKING_STATUSES =
+      List.of("CHEF_ACCEPT", "CONFIRMED", "COMPLETED");
+
+  @Override
+  @Transactional(readOnly = true)
+  public Map<Long, ChefBookingStats> findChefBookingStats(List<Long> chefIds) {
+    if (chefIds == null || chefIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<Long, ChefBookingStats> statsByChefId = new HashMap<>();
+    for (Object[] row :
+        this.bookingRepository.countChefBookingStats(chefIds, SUCCESS_BOOKING_STATUSES)) {
+      Long chefId = (Long) row[0];
+      int total = row[1] == null ? 0 : ((Number) row[1]).intValue();
+      int successful = row[2] == null ? 0 : ((Number) row[2]).intValue();
+      statsByChefId.put(chefId, new ChefBookingStats(total, successful));
+    }
+    return statsByChefId;
+  }
 }

@@ -378,4 +378,14 @@ export const ENDPOINTS = {
       },
     },
   },
+  EXPLORE_CHEFS: {
+    LIST: {
+      V1: (lastId: number | string) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/explore-chefs/${lastId}`),
+    },
+    DETAIL: {
+      V1: (chefId: number | string) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/explore-chefs/detail/${chefId}`),
+    },
+  },
 } as const;

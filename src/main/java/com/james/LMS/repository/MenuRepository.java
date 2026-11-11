@@ -65,4 +65,15 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
   @EntityGraph(attributePaths = {"category", "seller"})
   List<Menu> findByIdGreaterThanAndSeller_IdOrderByIdAsc(Long lastMenuId, Long chefId);
+
+  @Query("""
+      select m from Menu m
+      join fetch m.category c
+      join fetch m.seller s
+      where m.seller.id = :chefId
+        and m.isActive = true and c.isActive = true
+        and upper(coalesce(m.status, '')) in ('ACTIVE', 'PUBLISHED', 'APPROVED', 'AVAILABLE')
+      order by m.updatedAt desc, m.id desc
+      """)
+  List<Menu> findPublicMenusByChefId(@Param("chefId") Long chefId);
 }
