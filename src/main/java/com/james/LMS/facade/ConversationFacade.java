@@ -27,4 +27,8 @@ public interface ConversationFacade {
   BaseResponse<ChatConversationResponse> getOrCreateConversationForBooking(Long bookingId);
 
   BaseResponse<List<ChatMessageResponse>> getConversationMessages(Long conversationId);
+
+  BaseResponse<ChatConversationResponse> markConversationAsRead(Long conversationId);
+
+  BaseResponse<Long> getUnreadMessageCount();
 }

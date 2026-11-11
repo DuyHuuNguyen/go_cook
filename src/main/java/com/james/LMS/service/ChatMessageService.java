@@ -10,4 +10,10 @@ public interface ChatMessageService {
   Optional<ChatMessage> findById(Long id);
 
   List<ChatMessage> findByConversationId(Long conversationId);
+
+  long countUnreadInConversation(Long conversationId, Long userId);
+
+  long countTotalUnreadForUser(Long userId);
+
+  int markConversationAsRead(Long conversationId, Long userId);
 }

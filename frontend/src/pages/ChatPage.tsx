@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Container, Row, Col, Alert } from 'react-bootstrap';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -7,16 +7,19 @@ import {
   getConversations,
   getBookingConversation,
   ChatConversationResponse,
+  ChatMessageResponse,
 } from '../clients/ChatClient';
 import { WS_CHAT_URL } from '../config/ApiConfig';
 import { ConversationList } from '../components/chat/ConversationList';
 import { ChatContainer } from '../components/chat/ChatContainer';
 import { PriceNegotiationPanel } from '../components/chat/PriceNegotiationPanel';
 import { useProfile } from '../contexts/ProfileContext';
+import { useChatNotification } from '../contexts/ChatNotificationContext';
 
 export const ChatPage = () => {
   const [searchParams] = useSearchParams();
   const bookingIdParam = searchParams.get('bookingId');
+  const conversationIdParam = searchParams.get('conversationId');
 
   const [conversations, setConversations] = useState<ChatConversationResponse[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<number>();
@@ -24,6 +27,11 @@ export const ChatPage = () => {
   const [accessError, setAccessError] = useState<string | null>(null);
 
   const { profileData } = useProfile();
+  const {
+    unreadByConversation,
+    setActiveViewingConversationId,
+    markConversationRead,
+  } = useChatNotification();
   const currentUserId = profileData?.id ? parseInt(profileData.id, 10) : 0;
 
   useEffect(() => {
@@ -81,7 +89,10 @@ export const ChatPage = () => {
         }
 
         setConversations(list);
-        if (list.length > 0) {
+        const requestedConvId = conversationIdParam ? Number(conversationIdParam) : NaN;
+        if (!Number.isNaN(requestedConvId) && list.some((c) => c.id === requestedConvId)) {
+          setActiveConversationId(requestedConvId);
+        } else if (list.length > 0) {
           setActiveConversationId(list[0].id);
         }
       } catch (err) {
@@ -97,7 +108,43 @@ export const ChatPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [bookingIdParam]);
+  }, [bookingIdParam, conversationIdParam]);
+
+  useEffect(() => {
+    setActiveViewingConversationId(activeConversationId ?? null);
+    if (activeConversationId) {
+      void markConversationRead(activeConversationId);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === activeConversationId ? { ...c, unreadCount: 0 } : c
+        )
+      );
+    }
+    return () => {
+      setActiveViewingConversationId(null);
+    };
+  }, [activeConversationId, markConversationRead, setActiveViewingConversationId]);
+
+  const handleIncomingMessage = useCallback(
+    (message: ChatMessageResponse) => {
+      if (message.conversationId === activeConversationId) {
+        void markConversationRead(message.conversationId);
+      }
+    },
+    [activeConversationId, markConversationRead]
+  );
+
+  const conversationsWithUnread = useMemo(
+    () =>
+      conversations.map((conv) => ({
+        ...conv,
+        unreadCount:
+          conv.id === activeConversationId
+            ? 0
+            : unreadByConversation[conv.id] ?? conv.unreadCount ?? 0,
+      })),
+    [conversations, activeConversationId, unreadByConversation]
+  );
 
   // Subscribe to real-time conversation updates (new conversation, offer accepted price change, lastMessageAt)
   useEffect(() => {
@@ -169,7 +216,7 @@ export const ChatPage = () => {
             <div className="text-center text-muted">Đang tải...</div>
           ) : (
             <ConversationList
-              conversations={conversations}
+              conversations={conversationsWithUnread}
               activeConversationId={activeConversationId}
               onSelect={(id) => {
                 setAccessError(null);
@@ -187,6 +234,7 @@ export const ChatPage = () => {
                 currentBookingPrice={activeConversation.booking?.totalAmount}
                 partnerName={partnerName}
                 bookingCode={activeConversation.booking?.bookingCode}
+                onIncomingMessage={handleIncomingMessage}
               />
               {activeConversation.booking && (
                 <div className="mt-3">

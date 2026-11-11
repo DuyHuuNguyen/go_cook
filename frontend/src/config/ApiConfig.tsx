@@ -350,6 +350,17 @@ export const ENDPOINTS = {
   CHAT: {
     CONVERSATIONS: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations"),
+      UNREAD_COUNT: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/unread-count"),
+      },
+      READ: {
+        V1: (conversationId: number | string) =>
+          endpoint(
+            SERVICE.USER,
+            VERSION.V1,
+            `/conversations/${conversationId}/read`,
+          ),
+      },
       BOOKING: {
         V1: (bookingId: number | string) =>
           endpoint(

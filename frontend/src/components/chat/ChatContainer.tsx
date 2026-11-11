@@ -17,6 +17,7 @@ interface ChatContainerProps {
   currentBookingPrice?: number;
   partnerName?: string;
   bookingCode?: string;
+  onIncomingMessage?: (message: ChatMessageResponse) => void;
 }
 
 export const ChatContainer = ({
@@ -25,12 +26,18 @@ export const ChatContainer = ({
   currentBookingPrice,
   partnerName,
   bookingCode,
+  onIncomingMessage,
 }: ChatContainerProps) => {
   const [messages, setMessages] = useState<ChatMessageResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [connected, setConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<Client | null>(null);
+  const onIncomingMessageRef = useRef(onIncomingMessage);
+
+  useEffect(() => {
+    onIncomingMessageRef.current = onIncomingMessage;
+  }, [onIncomingMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,6 +75,9 @@ export const ChatContainer = ({
               if (prev.some((m) => m.id === newMessage.id)) return prev;
               return [...prev, newMessage];
             });
+            if (newMessage.senderId !== currentUserId) {
+              onIncomingMessageRef.current?.(newMessage);
+            }
           }
         });
       },

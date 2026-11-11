@@ -27,4 +27,21 @@ public class ChatMessageServiceImpl implements ChatMessageService {
   public List<ChatMessage> findByConversationId(Long conversationId) {
     return chatMessageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
   }
+
+  @Override
+  public long countUnreadInConversation(Long conversationId, Long userId) {
+    return chatMessageRepository.countByConversationIdAndSenderIdNotAndReadFalse(
+        conversationId, userId);
+  }
+
+  @Override
+  public long countTotalUnreadForUser(Long userId) {
+    return chatMessageRepository.countUnreadMessagesForUser(userId);
+  }
+
+  @Override
+  public int markConversationAsRead(Long conversationId, Long userId) {
+    return chatMessageRepository.markConversationMessagesAsRead(
+        conversationId, userId, System.currentTimeMillis());
+  }
 }

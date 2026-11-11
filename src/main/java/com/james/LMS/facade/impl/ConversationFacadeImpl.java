@@ -363,7 +363,9 @@ public class ConversationFacadeImpl implements ConversationFacade {
             .build();
 
     // Broadcast to WebSocket subscribers after commit
+    Long recipientId = currentUserId.equals(customerId) ? chefId : customerId;
     sendAfterCommit("/topic/messages", response);
+    sendAfterCommit("/topic/users/" + recipientId + "/messages", response);
     broadcastConversationUpdate(conversation);
 
     return BaseResponse.build(response, true);
@@ -378,9 +380,45 @@ public class ConversationFacadeImpl implements ConversationFacade {
     List<ChatConversation> conversations = chatConversationService.findByUserId(currentUserId);
 
     List<ChatConversationResponse> responses =
-        conversations.stream().map(this::mapToResponse).toList();
+        conversations.stream().map(conv -> mapToResponse(conv, currentUserId)).toList();
 
     return BaseResponse.build(responses, true);
+  }
+
+  @Override
+  @Transactional
+  public BaseResponse<ChatConversationResponse> markConversationAsRead(Long conversationId) {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long currentUserId = principal.getId();
+
+    ChatConversation conversation =
+        chatConversationService
+            .findById(conversationId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+    Long customerId = conversation.getCustomer().getId();
+    Long chefId = conversation.getChef().getId();
+    boolean isParticipant = currentUserId.equals(customerId) || currentUserId.equals(chefId);
+
+    if (!isParticipant) {
+      throw new ForbiddenException(ErrorCode.CONVERSATION_ACCESS_DENIED);
+    }
+
+    int updated = chatMessageService.markConversationAsRead(conversationId, currentUserId);
+    ChatConversationResponse response = mapToResponse(conversation, currentUserId);
+    if (updated > 0) {
+      sendAfterCommit("/topic/users/" + currentUserId + "/conversations", response);
+    }
+
+    return BaseResponse.build(response, true);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BaseResponse<Long> getUnreadMessageCount() {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long currentUserId = principal.getId();
+    return BaseResponse.build(chatMessageService.countTotalUnreadForUser(currentUserId), true);
   }
 
   @Override
@@ -439,7 +477,7 @@ public class ConversationFacadeImpl implements ConversationFacade {
       }
     }
 
-    ChatConversationResponse response = mapToResponse(conversation);
+    ChatConversationResponse response = mapToResponse(conversation, currentUserId);
     return BaseResponse.build(response, true);
   }
 
@@ -470,14 +508,15 @@ public class ConversationFacadeImpl implements ConversationFacade {
   }
 
   private void broadcastConversationUpdate(ChatConversation conversation) {
-    ChatConversationResponse convResponse = mapToResponse(conversation);
+    Long customerId = conversation.getCustomer().getId();
+    Long chefId = conversation.getChef().getId();
     sendAfterCommit(
-        "/topic/users/" + conversation.getCustomer().getId() + "/conversations", convResponse);
+        "/topic/users/" + customerId + "/conversations", mapToResponse(conversation, customerId));
     sendAfterCommit(
-        "/topic/users/" + conversation.getChef().getId() + "/conversations", convResponse);
+        "/topic/users/" + chefId + "/conversations", mapToResponse(conversation, chefId));
   }
 
-  private ChatConversationResponse mapToResponse(ChatConversation conv) {
+  private ChatConversationResponse mapToResponse(ChatConversation conv, Long viewerUserId) {
     ChatConversationResponse.BookingInfo bookingInfo = null;
     if (conv.getBooking() != null) {
       Booking booking = conv.getBooking();
@@ -498,6 +537,12 @@ public class ConversationFacadeImpl implements ConversationFacade {
               .build();
     }
 
+    int unreadCount =
+        viewerUserId != null
+            ? Math.toIntExact(
+                chatMessageService.countUnreadInConversation(conv.getId(), viewerUserId))
+            : 0;
+
     return ChatConversationResponse.builder()
         .id(conv.getId())
         .booking(bookingInfo)
@@ -515,7 +560,7 @@ public class ConversationFacadeImpl implements ConversationFacade {
                 .build())
         .status(conv.getStatus())
         .lastMessageAt(conv.getLastMessageAt())
-        .unreadCount(0) // ponytail: calculate unread count from messages
+        .unreadCount(unreadCount)
         .build();
   }
 

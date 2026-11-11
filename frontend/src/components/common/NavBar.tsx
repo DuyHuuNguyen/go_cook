@@ -1,15 +1,17 @@
 import { useEffect } from "react";
 import {
+  Badge,
   Container,
   Nav,
   Navbar as BsNavbar,
   NavDropdown,
 } from "react-bootstrap";
-import { BoxArrowUpRight, ShieldCheck } from "react-bootstrap-icons";
+import { BoxArrowUpRight, ChatDots, ShieldCheck } from "react-bootstrap-icons";
 import { Link, NavLink, useNavigate } from "react-router";
 import { UserProvider, useUser } from "../../contexts/UserContext.tsx";
 import { useProfile } from "../../contexts/ProfileContext.tsx";
 import { useApp } from "../../contexts/AppContext.tsx";
+import { useChatNotification } from "../../contexts/ChatNotificationContext";
 import { authStore } from "../../stores/authStore";
 import logo from "../../assets/go-cook-logo.svg";
 import "../../styles/siteChrome.css";
@@ -19,6 +21,7 @@ function NavbarContent() {
   const { logout } = useUser();
   const { profileData, loading, fetchProfile, setProfileData } = useProfile();
   const { notify } = useApp();
+  const { totalUnreadCount } = useChatNotification();
 
   useEffect(() => {
     void fetchProfile();
@@ -79,6 +82,22 @@ function NavbarContent() {
           </Nav>
 
           <Nav className="gc-navbar-account">
+            {profileData && (
+              <Nav.Link
+                as={Link}
+                to="/chat"
+                className="gc-admin-link position-relative"
+              >
+                <ChatDots size={17} />
+                <span>Tin nhắn</span>
+                {totalUnreadCount > 0 && (
+                  <Badge bg="danger" pill>
+                    {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                  </Badge>
+                )}
+              </Nav.Link>
+            )}
+
             {isAdmin && (
               <Nav.Link as={Link} to="/admin" className="gc-admin-link">
                 <ShieldCheck size={17} />

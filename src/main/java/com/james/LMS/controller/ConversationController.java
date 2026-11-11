@@ -34,6 +34,29 @@ public class ConversationController {
     return conversationFacade.getConversations();
   }
 
+  @GetMapping("/unread-count")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      summary = "Get total unread message count for current user",
+      tags = {"Conversation APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  public BaseResponse<Long> getUnreadMessageCount() {
+    return conversationFacade.getUnreadMessageCount();
+  }
+
+  @PatchMapping("/{conversationId}/read")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      summary = "Mark all incoming messages in a conversation as read",
+      tags = {"Conversation APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  public BaseResponse<ChatConversationResponse> markConversationAsRead(
+      @PathVariable Long conversationId) {
+    return conversationFacade.markConversationAsRead(conversationId);
+  }
+
   @GetMapping("/{conversationId}/messages")
   @ResponseStatus(HttpStatus.OK)
   @Operation(

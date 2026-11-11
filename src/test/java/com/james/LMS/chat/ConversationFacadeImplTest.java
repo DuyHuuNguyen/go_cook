@@ -13,14 +13,18 @@ import com.james.LMS.entity.Booking;
 import com.james.LMS.entity.BookingPriceOffer;
 import com.james.LMS.entity.ChatConversation;
 import com.james.LMS.entity.ChatConversationStatus;
+import com.james.LMS.entity.ChatMessage;
+import com.james.LMS.entity.ChatMessageType;
 import com.james.LMS.entity.User;
 import com.james.LMS.enums.BookingPriceOfferStatus;
 import com.james.LMS.exception.ForbiddenException;
 import com.james.LMS.facade.impl.ConversationFacadeImpl;
+import com.james.LMS.request.ChatMessageRequest;
 import com.james.LMS.request.UpsertBookingOfferPriceRequest;
 import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.BookingPriceOfferResponse;
 import com.james.LMS.response.ChatConversationResponse;
+import com.james.LMS.response.ChatMessageResponse;
 import com.james.LMS.service.BookingPriceOfferService;
 import com.james.LMS.service.BookingService;
 import com.james.LMS.service.ChatConversationService;
@@ -221,5 +225,83 @@ class ConversationFacadeImplTest {
             eq("/topic/users/" + chef.getId() + "/conversations"), convCaptor.capture());
     assertEquals(BigDecimal.valueOf(620000), convCaptor.getValue().getBooking().getTotalAmount());
   }
-}
 
+  @Test
+  void sendMessage_notifiesRecipientAndCalculatesUnreadCount() {
+    authenticateAs(chef);
+
+    ChatMessageRequest request = new ChatMessageRequest();
+    request.setConversationId(conversation.getId());
+    request.setContent("Chào bạn, mình xác nhận lịch nấu nhé!");
+    request.setMessageType(ChatMessageType.TEXT);
+
+    ChatMessage savedMessage =
+        ChatMessage.builder()
+            .id(301L)
+            .conversation(conversation)
+            .sender(chef)
+            .messageType(ChatMessageType.TEXT)
+            .content(request.getContent())
+            .read(false)
+            .createdAt(5000L)
+            .build();
+
+    when(chatConversationService.findById(conversation.getId()))
+        .thenReturn(Optional.of(conversation));
+    when(userService.findById(chef.getId())).thenReturn(Optional.of(chef));
+    when(chatMessageService.save(any(ChatMessage.class))).thenReturn(savedMessage);
+    when(chatConversationService.save(any(ChatConversation.class))).thenReturn(conversation);
+    when(chatMessageService.countUnreadInConversation(conversation.getId(), customer.getId()))
+        .thenReturn(2L);
+    when(chatMessageService.countUnreadInConversation(conversation.getId(), chef.getId()))
+        .thenReturn(0L);
+
+    BaseResponse<ChatMessageResponse> response = conversationFacade.sendMessage(request);
+
+    assertTrue(response.isSuccess());
+    assertEquals(301L, response.getData().getId());
+
+    verify(messagingTemplate)
+        .convertAndSend(
+            eq("/topic/users/" + customer.getId() + "/messages"), eq(response.getData()));
+
+    ArgumentCaptor<ChatConversationResponse> custConvCaptor =
+        ArgumentCaptor.forClass(ChatConversationResponse.class);
+    verify(messagingTemplate)
+        .convertAndSend(
+            eq("/topic/users/" + customer.getId() + "/conversations"), custConvCaptor.capture());
+    assertEquals(2, custConvCaptor.getValue().getUnreadCount());
+  }
+
+  @Test
+  void markConversationAsRead_marksMessagesAndBroadcastsZeroUnread() {
+    authenticateAs(customer);
+
+    when(chatConversationService.findById(conversation.getId()))
+        .thenReturn(Optional.of(conversation));
+    when(chatMessageService.markConversationAsRead(conversation.getId(), customer.getId()))
+        .thenReturn(3);
+    when(chatMessageService.countUnreadInConversation(conversation.getId(), customer.getId()))
+        .thenReturn(0L);
+
+    BaseResponse<ChatConversationResponse> response =
+        conversationFacade.markConversationAsRead(conversation.getId());
+
+    assertTrue(response.isSuccess());
+    assertEquals(0, response.getData().getUnreadCount());
+    verify(messagingTemplate)
+        .convertAndSend(
+            eq("/topic/users/" + customer.getId() + "/conversations"), eq(response.getData()));
+  }
+
+  @Test
+  void getUnreadMessageCount_returnsTotalUnreadForCurrentUser() {
+    authenticateAs(customer);
+    when(chatMessageService.countTotalUnreadForUser(customer.getId())).thenReturn(5L);
+
+    BaseResponse<Long> response = conversationFacade.getUnreadMessageCount();
+
+    assertTrue(response.isSuccess());
+    assertEquals(5L, response.getData());
+  }
+}
