@@ -1,6 +1,7 @@
 package com.james.LMS.chat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +26,7 @@ import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.BookingPriceOfferResponse;
 import com.james.LMS.response.ChatConversationResponse;
 import com.james.LMS.response.ChatMessageResponse;
+import com.james.LMS.response.KeySetPaginationResponse;
 import com.james.LMS.service.BookingPriceOfferService;
 import com.james.LMS.service.BookingService;
 import com.james.LMS.service.ChatConversationService;
@@ -303,5 +305,49 @@ class ConversationFacadeImplTest {
 
     assertTrue(response.isSuccess());
     assertEquals(5L, response.getData());
+  }
+
+  @Test
+  void getConversations_returnsKeysetPageWithHasNextWhenMoreThanPageSize() {
+    authenticateAs(customer);
+
+    List<ChatConversation> fetched =
+        java.util.stream.LongStream.rangeClosed(1, 21)
+            .<ChatConversation>mapToObj(
+                i ->
+                    ChatConversation.builder()
+                        .id(100L - i)
+                        .customer(customer)
+                        .chef(chef)
+                        .status(ChatConversationStatus.ACTIVE)
+                        .lastMessageAt(1000L + i)
+                        .build())
+            .toList();
+
+    when(chatConversationService.findByUserIdWithKeyset(customer.getId(), 0L, 21))
+        .thenReturn(fetched);
+
+    BaseResponse<KeySetPaginationResponse<ChatConversationResponse>> response =
+        conversationFacade.getConversations(0L);
+
+    assertTrue(response.isSuccess());
+    assertEquals(20, response.getData().getData().size());
+    assertTrue(response.getData().getHasNext());
+    assertEquals(80L, response.getData().getLastId());
+  }
+
+  @Test
+  void getConversations_returnsEmptyPageWithHasNextFalse() {
+    authenticateAs(customer);
+    when(chatConversationService.findByUserIdWithKeyset(customer.getId(), 50L, 21))
+        .thenReturn(List.of());
+
+    BaseResponse<KeySetPaginationResponse<ChatConversationResponse>> response =
+        conversationFacade.getConversations(50L);
+
+    assertTrue(response.isSuccess());
+    assertTrue(response.getData().getData().isEmpty());
+    assertFalse(response.getData().getHasNext());
+    assertEquals(-1L, response.getData().getLastId());
   }
 }

@@ -11,6 +11,8 @@ public interface ChatConversationService {
 
   List<ChatConversation> findByUserId(Long userId);
 
+  List<ChatConversation> findByUserIdWithKeyset(Long userId, Long lastId, int limit);
+
   Optional<ChatConversation> findByBookingId(Long bookingId);
 
   List<ChatConversation> findByCustomerIdAndChefId(Long customerId, Long chefId);

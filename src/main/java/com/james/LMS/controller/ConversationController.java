@@ -7,6 +7,7 @@ import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.BookingPriceOfferResponse;
 import com.james.LMS.response.ChatConversationResponse;
 import com.james.LMS.response.ChatMessageResponse;
+import com.james.LMS.response.KeySetPaginationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -26,12 +27,13 @@ public class ConversationController {
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-      summary = "Get all conversations for current user",
+      summary = "Get conversations for current user with keyset pagination",
       tags = {"Conversation APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
-  public BaseResponse<List<ChatConversationResponse>> getConversations() {
-    return conversationFacade.getConversations();
+  public BaseResponse<KeySetPaginationResponse<ChatConversationResponse>> getConversations(
+      @RequestParam(value = "lastId", required = false, defaultValue = "0") Long lastId) {
+    return conversationFacade.getConversations(lastId);
   }
 
   @GetMapping("/unread-count")

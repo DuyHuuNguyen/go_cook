@@ -349,7 +349,8 @@ export const ENDPOINTS = {
   },
   CHAT: {
     CONVERSATIONS: {
-      V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations"),
+      V1: (lastId: number | string = 0) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/conversations?lastId=${lastId}`),
       UNREAD_COUNT: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/unread-count"),
       },

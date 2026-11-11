@@ -6,6 +6,7 @@ import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.BookingPriceOfferResponse;
 import com.james.LMS.response.ChatConversationResponse;
 import com.james.LMS.response.ChatMessageResponse;
+import com.james.LMS.response.KeySetPaginationResponse;
 import java.util.List;
 
 public interface ConversationFacade {
@@ -22,7 +23,7 @@ public interface ConversationFacade {
 
   BaseResponse<ChatMessageResponse> sendMessage(ChatMessageRequest request);
 
-  BaseResponse<List<ChatConversationResponse>> getConversations();
+  BaseResponse<KeySetPaginationResponse<ChatConversationResponse>> getConversations(Long lastId);
 
   BaseResponse<ChatConversationResponse> getOrCreateConversationForBooking(Long bookingId);
 

@@ -23,7 +23,10 @@ export const ChatPage = () => {
 
   const [conversations, setConversations] = useState<ChatConversationResponse[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<number>();
+  const [lastId, setLastId] = useState<number>(0);
+  const [hasNext, setHasNext] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [accessError, setAccessError] = useState<string | null>(null);
 
   const { profileData } = useProfile();
@@ -42,8 +45,11 @@ export const ChatPage = () => {
       setAccessError(null);
 
       try {
-        const list = await getConversations();
+        const page = await getConversations(0);
         if (!isMounted) return;
+        const list = page?.data ?? [];
+        setLastId(page?.lastId ?? -1);
+        setHasNext(Boolean(page?.hasNext) && list.length > 0);
 
         if (bookingIdParam) {
           const bookingId = Number(bookingIdParam);
@@ -134,6 +140,27 @@ export const ChatPage = () => {
     [activeConversationId, markConversationRead]
   );
 
+  const handleLoadMoreConversations = useCallback(async () => {
+    if (loadingMore || !hasNext || lastId <= 0) return;
+
+    setLoadingMore(true);
+    try {
+      const page = await getConversations(lastId);
+      const nextItems = page?.data ?? [];
+      setConversations((prev) => {
+        const existingIds = new Set(prev.map((c) => c.id));
+        const uniqueNew = nextItems.filter((c) => !existingIds.has(c.id));
+        return [...prev, ...uniqueNew];
+      });
+      setLastId(page?.lastId ?? -1);
+      setHasNext(Boolean(page?.hasNext) && nextItems.length > 0);
+    } catch (err) {
+      console.error('Failed to load more conversations:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasNext, lastId, loadingMore]);
+
   const conversationsWithUnread = useMemo(
     () =>
       conversations.map((conv) => ({
@@ -218,6 +245,9 @@ export const ChatPage = () => {
             <ConversationList
               conversations={conversationsWithUnread}
               activeConversationId={activeConversationId}
+              hasNext={hasNext}
+              loadingMore={loadingMore}
+              onLoadMore={handleLoadMoreConversations}
               onSelect={(id) => {
                 setAccessError(null);
                 setActiveConversationId(id);

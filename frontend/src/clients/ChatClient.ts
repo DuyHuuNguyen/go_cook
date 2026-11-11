@@ -1,5 +1,6 @@
 import axiosClient from './AxiosClient';
 import { ENDPOINTS } from '../config/ApiConfig';
+import type { KeySetPaginationResponse } from '../types/BookingTypes';
 
 export interface SendMessageRequest {
   conversationId: number;
@@ -53,11 +54,13 @@ export const sendMessage = async (
   return response.data.data;
 };
 
-export const getConversations = async (): Promise<ChatConversationResponse[]> => {
+export const getConversations = async (
+  lastId = 0
+): Promise<KeySetPaginationResponse<ChatConversationResponse>> => {
   const response = await axiosClient.get<{
-    data: ChatConversationResponse[];
+    data: KeySetPaginationResponse<ChatConversationResponse>;
     success: boolean;
-  }>(ENDPOINTS.CHAT.CONVERSATIONS.V1);
+  }>(ENDPOINTS.CHAT.CONVERSATIONS.V1(lastId));
   return response.data.data;
 };
 

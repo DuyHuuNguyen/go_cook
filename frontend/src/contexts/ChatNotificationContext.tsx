@@ -17,6 +17,7 @@ import {
   ChatConversationResponse,
   ChatMessageResponse,
   getConversations,
+  getUnreadMessageCount,
   markConversationAsRead,
 } from "../clients/ChatClient";
 import { WS_CHAT_URL } from "../config/ApiConfig";
@@ -48,6 +49,7 @@ export function ChatNotificationProvider({
   const [unreadByConversation, setUnreadByConversation] = useState<
     Record<number, number>
   >({});
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
   const [latestNotification, setLatestNotification] =
     useState<ChatMessageResponse | null>(null);
 
@@ -79,11 +81,16 @@ export function ChatNotificationProvider({
   const refreshUnread = useCallback(async () => {
     if (!currentUserId) {
       setUnreadByConversation({});
+      setTotalUnreadCount(0);
       return;
     }
     try {
-      const list = await getConversations();
-      syncFromConversations(list);
+      const [page, unreadTotal] = await Promise.all([
+        getConversations(0),
+        getUnreadMessageCount(),
+      ]);
+      syncFromConversations(page.data ?? []);
+      setTotalUnreadCount(unreadTotal);
     } catch (err) {
       console.error("Failed to refresh unread chat count:", err);
     }
@@ -92,10 +99,16 @@ export function ChatNotificationProvider({
   const markConversationRead = useCallback(
     async (conversationId: number) => {
       if (!currentUserId) return;
-      setUnreadByConversation((prev) => ({
-        ...prev,
-        [conversationId]: 0,
-      }));
+      setUnreadByConversation((prev) => {
+        const previousCount = prev[conversationId] ?? 0;
+        if (previousCount > 0) {
+          setTotalUnreadCount((total) => Math.max(0, total - previousCount));
+        }
+        return {
+          ...prev,
+          [conversationId]: 0,
+        };
+      });
       try {
         const updated = await markConversationAsRead(conversationId);
         setUnreadByConversation((prev) => ({
@@ -112,6 +125,7 @@ export function ChatNotificationProvider({
   useEffect(() => {
     if (!currentUserId) {
       setUnreadByConversation({});
+      setTotalUnreadCount(0);
       setLatestNotification(null);
       return;
     }
@@ -126,10 +140,24 @@ export function ChatNotificationProvider({
           `/topic/users/${currentUserId}/conversations`,
           (message) => {
             const conv = JSON.parse(message.body) as ChatConversationResponse;
-            setUnreadByConversation((prev) => ({
-              ...prev,
-              [conv.id]: conv.unreadCount ?? 0,
-            }));
+            const nextUnread = conv.unreadCount ?? 0;
+            setUnreadByConversation((prev) => {
+              const previousUnread = prev[conv.id];
+              if (previousUnread !== undefined) {
+                const delta = nextUnread - previousUnread;
+                if (delta !== 0) {
+                  setTotalUnreadCount((total) => Math.max(0, total + delta));
+                }
+              } else {
+                void getUnreadMessageCount()
+                  .then((count) => setTotalUnreadCount(count))
+                  .catch(() => undefined);
+              }
+              return {
+                ...prev,
+                [conv.id]: nextUnread,
+              };
+            });
           },
         );
 
@@ -156,15 +184,6 @@ export function ChatNotificationProvider({
       void client.deactivate();
     };
   }, [currentUserId, refreshUnread]);
-
-  const totalUnreadCount = useMemo(
-    () =>
-      Object.values(unreadByConversation).reduce(
-        (sum, count) => sum + (count > 0 ? count : 0),
-        0,
-      ),
-    [unreadByConversation],
-  );
 
   const handleOpenNotification = () => {
     if (!latestNotification) return;

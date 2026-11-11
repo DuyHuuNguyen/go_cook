@@ -19,6 +19,7 @@ import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.BookingPriceOfferResponse;
 import com.james.LMS.response.ChatConversationResponse;
 import com.james.LMS.response.ChatMessageResponse;
+import com.james.LMS.response.KeySetPaginationResponse;
 import com.james.LMS.service.BookingPriceOfferService;
 import com.james.LMS.service.BookingService;
 import com.james.LMS.service.ChatConversationService;
@@ -39,6 +40,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Service
 @RequiredArgsConstructor
 public class ConversationFacadeImpl implements ConversationFacade {
+  private static final int CONVERSATION_PAGE_SIZE = 20;
+
   private final ChatConversationService chatConversationService;
   private final UserService userService;
   private final BookingService bookingService;
@@ -373,16 +376,32 @@ public class ConversationFacadeImpl implements ConversationFacade {
 
   @Override
   @Transactional(readOnly = true)
-  public BaseResponse<List<ChatConversationResponse>> getConversations() {
+  public BaseResponse<KeySetPaginationResponse<ChatConversationResponse>> getConversations(
+      Long lastId) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
     Long currentUserId = principal.getId();
 
-    List<ChatConversation> conversations = chatConversationService.findByUserId(currentUserId);
+    List<ChatConversation> fetched =
+        chatConversationService.findByUserIdWithKeyset(
+            currentUserId, lastId, CONVERSATION_PAGE_SIZE + 1);
+
+    boolean hasNext = fetched.size() > CONVERSATION_PAGE_SIZE;
+    List<ChatConversation> pageItems =
+        hasNext ? fetched.subList(0, CONVERSATION_PAGE_SIZE) : fetched;
 
     List<ChatConversationResponse> responses =
-        conversations.stream().map(conv -> mapToResponse(conv, currentUserId)).toList();
+        pageItems.stream().map(conv -> mapToResponse(conv, currentUserId)).toList();
 
-    return BaseResponse.build(responses, true);
+    Long nextLastId = responses.isEmpty() ? -1L : responses.getLast().getId();
+
+    KeySetPaginationResponse<ChatConversationResponse> pageResponse =
+        KeySetPaginationResponse.<ChatConversationResponse>builder()
+            .data(responses)
+            .lastId(nextLastId)
+            .hasNext(hasNext)
+            .build();
+
+    return BaseResponse.build(pageResponse, true);
   }
 
   @Override
