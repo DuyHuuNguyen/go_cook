@@ -1,5 +1,6 @@
 package com.james.LMS.entity;
 
+import com.james.LMS.enums.ChatConversationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

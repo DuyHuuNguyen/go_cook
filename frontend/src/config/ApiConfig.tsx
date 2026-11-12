@@ -72,6 +72,14 @@ export const ENDPOINTS = {
         ),
     },
   },
+  PAYMENTS: {
+    VNPAY: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/payments/vnpay"),
+    },
+    RESULT: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/payments/result"),
+    },
+  },
   LOCATION: {
     PROVINCE: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/locations/provinces"),

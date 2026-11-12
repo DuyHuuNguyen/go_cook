@@ -3,15 +3,16 @@ package com.james.LMS.facade.impl;
 import com.james.LMS.config.SecurityUserDetails;
 import com.james.LMS.facade.BookingFacade;
 import com.james.LMS.request.BookingSearchRequest;
-import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.request.CreateBookingChefRequest;
+import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.response.BaseResponse;
-import com.james.LMS.response.BookingResponse;
 import com.james.LMS.response.BookingChefRequestResponse;
+import com.james.LMS.response.BookingDetailResponse;
+import com.james.LMS.response.BookingResponse;
 import com.james.LMS.response.MatchingChefsResponse;
 import com.james.LMS.response.PaginationResponse;
-import com.james.LMS.service.BookingService;
 import com.james.LMS.service.BookingRequestService;
+import com.james.LMS.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -49,6 +50,13 @@ public class BookingFacadeImpl implements BookingFacade {
                         .and(Sort.by(Sort.Direction.DESC, "id"))))
             .map(BookingResponse::from);
     return BaseResponse.build(PaginationResponse.from(page), true);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BaseResponse<BookingDetailResponse> findBookingDetails(Long bookingId) {
+    Long customerId = SecurityUserDetails.getPrincipal().getId();
+    return BaseResponse.build(bookingService.findBookingDetails(bookingId, customerId), true);
   }
 
   @Override

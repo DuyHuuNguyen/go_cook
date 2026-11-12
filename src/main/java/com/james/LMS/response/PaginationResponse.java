@@ -1,7 +1,6 @@
 package com.james.LMS.response;
 
 import java.util.List;
-
 import lombok.*;
 import org.springframework.data.domain.Page;
 

@@ -48,10 +48,6 @@ public class Booking extends BaseEntity {
   @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
   private BigDecimal totalAmount;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "payment_id")
-  private Payment payment;
-
   @Column(name = "booking_status", nullable = false, length = 30)
   @Builder.Default
   private String bookingStatus = "PENDING";

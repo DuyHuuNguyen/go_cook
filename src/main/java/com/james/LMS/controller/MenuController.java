@@ -34,7 +34,8 @@ public class MenuController {
       description =
           "Search by menu or dish, filter by category, price and diners, then sort by latest, price or name. Page is one-based.",
       tags = {"Menu APIs"})
-  public BaseResponse<PaginationResponse<MenuResponse>> findMenus(@Valid @ParameterObject MenuSearchRequest request) {
+  public BaseResponse<PaginationResponse<MenuResponse>> findMenus(
+      @Valid @ParameterObject MenuSearchRequest request) {
     return menuFacade.findMenus(request);
   }
 

@@ -3,11 +3,12 @@ package com.james.LMS.controller;
 import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.facade.BookingFacade;
 import com.james.LMS.request.BookingSearchRequest;
-import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.request.CreateBookingChefRequest;
+import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.response.BaseResponse;
-import com.james.LMS.response.BookingResponse;
 import com.james.LMS.response.BookingChefRequestResponse;
+import com.james.LMS.response.BookingDetailResponse;
+import com.james.LMS.response.BookingResponse;
 import com.james.LMS.response.MatchingChefsResponse;
 import com.james.LMS.response.PaginationResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +51,16 @@ public class BookingController {
     return bookingFacade.findBookings(request);
   }
 
+  @GetMapping("/{bookingId}")
+  @Operation(
+      summary = "Get booking details for checkout",
+      tags = {"Booking APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
+  public BaseResponse<BookingDetailResponse> findBookingDetails(@PathVariable Long bookingId) {
+    return bookingFacade.findBookingDetails(bookingId);
+  }
+
   @GetMapping("/{bookingId}/matching-chefs")
   @Operation(
       summary = "Find available chefs matching a customer's booking",
@@ -62,7 +73,9 @@ public class BookingController {
 
   @PostMapping("/{bookingId}/requests")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Request a chef for a booking", tags = {"Booking APIs"})
+  @Operation(
+      summary = "Request a chef for a booking",
+      tags = {"Booking APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
   public BaseResponse<BookingChefRequestResponse> requestChef(

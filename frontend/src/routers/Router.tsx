@@ -15,6 +15,8 @@ import MenuCatalog from "../pages/MenuCatalog";
 import MenuDetailPage from "../pages/MenuDetailPage";
 import CustomMenu from "../pages/booking/CustomMenu";
 import MatchingChefPage from "../pages/booking/MatchingChefPage";
+import CheckoutPage from "../pages/booking/CheckoutPage";
+import PaymentResultPage from "../pages/booking/PaymentResultPage";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import { useProfile } from "../contexts/ProfileContext";
@@ -64,6 +66,14 @@ export const router = createBrowserRouter(
             {
               path: "/bookings/:bookingId/matching-chefs",
               element: <MatchingChefPage />,
+            },
+            {
+              path: "/bookings/:bookingId/checkout",
+              element: <CheckoutPage />,
+            },
+            {
+              path: "/payment/result",
+              element: <PaymentResultPage />,
             },
             { path: "/profile", element: <Profile /> },
           ],

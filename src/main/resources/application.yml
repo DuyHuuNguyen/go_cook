@@ -25,6 +25,13 @@ booking:
     negotiation-hold: PT2H
     payment-hold: PT30M
 
+vnpay:
+  tmn-code: ${VNPAY_TMN_CODE:}
+  hash-secret: ${VNPAY_HASH_SECRET:}
+  pay-url: ${VNPAY_PAY_URL:}
+  return-url: ${VNPAY_RETURN_URL:}
+  ipn-url: ${VNPAY_IPN_URL:}
+
 logging:
   pattern:
     console: ${LOG_PATTERN:%d{yyyy-MM-dd HH:mm:ss.SSS} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{1}){cyan} %clr(%X{requestId}){yellow} - %clr(%X{email}){green} - %msg%n}

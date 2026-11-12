@@ -101,6 +101,11 @@ public class SecurityConfig implements WebMvcConfigurer {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/menus")
                     .permitAll()
+                    .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/v1/payments/vnpay/ipn",
+                        "/api/v1/payments/vnpay/return")
+                    .permitAll()
                     .requestMatchers(WHITE_LISTS)
                     .permitAll()
                     .anyRequest()

@@ -1,7 +1,5 @@
--- Seed 100 users: 50 ROLE_USER + 50 ROLE_CHEF
 -- Địa chỉ lấy ngẫu nhiên từ bảng wards/provinces có sẵn => province_code/ward_code luôn hợp lệ, JOIN được.
 -- Mật khẩu: dùng lại hash bcrypt của systemadmin (đăng nhập bằng cùng mật khẩu với systemadmin).
--- Giả định: bảng nối là user_roles(user_id, role_id). Nếu tên khác thì sửa ở cuối khối INSERT INTO user_roles.
 
 DO $$
 DECLARE

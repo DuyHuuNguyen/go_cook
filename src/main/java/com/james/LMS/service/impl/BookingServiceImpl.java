@@ -1,11 +1,11 @@
 package com.james.LMS.service.impl;
 
+import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.entity.Booking;
 import com.james.LMS.entity.BookingItemDish;
 import com.james.LMS.entity.ChefProfile;
 import com.james.LMS.entity.Dish;
 import com.james.LMS.entity.User;
-import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.enums.ChefApplicationStatus;
 import com.james.LMS.enums.ChefScheduleStatus;
 import com.james.LMS.enums.ErrorCode;
@@ -14,7 +14,9 @@ import com.james.LMS.repository.BookingRepository;
 import com.james.LMS.repository.ChefProfileRepository;
 import com.james.LMS.repository.ChefScheduleRepository;
 import com.james.LMS.repository.DishRepository;
+import com.james.LMS.repository.PaymentRepository;
 import com.james.LMS.request.CreateBookingRequest;
+import com.james.LMS.response.BookingDetailResponse;
 import com.james.LMS.response.MatchingChefResponse;
 import com.james.LMS.service.BookingService;
 import com.james.LMS.service.DishService;
@@ -46,6 +48,7 @@ public class BookingServiceImpl implements BookingService {
   private final ChefProfileRepository chefProfileRepository;
   private final ChefScheduleRepository chefScheduleRepository;
   private final DishRepository dishRepository;
+  private final PaymentRepository paymentRepository;
   private final ChefBookingProperties chefBookingProperties;
 
   @Override
@@ -103,6 +106,20 @@ public class BookingServiceImpl implements BookingService {
   @Transactional(readOnly = true)
   public Page<Booking> findCustomerBookings(Long customerId, Pageable pageable) {
     return bookingRepository.findByCustomer_IdAndIsActiveTrue(customerId, pageable);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BookingDetailResponse findBookingDetails(Long bookingId, Long customerId) {
+    Booking booking =
+        bookingRepository
+            .findDetailsByIdAndCustomer_IdAndIsActiveTrue(bookingId, customerId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
+    var payment =
+        paymentRepository
+            .findFirstByBooking_IdAndIsActiveTrueOrderByIdDesc(bookingId)
+            .orElse(null);
+    return BookingDetailResponse.from(booking, payment);
   }
 
   @Override
