@@ -92,6 +92,14 @@ export const getUnreadMessageCount = async (): Promise<number> => {
   return response.data.data ?? 0;
 };
 
+export const getUnreadMessages = async (): Promise<ChatMessageResponse[]> => {
+  const response = await axiosClient.get<{
+    data: ChatMessageResponse[];
+    success: boolean;
+  }>(ENDPOINTS.CHAT.CONVERSATIONS.UNREAD_MESSAGES.V1);
+  return response.data.data ?? [];
+};
+
 export const markConversationAsRead = async (
   conversationId: number
 ): Promise<ChatConversationResponse> => {
@@ -102,8 +110,17 @@ export const markConversationAsRead = async (
   return response.data.data;
 };
 
-export const markMessageRead = async (messageId: number): Promise<void> => {
-  // ponytail: implement mark as read endpoint in backend
-  console.log('Mark read not yet implemented:', messageId);
+export const markAllConversationsAsRead = async (): Promise<void> => {
+  await axiosClient.patch(ENDPOINTS.CHAT.CONVERSATIONS.READ_ALL.V1);
+};
+
+export const markMessageRead = async (
+  messageId: number
+): Promise<ChatMessageResponse> => {
+  const response = await axiosClient.patch<{
+    data: ChatMessageResponse;
+    success: boolean;
+  }>(ENDPOINTS.CHAT.MESSAGES.MARK_READ.V1(messageId));
+  return response.data.data;
 };
 

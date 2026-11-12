@@ -354,6 +354,12 @@ export const ENDPOINTS = {
       UNREAD_COUNT: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/unread-count"),
       },
+      UNREAD_MESSAGES: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/unread-messages"),
+      },
+      READ_ALL: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/read-all"),
+      },
       READ: {
         V1: (conversationId: number | string) =>
           endpoint(
@@ -376,6 +382,10 @@ export const ENDPOINTS = {
         endpoint(SERVICE.USER, VERSION.V1, `/conversations/${conversationId}/messages`),
       SEND: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/messages"),
+      },
+      MARK_READ: {
+        V1: (messageId: number | string) =>
+          endpoint(SERVICE.USER, VERSION.V1, `/messages/${messageId}/read`),
       },
     },
     OFFERS: {
