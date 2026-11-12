@@ -58,6 +58,15 @@ public class RestHandlerException {
         HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(ForbiddenException.class)
+  public ResponseEntity<BaseResponse<ExceptionResponse>> handleForbiddenException(
+      ForbiddenException exception) {
+    return new ResponseEntity<>(
+        BaseResponse.build(
+            new ExceptionResponse(exception.getErrorCode(), exception.getMessage()), false),
+        HttpStatus.FORBIDDEN);
+  }
+
   @ExceptionHandler(InvalidTokenException.class)
   public ResponseEntity<BaseResponse<ExceptionResponse>> handleInvalidTokenException(
       InvalidTokenException exception) {

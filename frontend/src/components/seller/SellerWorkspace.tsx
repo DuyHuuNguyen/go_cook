@@ -1,10 +1,16 @@
 import { useEffect, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router";
+import {useProfile} from "../../contexts/ProfileContext.tsx";
 
 const links = [
   [
     "/seller",
     "Tổng quan",
+    "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
+  ],
+  [
+    "/seller/menu-management",
+    "Quản lý menus",
     "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
   ],
   [
@@ -25,18 +31,17 @@ const links = [
   ],
 ];
 export function SellerWorkspace({
-  title,
-  description,
   children,
 }: {
-  title: string;
-  description: string;
   children: ReactNode;
 }) {
   const { pathname } = useLocation();
+  const {profileData} =  useProfile();
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [pathname]);
+
   return (
     <div className="container chef-preview">
       <div className="page-heading">
@@ -47,9 +52,7 @@ export function SellerWorkspace({
         </nav>
         <div className="between chef-section-heading">
           <div>
-            <p className="eyebrow">Bếp Cô Mai · Kênh đầu bếp</p>
-            <h1>{title}</h1>
-            <p className="lead">{description}</p>
+            <p className="eyebrow">{`Bếp ${profileData?.username} · Kênh đầu bếp`}</p>
           </div>
           <Link className="btn secondary" to="/seller/product-new">
             + Thêm thực đơn
@@ -61,7 +64,7 @@ export function SellerWorkspace({
           <div className="chef-identity">
             <span className="chef-avatar">M</span>
             <div>
-              <strong>Bếp Cô Mai</strong>
+              <strong>{profileData?.username} </strong>
               <p className="small muted">Đầu bếp tại gia</p>
             </div>
           </div>

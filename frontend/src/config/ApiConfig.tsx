@@ -49,6 +49,7 @@ export const ENDPOINTS = {
     GET: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/bookings"),
     },
+
     LIST: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/bookings"),
     },
@@ -170,6 +171,31 @@ export const ENDPOINTS = {
       GET: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/categories"),
       },
+        INSTRUCTOR: {
+            CREATE: {
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/users/instructor"),
+            },
+        },
+        CHEF:{
+            CREATE: {
+                V2: endpoint(SERVICE.USER, VERSION.V2, "/users/become-chef"),
+            }
+        },
+        DISH:{
+            GET:{
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/dishes"),
+            }
+        },
+        MENU:{
+            POST:{
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/menus/creation"),
+            }
+        },
+        CATEGORY: {
+            GET: {
+                V1: endpoint(SERVICE.USER, VERSION.V1, "/categories"),
+            }
+        }
     },
   },
 
@@ -305,6 +331,31 @@ export const ENDPOINTS = {
     DETAIL: {
       GET: {
         V1: endpoint(SERVICE.CURRICULUM, VERSION.V1, "/exams/detail"),
+      },
+    },
+  },
+  CHAT: {
+    CONVERSATIONS: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations"),
+    },
+    MESSAGES: {
+      V1: (conversationId: number | string) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/conversations/${conversationId}/messages`),
+      SEND: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/messages"),
+      },
+    },
+    OFFERS: {
+      CREATE: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/offers"),
+      },
+      ACCEPT: {
+        V1: (offerId: number | string) =>
+          endpoint(SERVICE.USER, VERSION.V1, `/conversations/offers/${offerId}/accept`),
+      },
+      REJECT: {
+        V1: (offerId: number | string) =>
+          endpoint(SERVICE.USER, VERSION.V1, `/conversations/offers/${offerId}/reject`),
       },
     },
   },

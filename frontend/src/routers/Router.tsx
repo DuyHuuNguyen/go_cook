@@ -25,12 +25,16 @@ import MainLayout from "../layouts/MainLayout";
 import NotFound from "../components/common/NotFound";
 import { authStore } from "../stores/authStore";
 import DemoPage from "../pages/DemoPage.tsx";
+import ChatDemo from "../pages/ChatDemo.tsx";
+import {MenuManagementPage} from "../pages/seller/MenuManagementPage.tsx";
+import UpdateMenu from "../pages/seller/UpdateMenuPage.tsx";
 import AdminLayout from "../components/admin/AdminLayout";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminResourcePage from "../components/admin/AdminResourcePage";
 import AdminReports from "../pages/admin/AdminReports";
 import AdminSettings from "../pages/admin/AdminSettings";
 import { adminSectionKeys } from "../types/AdminTypes";
+import {ChatPage} from "../pages/ChatPage.tsx";
 
 export const router = createBrowserRouter(
   [
@@ -38,12 +42,16 @@ export const router = createBrowserRouter(
       element: <MainLayout />,
       children: [
         { path: "/become-chef", element: <BecomeChefPage /> },
-        { path: "/demo", element: <DemoPage /> },
+        { path:"/demo", element : <DemoPage/>},
+        { path:"/chat-demo", element : <ChatDemo/>},
+        { path: "/chat", element: <ChatPage /> },
         {
           path: "/seller",
           element: <SellerDemoLayout />,
           children: [
             { index: true, element: <SellerDashboardPage /> },
+            { path: "menu-management", element: <MenuManagementPage/> },
+            { path: "update-menu", element: <UpdateMenu/> },
             { path: "products", element: <SellerProductsPage /> },
             { path: "product-new", element: <SellerProductNewPage /> },
             { path: "product-edit", element: <SellerProductEditPage /> },

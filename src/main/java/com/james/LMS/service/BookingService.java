@@ -2,6 +2,7 @@ package com.james.LMS.service;
 
 import com.james.LMS.entity.Booking;
 import com.james.LMS.request.CreateBookingRequest;
+import java.util.Optional;
 import com.james.LMS.response.BookingDetailResponse;
 import com.james.LMS.response.MatchingChefResponse;
 import java.util.List;
@@ -13,7 +14,9 @@ public interface BookingService {
 
   Page<Booking> findCustomerBookings(Long customerId, Pageable pageable);
 
+  List<MatchingChefResponse> findMatchingChefs(Long bookingId, Long customerId);
+
   BookingDetailResponse findBookingDetails(Long bookingId, Long customerId);
 
-  List<MatchingChefResponse> findMatchingChefs(Long bookingId, Long customerId);
+  Optional<Booking> findById(Long id);
 }

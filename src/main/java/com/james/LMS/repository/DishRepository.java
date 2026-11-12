@@ -16,6 +16,8 @@ public interface DishRepository extends JpaRepository<Dish, Long>, JpaSpecificat
   List<Dish> findByIdGreaterThanAndChef_IdAndIsActiveTrueOrderByIdAsc(
       Long id, Long chefId, Limit limit);
 
+  List<Dish> findByIdGreaterThanAndIsActiveTrueOrderByIdAsc(Long id, Limit limit);
+
   List<Dish> findByIdGreaterThanAndChef_IdAndIsActiveTrueAndNameContainingIgnoreCaseOrderByIdAsc(
       Long id, Long chefId, String name, Limit limit);
 

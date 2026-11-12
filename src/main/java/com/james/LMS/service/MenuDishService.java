@@ -1,3 +1,7 @@
 package com.james.LMS.service;
 
-public interface MenuDishService {}
+import java.util.List;
+
+public interface MenuDishService {
+  void deleteMenuDishes(List<Long> dishIds, Long menuId);
+}
