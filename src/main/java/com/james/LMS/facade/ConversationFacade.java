@@ -32,4 +32,10 @@ public interface ConversationFacade {
   BaseResponse<ChatConversationResponse> markConversationAsRead(Long conversationId);
 
   BaseResponse<Long> getUnreadMessageCount();
+
+  BaseResponse<List<ChatMessageResponse>> getUnreadMessages();
+
+  BaseResponse<ChatMessageResponse> markMessageAsRead(Long messageId);
+
+  BaseResponse<Void> markAllMessagesAsRead();
 }

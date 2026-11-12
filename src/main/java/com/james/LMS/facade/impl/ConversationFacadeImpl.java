@@ -441,6 +441,61 @@ public class ConversationFacadeImpl implements ConversationFacade {
   }
 
   @Override
+  @Transactional(readOnly = true)
+  public BaseResponse<List<ChatMessageResponse>> getUnreadMessages() {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long currentUserId = principal.getId();
+
+    List<ChatMessageResponse> responses =
+        chatMessageService.findUnreadMessagesForUser(currentUserId, CONVERSATION_PAGE_SIZE).stream()
+            .map(this::mapMessageToResponse)
+            .toList();
+
+    return BaseResponse.build(responses, true);
+  }
+
+  @Override
+  @Transactional
+  public BaseResponse<ChatMessageResponse> markMessageAsRead(Long messageId) {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long currentUserId = principal.getId();
+
+    ChatMessage message =
+        chatMessageService
+            .findById(messageId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.MESSAGE_NOT_FOUND));
+
+    ChatConversation conversation = message.getConversation();
+    Long customerId = conversation.getCustomer().getId();
+    Long chefId = conversation.getChef().getId();
+    boolean isParticipant = currentUserId.equals(customerId) || currentUserId.equals(chefId);
+
+    if (!isParticipant) {
+      throw new ForbiddenException(ErrorCode.CONVERSATION_ACCESS_DENIED);
+    }
+
+    if (!currentUserId.equals(message.getSender().getId()) && !message.isRead()) {
+      message.setRead(true);
+      message.setReadAt(System.currentTimeMillis());
+      message = chatMessageService.save(message);
+      sendAfterCommit(
+          "/topic/users/" + currentUserId + "/conversations",
+          mapToResponse(conversation, currentUserId));
+    }
+
+    return BaseResponse.build(mapMessageToResponse(message), true);
+  }
+
+  @Override
+  @Transactional
+  public BaseResponse<Void> markAllMessagesAsRead() {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long currentUserId = principal.getId();
+    chatMessageService.markAllMessagesAsRead(currentUserId);
+    return BaseResponse.ok();
+  }
+
+  @Override
   @Transactional
   public BaseResponse<ChatConversationResponse> getOrCreateConversationForBooking(Long bookingId) {
     SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
@@ -606,27 +661,24 @@ public class ConversationFacadeImpl implements ConversationFacade {
     List<ChatMessage> messages = chatMessageService.findByConversationId(conversationId);
 
     List<ChatMessageResponse> responses =
-        messages.stream()
-            .map(
-                msg ->
-                    ChatMessageResponse.builder()
-                        .id(msg.getId())
-                        .conversationId(msg.getConversation().getId())
-                        .senderId(msg.getSender().getId())
-                        .senderName(msg.getSender().getUsername())
-                        .messageType(msg.getMessageType())
-                        .content(msg.getContent())
-                        .sentAt(msg.getCreatedAt())
-                        .read(msg.isRead())
-                        .readAt(msg.getReadAt())
-                        .replyToMessageId(
-                            msg.getReplyToMessage() != null
-                                ? msg.getReplyToMessage().getId()
-                                : null)
-                        .attachments(List.of()) // ponytail: fetch attachments from service
-                        .build())
-            .toList();
+        messages.stream().map(this::mapMessageToResponse).toList();
 
     return BaseResponse.build(responses, true);
+  }
+
+  private ChatMessageResponse mapMessageToResponse(ChatMessage msg) {
+    return ChatMessageResponse.builder()
+        .id(msg.getId())
+        .conversationId(msg.getConversation().getId())
+        .senderId(msg.getSender().getId())
+        .senderName(msg.getSender().getUsername())
+        .messageType(msg.getMessageType())
+        .content(msg.getContent())
+        .sentAt(msg.getCreatedAt())
+        .read(msg.isRead())
+        .readAt(msg.getReadAt())
+        .replyToMessageId(msg.getReplyToMessage() != null ? msg.getReplyToMessage().getId() : null)
+        .attachments(List.of()) // ponytail: fetch attachments from service
+        .build();
   }
 }

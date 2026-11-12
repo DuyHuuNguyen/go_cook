@@ -2,6 +2,7 @@ package com.james.LMS.chat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -349,5 +350,92 @@ class ConversationFacadeImplTest {
     assertTrue(response.getData().getData().isEmpty());
     assertFalse(response.getData().getHasNext());
     assertEquals(-1L, response.getData().getLastId());
+  }
+
+  @Test
+  void getUnreadMessages_returnsUnreadIncomingMessagesForCurrentUser() {
+    authenticateAs(customer);
+    ChatMessage unreadMsg =
+        ChatMessage.builder()
+            .id(401L)
+            .conversation(conversation)
+            .sender(chef)
+            .messageType(ChatMessageType.TEXT)
+            .content("Bạn ơi xác nhận lịch nấu nhé")
+            .read(false)
+            .createdAt(9000L)
+            .build();
+    when(chatMessageService.findUnreadMessagesForUser(customer.getId(), 20))
+        .thenReturn(List.of(unreadMsg));
+
+    BaseResponse<List<ChatMessageResponse>> response = conversationFacade.getUnreadMessages();
+
+    assertTrue(response.isSuccess());
+    assertEquals(1, response.getData().size());
+    assertEquals(401L, response.getData().get(0).getId());
+    assertFalse(response.getData().get(0).isRead());
+    assertEquals("ChefB", response.getData().get(0).getSenderName());
+  }
+
+  @Test
+  void markMessageAsRead_marksUnreadMessageAsReadAndBroadcastsConversationUpdate() {
+    authenticateAs(customer);
+    ChatMessage unreadMsg =
+        ChatMessage.builder()
+            .id(402L)
+            .conversation(conversation)
+            .sender(chef)
+            .messageType(ChatMessageType.TEXT)
+            .content("Tin nhắn chưa đọc")
+            .read(false)
+            .createdAt(9100L)
+            .build();
+    when(chatMessageService.findById(402L)).thenReturn(Optional.of(unreadMsg));
+    when(chatMessageService.save(any(ChatMessage.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(chatMessageService.countUnreadInConversation(conversation.getId(), customer.getId()))
+        .thenReturn(0L);
+
+    BaseResponse<ChatMessageResponse> response = conversationFacade.markMessageAsRead(402L);
+
+    assertTrue(response.isSuccess());
+    assertTrue(response.getData().isRead());
+    assertNotNull(response.getData().getReadAt());
+    verify(chatMessageService).save(unreadMsg);
+    verify(messagingTemplate)
+        .convertAndSend(
+            eq("/topic/users/" + customer.getId() + "/conversations"),
+            any(ChatConversationResponse.class));
+  }
+
+  @Test
+  void markMessageAsRead_deniesNonParticipant() {
+    User stranger = User.builder().id(999L).username("Stranger").email("stranger@test.com").build();
+    authenticateAs(stranger);
+    ChatMessage unreadMsg =
+        ChatMessage.builder()
+            .id(403L)
+            .conversation(conversation)
+            .sender(chef)
+            .messageType(ChatMessageType.TEXT)
+            .content("Private message")
+            .read(false)
+            .createdAt(9200L)
+            .build();
+    when(chatMessageService.findById(403L)).thenReturn(Optional.of(unreadMsg));
+
+    assertThrows(
+        com.james.LMS.exception.ForbiddenException.class,
+        () -> conversationFacade.markMessageAsRead(403L));
+  }
+
+  @Test
+  void markAllMessagesAsRead_marksAllUnreadForCurrentUser() {
+    authenticateAs(customer);
+
+    BaseResponse<Void> response = conversationFacade.markAllMessagesAsRead();
+
+    assertTrue(response.isSuccess());
+    verify(chatMessageService).markAllMessagesAsRead(customer.getId());
   }
 }

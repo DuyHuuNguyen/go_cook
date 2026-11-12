@@ -44,4 +44,16 @@ public class ChatController {
       @Valid @RequestBody ChatMessageRequest request) {
     return conversationFacade.sendMessage(request);
   }
+
+  @PatchMapping("/api/v1/messages/{messageId}/read")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      summary = "Mark a chat message as read",
+      tags = {"Chat APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  @ResponseBody
+  public BaseResponse<ChatMessageResponse> markMessageAsRead(@PathVariable Long messageId) {
+    return conversationFacade.markMessageAsRead(messageId);
+  }
 }
