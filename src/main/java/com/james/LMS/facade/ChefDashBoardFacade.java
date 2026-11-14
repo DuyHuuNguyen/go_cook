@@ -9,4 +9,6 @@ public interface ChefDashBoardFacade {
   BaseResponse<ChefDashboardStatisticsResponse> getDashboardStatistics(Integer month, Integer year);
 
   BaseResponse<ChefWeeklyScheduleResponse> getWeeklySchedule(LocalDate startDate);
+
+  BaseResponse<String> seedMockSchedules();
 }

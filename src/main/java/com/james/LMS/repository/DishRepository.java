@@ -2,6 +2,7 @@ package com.james.LMS.repository;
 
 import com.james.LMS.entity.Dish;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,4 +49,6 @@ public interface DishRepository extends JpaRepository<Dish, Long>, JpaSpecificat
       order by d.id asc
       """)
   List<Object[]> findProfileDishesByChefIds(@Param("chefIds") List<Long> chefIds);
+
+  Optional<Dish> findByName(String name);
 }

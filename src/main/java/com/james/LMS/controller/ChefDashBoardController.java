@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,5 +44,15 @@ public class ChefDashBoardController {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
           LocalDate startDate) {
     return chefDashBoardFacade.getWeeklySchedule(startDate);
+  }
+
+  @PostMapping("/schedules/mock-data")
+  @Operation(
+      summary = "Seed meaningful mock bookings and schedules for the current chef",
+      tags = {"Chef Dashboard APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasAuthority('ROLE_CHEF') or hasRole('CHEF')")
+  public BaseResponse<String> seedMockSchedules() {
+    return chefDashBoardFacade.seedMockSchedules();
   }
 }

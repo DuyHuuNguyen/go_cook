@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ChefScheduleService {
   List<ChefSchedule> findWeeklySchedules(Long chefId, Instant startOfWeek, Instant endOfWeek);
+
+  void seedMockSchedules(Long chefId);
 }

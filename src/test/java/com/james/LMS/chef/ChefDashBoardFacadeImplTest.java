@@ -155,4 +155,13 @@ class ChefDashBoardFacadeImplTest {
     assertEquals("GC-BK1001", data.days().get(0).items().get(0).bookingCode());
     assertEquals("CustomerDuy", data.days().get(0).items().get(0).customerName());
   }
+
+  @Test
+  void seedMockSchedules_callsServiceSuccessfully() {
+    BaseResponse<String> response = chefDashBoardFacade.seedMockSchedules();
+
+    assertTrue(response.isSuccess());
+    assertNotNull(response.getData());
+    org.mockito.Mockito.verify(chefScheduleService).seedMockSchedules(50L);
+  }
 }

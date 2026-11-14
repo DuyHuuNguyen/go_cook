@@ -159,4 +159,14 @@ public class ChefDashBoardFacadeImpl implements ChefDashBoardFacade {
 
     return BaseResponse.build(response, true);
   }
+
+  @Override
+  @Transactional
+  public BaseResponse<String> seedMockSchedules() {
+    SecurityUserDetails principal = SecurityUserDetails.getPrincipal();
+    Long chefId = principal.getId();
+    chefScheduleService.seedMockSchedules(chefId);
+    return BaseResponse.build(
+        "Đã tạo thành công dữ liệu mẫu lịch trình và booking cho đầu bếp!", true);
+  }
 }
