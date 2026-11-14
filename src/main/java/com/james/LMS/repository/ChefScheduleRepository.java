@@ -43,4 +43,18 @@ public interface ChefScheduleRepository extends JpaRepository<ChefSchedule, Long
 
   List<ChefSchedule> findByBooking_IdAndChef_IdAndStatus(
       Long bookingId, Long chefId, ChefScheduleStatus status);
+
+  @Query("""
+      select distinct s from ChefSchedule s
+      join fetch s.booking b
+      left join fetch b.customer c
+      left join fetch b.dishes d
+      where s.chef.id = :chefId and s.isActive = true
+        and s.startAt < :endOfWeek and s.endAt >= :startOfWeek
+      order by s.startAt asc
+      """)
+  List<ChefSchedule> findWeeklySchedules(
+      @Param("chefId") Long chefId,
+      @Param("startOfWeek") Instant startOfWeek,
+      @Param("endOfWeek") Instant endOfWeek);
 }

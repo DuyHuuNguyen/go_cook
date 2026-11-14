@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { SellerWorkspace } from "../../components/seller/SellerWorkspace";
 import { useSellerDemo } from "../../contexts/SellerDemoContext";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { getChefWeeklySchedule } from "../../clients/ChefDashboardClient";
+import type { ChefWeeklyScheduleResponse } from "../../types/ChefScheduleTypes";
 import {
   DEMO_TODAY,
   displayDate,
@@ -28,6 +30,27 @@ export function SellerSchedulePage() {
     paramDate.slice(0, 4) >= "2000" &&
     paramDate.slice(0, 4) <= "2099";
   const date = dateValid ? paramDate : DEMO_TODAY;
+
+  const [weeklySchedule, setWeeklySchedule] =
+    useState<ChefWeeklyScheduleResponse | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getChefWeeklySchedule(paramDate || undefined)
+      .then((data) => {
+        if (active && data) {
+          setWeeklySchedule(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Không thể tải lịch tuần từ backend:", err);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [paramDate]);
+
   const [start, setStart] = useState("09:00");
   const [end, setEnd] = useState("12:00");
   const [available, setAvailable] = useState(true);
@@ -52,12 +75,9 @@ export function SellerSchedulePage() {
     }
   }
   return (
-    <SellerWorkspace
-      title="Lịch phục vụ"
-      description="Chủ động thời gian, dành trọn tâm sức cho từng bữa ăn."
-    >
+    <SellerWorkspace>
       <div className="chef-demo-banner">
-        <strong>Lịch mẫu · Giờ Việt Nam</strong>
+        <strong>Lịch phục vụ · Giờ Việt Nam</strong>
         <span>
           Không nhận hai đơn trùng giờ. Khung giờ liền nhau được phép.
         </span>
@@ -65,48 +85,81 @@ export function SellerSchedulePage() {
       <section className="card stack">
         <div className="between chef-section-heading">
           <div>
-            <p className="eyebrow">Kế hoạch của bạn</p>
+            <p className="eyebrow">Kế hoạch tuần của bạn</p>
             <h2>
-              {displayDate(date)} — {displayDate(dayOffset(date, 6))}
+              {weeklySchedule
+                ? weeklySchedule.displayRange
+                : `${displayDate(date)} — ${displayDate(dayOffset(date, 6))}`}
             </h2>
           </div>
-          <div className="row">
+          <div className="row" style={{ alignItems: "center", gap: 8 }}>
             <button
               className="btn secondary sm"
-              aria-label="7 ngày trước"
-              onClick={() => setParams({ date: dayOffset(date, -7) })}
+              aria-label="Tuần trước"
+              onClick={() =>
+                setParams({
+                  date: weeklySchedule
+                    ? weeklySchedule.prevWeekStartDate
+                    : dayOffset(date, -7),
+                })
+              }
             >
-              ←
+              ← Tuần trước
             </button>
             <button
               className="btn secondary sm"
-              onClick={() => setParams({ date: DEMO_TODAY })}
+              onClick={() => {
+                const today = new Date().toISOString().slice(0, 10);
+                setParams({ date: today });
+              }}
             >
-              Hôm nay mẫu
+              Hôm nay
             </button>
             <button
               className="btn secondary sm"
-              aria-label="7 ngày sau"
-              onClick={() => setParams({ date: dayOffset(date, 7) })}
+              aria-label="Tuần sau"
+              onClick={() =>
+                setParams({
+                  date: weeklySchedule
+                    ? weeklySchedule.nextWeekStartDate
+                    : dayOffset(date, 7),
+                })
+              }
             >
-              →
+              Tuần sau →
             </button>
+            <Link to="/seller/schedule-test" className="btn sm primary">
+              📅 Xem Google Calendar View
+            </Link>
           </div>
         </div>
         <div className="chef-week">
           {Array.from({ length: 7 }, (_, index) => {
-            const day = dayOffset(date, index);
-            const count = orders.filter(
+            const day = weeklySchedule
+              ? weeklySchedule.days[index]?.date || dayOffset(date, index)
+              : dayOffset(date, index);
+
+            const apiDay = weeklySchedule?.days.find((d) => d.date === day);
+            const apiCount = apiDay?.scheduleCount ?? 0;
+
+            const mockCount = orders.filter(
               (order) => isBooked(order.status) && order.date === day,
             ).length;
+
+            const count = apiCount > 0 ? apiCount : mockCount;
+
             const open = slots.some(
               (slot) => slot.date === day && slot.available,
             );
+            const isToday =
+              apiDay?.isToday ??
+              day === new Date().toISOString().slice(0, 10);
+
             return (
               <button
-                className={`chef-day ${index === 0 ? "is-today" : ""}`}
+                className={`chef-day ${isToday ? "is-today" : ""}`}
                 key={day}
-                aria-pressed={index === 0}
+                aria-pressed={day === date}
                 onClick={() => setParams({ date: day })}
               >
                 <span>
@@ -118,7 +171,7 @@ export function SellerSchedulePage() {
                 <strong>{day.slice(8)}</strong>
                 <small>
                   {count
-                    ? `${count} lịch đã nhận`
+                    ? `${count} lịch hẹn`
                     : open
                       ? "Đang mở lịch"
                       : "Chưa mở lịch"}

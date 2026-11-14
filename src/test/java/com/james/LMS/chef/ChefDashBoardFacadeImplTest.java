@@ -8,13 +8,20 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.james.LMS.config.SecurityUserDetails;
+import com.james.LMS.entity.Booking;
+import com.james.LMS.entity.ChefSchedule;
 import com.james.LMS.entity.User;
+import com.james.LMS.enums.ChefScheduleStatus;
 import com.james.LMS.facade.impl.ChefDashBoardFacadeImpl;
 import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.ChefDashboardStatisticsResponse;
+import com.james.LMS.response.ChefWeeklyScheduleResponse;
 import com.james.LMS.service.BookingService;
+import com.james.LMS.service.ChefScheduleService;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
@@ -31,6 +38,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class ChefDashBoardFacadeImplTest {
 
   @Mock private BookingService bookingService;
+  @Mock private ChefScheduleService chefScheduleService;
 
   @InjectMocks private ChefDashBoardFacadeImpl chefDashBoardFacade;
 
@@ -96,5 +104,55 @@ class ChefDashBoardFacadeImplTest {
     assertEquals(0, data.servingOrdersCount());
     assertEquals(0, data.awaitingAcceptanceCount());
     assertEquals(new BigDecimal("0.00"), data.monthlyIncome());
+  }
+
+  @Test
+  void getWeeklySchedule_returnsSchedulesGroupedByDay() {
+    LocalDate sunday = LocalDate.of(2026, 11, 8);
+    Instant sundayNoon = sunday.atTime(12, 0).atZone(ZoneId.systemDefault()).toInstant();
+    Instant sundayAfternoon = sunday.atTime(15, 0).atZone(ZoneId.systemDefault()).toInstant();
+
+    User customer = User.builder().id(99L).username("CustomerDuy").phone("0987654321").build();
+    Booking booking =
+        Booking.builder()
+            .id(1001L)
+            .bookingCode("GC-BK1001")
+            .customer(customer)
+            .chef(chef)
+            .scheduledAt(sundayNoon)
+            .serviceAddress("456 Nguyen Hue, Q1")
+            .guestCount(6)
+            .totalAmount(BigDecimal.valueOf(1200000))
+            .build();
+
+    ChefSchedule schedule =
+        ChefSchedule.builder()
+            .id(501L)
+            .chef(chef)
+            .booking(booking)
+            .startAt(sundayNoon)
+            .endAt(sundayAfternoon)
+            .status(ChefScheduleStatus.CONFIRMED)
+            .build();
+
+    when(chefScheduleService.findWeeklySchedules(eq(50L), any(Instant.class), any(Instant.class)))
+        .thenReturn(List.of(schedule));
+
+    BaseResponse<ChefWeeklyScheduleResponse> response =
+        chefDashBoardFacade.getWeeklySchedule(sunday);
+
+    assertTrue(response.isSuccess());
+    ChefWeeklyScheduleResponse data = response.getData();
+    assertNotNull(data);
+    assertEquals(LocalDate.of(2026, 11, 8), data.startDate());
+    assertEquals(LocalDate.of(2026, 11, 14), data.endDate());
+    assertEquals(LocalDate.of(2026, 11, 1), data.prevWeekStartDate());
+    assertEquals(LocalDate.of(2026, 11, 15), data.nextWeekStartDate());
+    assertEquals(7, data.days().size());
+    assertEquals("SUN", data.days().get(0).dayOfWeek());
+    assertEquals(1, data.days().get(0).scheduleCount());
+    assertEquals(501L, data.days().get(0).items().get(0).id());
+    assertEquals("GC-BK1001", data.days().get(0).items().get(0).bookingCode());
+    assertEquals("CustomerDuy", data.days().get(0).items().get(0).customerName());
   }
 }

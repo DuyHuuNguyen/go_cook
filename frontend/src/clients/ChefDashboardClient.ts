@@ -1,6 +1,7 @@
 import axiosClient from "./AxiosClient";
 import { ENDPOINTS } from "../config/ApiConfig";
 import { ChefDashboardStatistics } from "../types/ChefDashboardTypes";
+import { ChefWeeklyScheduleResponse } from "../types/ChefScheduleTypes";
 
 export const getChefDashboardStatistics = async (
   month?: number,
@@ -14,6 +15,20 @@ export const getChefDashboardStatistics = async (
     data: ChefDashboardStatistics;
     success: boolean;
   }>(ENDPOINTS.CHEF_DASHBOARD.STATISTICS.V1, { params });
+
+  return response.data.data;
+};
+
+export const getChefWeeklySchedule = async (
+  startDate?: string,
+): Promise<ChefWeeklyScheduleResponse> => {
+  const params: Record<string, string> = {};
+  if (startDate) params.startDate = startDate;
+
+  const response = await axiosClient.get<{
+    data: ChefWeeklyScheduleResponse;
+    success: boolean;
+  }>(ENDPOINTS.CHEF_DASHBOARD.WEEKLY_SCHEDULE.V1, { params });
 
   return response.data.data;
 };

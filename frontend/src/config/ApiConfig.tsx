@@ -424,5 +424,8 @@ export const ENDPOINTS = {
     STATISTICS: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/statistics"),
     },
+    WEEKLY_SCHEDULE: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/schedules/weekly"),
+    },
   },
 } as const;

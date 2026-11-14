@@ -7,6 +7,7 @@ import { SellerOrdersPage } from "../pages/seller/SellerOrdersPage";
 import { SellerOrderDetailPage } from "../pages/seller/SellerOrderDetailPage";
 import { SellerRevenuePage } from "../pages/seller/SellerRevenuePage";
 import { SellerSchedulePage } from "../pages/seller/SellerSchedulePage";
+import { SellerScheduleTestPage } from "../pages/seller/SellerScheduleTestPage";
 import { BecomeChefPage } from "../pages/seller/BecomeChefPage";
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { useSyncExternalStore } from "react";
@@ -61,6 +62,7 @@ export const router = createBrowserRouter(
             { path: "order-detail", element: <SellerOrderDetailPage /> },
             { path: "revenue", element: <SellerRevenuePage /> },
             { path: "schedule", element: <SellerSchedulePage /> },
+            { path: "schedule-test", element: <SellerScheduleTestPage /> },
             { path: "booking-management", element: <BookingChefManagement/>},
 
           ],
