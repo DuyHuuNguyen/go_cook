@@ -1,7 +1,7 @@
 package com.james.LMS.service;
 
 import com.james.LMS.entity.BookingPriceOffer;
-import com.james.LMS.enums.BookingPriceOfferStatus;
+import java.util.List;
 import java.util.Optional;
 
 public interface BookingPriceOfferService {
@@ -10,4 +10,6 @@ public interface BookingPriceOfferService {
   Optional<BookingPriceOffer> findById(Long id);
 
   Optional<BookingPriceOffer> findLatestAcceptedByConversationId(Long conversationId);
+
+  List<BookingPriceOffer> findByConversationId(Long conversationId);
 }

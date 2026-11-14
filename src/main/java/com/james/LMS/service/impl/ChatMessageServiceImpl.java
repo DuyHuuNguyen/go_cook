@@ -6,6 +6,7 @@ import com.james.LMS.service.ChatMessageService;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,5 +27,32 @@ public class ChatMessageServiceImpl implements ChatMessageService {
   @Override
   public List<ChatMessage> findByConversationId(Long conversationId) {
     return chatMessageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+  }
+
+  @Override
+  public long countUnreadInConversation(Long conversationId, Long userId) {
+    return chatMessageRepository.countByConversationIdAndSenderIdNotAndReadFalse(
+        conversationId, userId);
+  }
+
+  @Override
+  public long countTotalUnreadForUser(Long userId) {
+    return chatMessageRepository.countUnreadMessagesForUser(userId);
+  }
+
+  @Override
+  public List<ChatMessage> findUnreadMessagesForUser(Long userId, int limit) {
+    return chatMessageRepository.findUnreadMessagesForUser(userId, Limit.of(limit));
+  }
+
+  @Override
+  public int markConversationAsRead(Long conversationId, Long userId) {
+    return chatMessageRepository.markConversationMessagesAsRead(
+        conversationId, userId, System.currentTimeMillis());
+  }
+
+  @Override
+  public int markAllMessagesAsRead(Long userId) {
+    return chatMessageRepository.markAllMessagesAsRead(userId, System.currentTimeMillis());
   }
 }

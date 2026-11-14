@@ -16,6 +16,8 @@ const endpoint = (service: string, version: string, path: string) => {
   return `${service}${version}${path}`;
 };
 
+export const WS_CHAT_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/ws-chat`;
+
 export const ENDPOINTS = {
   ADMIN: {
     DASHBOARD: "/api/v1/admin/dashboard",
@@ -70,6 +72,22 @@ export const ENDPOINTS = {
           SERVICE.USER,
           VERSION.V1,
           `/bookings/${bookingId}/requests`,
+        ),
+    },
+    CHEF_BOOKINGS: {
+      V1: (lastId: number | string) =>
+        endpoint(
+          SERVICE.USER,
+          VERSION.V1,
+          `/bookings/chef/bookings/${lastId}`,
+        ),
+    },
+    CHEF_BOOKING_STATUS: {
+      V1: (id: number | string) =>
+        endpoint(
+          SERVICE.USER,
+          VERSION.V1,
+          `/bookings/chef/bookings/${id}/booking-status`,
         ),
     },
   },
@@ -157,6 +175,9 @@ export const ENDPOINTS = {
     MENU: {
       POST: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/menus"),
+      },
+      CREATE: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/menus/creation"),
       },
     },
     CATEGORY: {
@@ -328,7 +349,33 @@ export const ENDPOINTS = {
   },
   CHAT: {
     CONVERSATIONS: {
-      V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations"),
+      V1: (lastId: number | string = 0) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/conversations?lastId=${lastId}`),
+      UNREAD_COUNT: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/unread-count"),
+      },
+      UNREAD_MESSAGES: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/unread-messages"),
+      },
+      READ_ALL: {
+        V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/read-all"),
+      },
+      READ: {
+        V1: (conversationId: number | string) =>
+          endpoint(
+            SERVICE.USER,
+            VERSION.V1,
+            `/conversations/${conversationId}/read`,
+          ),
+      },
+      BOOKING: {
+        V1: (bookingId: number | string) =>
+          endpoint(
+            SERVICE.USER,
+            VERSION.V1,
+            `/conversations/booking/${bookingId}`,
+          ),
+      },
     },
     MESSAGES: {
       V1: (conversationId: number | string) =>
@@ -336,8 +383,20 @@ export const ENDPOINTS = {
       SEND: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/messages"),
       },
+      MARK_READ: {
+        V1: (messageId: number | string) =>
+          endpoint(SERVICE.USER, VERSION.V1, `/messages/${messageId}/read`),
+      },
     },
     OFFERS: {
+      LIST: {
+        V1: (conversationId: number | string) =>
+          endpoint(
+            SERVICE.USER,
+            VERSION.V1,
+            `/conversations/${conversationId}/offers`,
+          ),
+      },
       CREATE: {
         V1: endpoint(SERVICE.USER, VERSION.V1, "/conversations/offers"),
       },
@@ -349,6 +408,27 @@ export const ENDPOINTS = {
         V1: (offerId: number | string) =>
           endpoint(SERVICE.USER, VERSION.V1, `/conversations/offers/${offerId}/reject`),
       },
+    },
+  },
+  EXPLORE_CHEFS: {
+    LIST: {
+      V1: (lastId: number | string) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/explore-chefs/${lastId}`),
+    },
+    DETAIL: {
+      V1: (chefId: number | string) =>
+        endpoint(SERVICE.USER, VERSION.V1, `/explore-chefs/detail/${chefId}`),
+    },
+  },
+  CHEF_DASHBOARD: {
+    STATISTICS: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/statistics"),
+    },
+    WEEKLY_SCHEDULE: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/schedules/weekly"),
+    },
+    MOCK_SCHEDULES: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/schedules/mock-data"),
     },
   },
 } as const;

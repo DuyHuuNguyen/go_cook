@@ -1,15 +1,18 @@
 import { useEffect } from "react";
 import {
+  Badge,
+  Button,
   Container,
   Nav,
   Navbar as BsNavbar,
   NavDropdown,
 } from "react-bootstrap";
-import { BoxArrowUpRight, ShieldCheck } from "react-bootstrap-icons";
+import { Bell, BoxArrowUpRight, ChatDots, ShieldCheck } from "react-bootstrap-icons";
 import { Link, NavLink, useNavigate } from "react-router";
 import { UserProvider, useUser } from "../../contexts/UserContext.tsx";
 import { useProfile } from "../../contexts/ProfileContext.tsx";
 import { useApp } from "../../contexts/AppContext.tsx";
+import { useChatNotification } from "../../contexts/ChatNotificationContext";
 import { authStore } from "../../stores/authStore";
 import logo from "../../assets/go-cook-logo.svg";
 import "../../styles/siteChrome.css";
@@ -19,6 +22,13 @@ function NavbarContent() {
   const { logout } = useUser();
   const { profileData, loading, fetchProfile, setProfileData } = useProfile();
   const { notify } = useApp();
+  const {
+    totalUnreadCount,
+    unreadNotifications,
+    markConversationRead,
+    markNotificationRead,
+    markAllNotificationsRead,
+  } = useChatNotification();
 
   useEffect(() => {
     void fetchProfile();
@@ -62,7 +72,7 @@ function NavbarContent() {
 
         <BsNavbar.Collapse id="gc-main-nav" className="gc-navbar-collapse">
           <Nav className="gc-nav-links">
-            <Nav.Link as={Link} to="/#dau-bep">
+            <Nav.Link as={Link} to="/explore-chefs">
               Khám phá đầu bếp
             </Nav.Link>
             <Nav.Link as={NavLink} to="/menus">
@@ -79,6 +89,106 @@ function NavbarContent() {
           </Nav>
 
           <Nav className="gc-navbar-account">
+            {profileData && (
+              <>
+                <NavDropdown
+                  align="end"
+                  id="gc-chat-notifications"
+                  title={
+                    <span className="gc-admin-link position-relative">
+                      <Bell size={17} />
+                      {totalUnreadCount > 0 && (
+                        <Badge bg="danger" pill>
+                          {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                        </Badge>
+                      )}
+                    </span>
+                  }
+                >
+                  <div
+                    className="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"
+                    style={{ minWidth: "300px" }}
+                  >
+                    <strong className="small">Thông báo tin nhắn</strong>
+                    {unreadNotifications.length > 0 && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="p-0 text-decoration-none small"
+                        onClick={() => void markAllNotificationsRead()}
+                      >
+                        Đánh dấu tất cả đã đọc
+                      </Button>
+                    )}
+                  </div>
+
+                  {unreadNotifications.length === 0 ? (
+                    <div className="px-3 py-3 text-muted small text-center">
+                      Không có tin nhắn chưa đọc.
+                    </div>
+                  ) : (
+                    <div style={{ maxHeight: "320px", overflowY: "auto" }}>
+                      {unreadNotifications.map((msg) => (
+                        <div
+                          key={msg.id}
+                          className="px-3 py-2 border-bottom d-flex align-items-start justify-content-between gap-2"
+                        >
+                          <button
+                            type="button"
+                            className="btn btn-link p-0 text-start text-decoration-none flex-grow-1"
+                            onClick={() => {
+                              void markConversationRead(msg.conversationId);
+                              navigate(`/chat?conversationId=${msg.conversationId}`);
+                            }}
+                          >
+                            <div className="fw-semibold text-dark small">
+                              {msg.senderName}
+                            </div>
+                            <div
+                              className="text-muted small"
+                              style={{
+                                display: "-webkit-box",
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {msg.content}
+                            </div>
+                          </button>
+                          <Button
+                            size="sm"
+                            variant="outline-secondary"
+                            style={{ fontSize: "0.72rem", whiteSpace: "nowrap" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void markNotificationRead(msg.id);
+                            }}
+                          >
+                            Đã đọc
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </NavDropdown>
+
+                <Nav.Link
+                  as={Link}
+                  to="/chat"
+                  className="gc-admin-link position-relative"
+                >
+                  <ChatDots size={17} />
+                  <span>Tin nhắn</span>
+                  {totalUnreadCount > 0 && (
+                    <Badge bg="danger" pill>
+                      {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                    </Badge>
+                  )}
+                </Nav.Link>
+              </>
+            )}
+
             {isAdmin && (
               <Nav.Link as={Link} to="/admin" className="gc-admin-link">
                 <ShieldCheck size={17} />
@@ -111,6 +221,11 @@ function NavbarContent() {
                     Gian bếp
                   </NavDropdown.Item>
                 )}
+
+                <NavDropdown.Item as={Link} to="/customer-booking">
+                  Đơn
+                </NavDropdown.Item>
+
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleLogout}>
                   Đăng xuất

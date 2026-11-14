@@ -1,7 +1,10 @@
 package com.james.LMS.repository;
 
+import com.james.LMS.dto.ExploreChefDTO;
 import com.james.LMS.entity.User;
 import jakarta.persistence.LockModeType;
+
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,4 +66,48 @@ public interface UserRepository extends JpaRepository<User, Long> {
     WHERE u.id = :id
     """)
   Optional<User> findUserAndFetchRolesById(@Param("id") Long id);
+
+
+  @Query("""
+    select new com.james.LMS.dto.ExploreChefDTO(
+      u.id,
+      u.username,
+      u.phone,
+      u.email,
+      u.avatarUrl,
+      u.chefProfile.bio,
+      u.chefProfile.experienceYears,
+      u.chefProfile.reviewReason,
+      coalesce(u.chefProfile.statusChangedAt, u.chefProfile.createdAt))
+      from User u
+        where u.chefProfile is not null
+          and u.chefProfile.isActive = true
+          and u.chefProfile.reviewStatus = com.james.LMS.enums.ChefApplicationStatus.APPROVED
+          and u.isActive = true
+          and u.id > :lastId
+        order by u.id asc
+          limit :limitedChefs
+  """)
+  List<ExploreChefDTO> findChefByLastId(
+      @Param("lastId") Long lastId, @Param("limitedChefs") Integer limitedChefs);
+
+  @Query("""
+    select new com.james.LMS.dto.ExploreChefDTO(
+      u.id,
+      u.username,
+      u.phone,
+      u.email,
+      u.avatarUrl,
+      u.chefProfile.bio,
+      u.chefProfile.experienceYears,
+      u.chefProfile.reviewReason,
+      coalesce(u.chefProfile.statusChangedAt, u.chefProfile.createdAt))
+      from User u
+        where u.id = :chefId
+          and u.chefProfile is not null
+          and u.chefProfile.isActive = true
+          and u.chefProfile.reviewStatus = com.james.LMS.enums.ChefApplicationStatus.APPROVED
+          and u.isActive = true
+  """)
+  Optional<ExploreChefDTO> findApprovedChefDetailByUserId(@Param("chefId") Long chefId);
 }

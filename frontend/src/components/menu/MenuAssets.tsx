@@ -62,12 +62,15 @@ export default function MenuAssets({menuId, menuName}: MenuAssetsProps) {
     }
 
     return (
-        <div className="stack">
-            <div className="d-flex align-items-center justify-content-between">
-                <p className="eyebrow m-0">Hình ảnh thực đơn</p>
+        <div className="stack-sm">
+            <div className="between">
+                <div>
+                    <p className="eyebrow m-0">03 · Hình ảnh thực đơn</p>
+                    <h3 className="mt-1">Thư viện hình ảnh ({assets.length})</h3>
+                </div>
                 <button
                     type="button"
-                    className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                    className="btn secondary sm"
                     onClick={(e) => openUploadPopover(e.currentTarget)}
                 >
                     <i className="bi bi-plus-lg"></i>
@@ -76,20 +79,29 @@ export default function MenuAssets({menuId, menuName}: MenuAssetsProps) {
             </div>
 
             {assets.length === 0 && !loading && !error && (
-                <p className="text-muted">Chưa có hình ảnh</p>
+                <div className="soft text-center py-4">
+                    <p className="muted mb-0">Chưa có hình ảnh nào cho thực đơn này. Nhấn &ldquo;Thêm ảnh&rdquo; để tải lên.</p>
+                </div>
             )}
 
             <div style={{
                 display: "grid",
                 gridTemplateColumns: `repeat(auto-fill, minmax(${IMAGE_MIN_SIZE}px, 1fr))`,
-                gap: GRID_GAP
+                gap: 12
             }}>
                 {assets.map((asset) => {
                     const isDeleting = deletingIds.includes(asset.id);
                     return (
                         <div
                             key={asset.id}
-                            style={{position: "relative", opacity: isDeleting ? 0.5 : 1}}
+                            style={{
+                                position: "relative",
+                                opacity: isDeleting ? 0.5 : 1,
+                                borderRadius: 12,
+                                overflow: "hidden",
+                                border: "1px solid #e5e6dc",
+                                background: "#f6f3ea"
+                            }}
                         >
                             <img
                                 src={asset.url}
@@ -99,16 +111,33 @@ export default function MenuAssets({menuId, menuName}: MenuAssetsProps) {
                                     width: "100%",
                                     aspectRatio: "1 / 1",
                                     objectFit: "cover",
-                                    borderRadius: 8
+                                    display: "block"
                                 }}
                             />
                             <button
                                 type="button"
-                                className="btn btn-sm btn-danger"
                                 title="Xóa hình"
                                 disabled={isDeleting}
                                 onClick={() => void handleDelete(asset.id)}
-                                style={{position: "absolute", top: 4, right: 4, lineHeight: 1}}
+                                style={{
+                                    position: "absolute",
+                                    top: 6,
+                                    right: 6,
+                                    width: 28,
+                                    height: 28,
+                                    minHeight: 28,
+                                    padding: 0,
+                                    borderRadius: "50%",
+                                    background: "rgba(180, 35, 24, 0.9)",
+                                    color: "#fff",
+                                    border: "none",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: 13,
+                                    lineHeight: 1,
+                                    boxShadow: "0 2px 6px rgba(0,0,0,0.25)"
+                                }}
                             >
                                 {isDeleting ? "..." : <i className="bi bi-trash"></i>}
                             </button>
@@ -117,18 +146,20 @@ export default function MenuAssets({menuId, menuName}: MenuAssetsProps) {
                 })}
             </div>
 
-            {error && <p className="text-danger">{error}</p>}
-            {deleteError && <p className="text-danger">{deleteError}</p>}
+            {error && <p className="text-danger mb-0">{error}</p>}
+            {deleteError && <p className="text-danger mb-0">{deleteError}</p>}
 
             {hasNext && (
-                <button
-                    type="button"
-                    className="btn btn-link p-0"
-                    disabled={loading}
-                    onClick={() => void loadMore()}
-                >
-                    {loading ? "Đang tải..." : "Tải thêm hình ảnh"}
-                </button>
+                <div>
+                    <button
+                        type="button"
+                        className="btn secondary sm"
+                        disabled={loading}
+                        onClick={() => void loadMore()}
+                    >
+                        {loading ? "Đang tải..." : "Tải thêm hình ảnh"}
+                    </button>
+                </div>
             )}
 
             {popoverPosition && createPortal(

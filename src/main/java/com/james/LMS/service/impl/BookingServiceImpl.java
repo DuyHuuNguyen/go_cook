@@ -1,11 +1,11 @@
 package com.james.LMS.service.impl;
 
+import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.entity.Booking;
 import com.james.LMS.entity.BookingItemDish;
 import com.james.LMS.entity.ChefProfile;
 import com.james.LMS.entity.Dish;
 import com.james.LMS.entity.User;
-import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.enums.ChefApplicationStatus;
 import com.james.LMS.enums.ChefScheduleStatus;
 import com.james.LMS.enums.ErrorCode;
@@ -27,12 +27,13 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -196,5 +197,78 @@ public class BookingServiceImpl implements BookingService {
       returnedChefIds.add(chef.getId());
     }
     return result;
+  }
+
+  private static final int LIMIT_DEFAULT = 20;
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Booking> findByLastIdAndChefIdOrderByIdDesc(Long lastId, Long chefId) {
+    if (lastId == null || lastId <= 0) {
+      return this.bookingRepository.findByChef_IdAndIsActiveTrueOrderByIdDesc(
+          chefId, Limit.of(LIMIT_DEFAULT));
+    }
+    return this.bookingRepository.findByIdGreaterThanAndChef_IdAndIsActiveTrueOrderByIdDesc(
+        lastId, chefId, Limit.of(LIMIT_DEFAULT));
+  }
+
+  @Override
+  public Optional<Booking> findBookingByIdAndChefIdAndIsActiveTrue(Long id, Long chefId) {
+    return this.bookingRepository.findBookingByIdAndChef_IdAndIsActiveTrue(id, chefId);
+  }
+
+  @Override
+  public void save(Booking booking) {
+    this.bookingRepository.save(booking);
+  }
+
+  private static final List<String> SUCCESS_BOOKING_STATUSES =
+      List.of("CHEF_ACCEPT", "CONFIRMED", "COMPLETED");
+
+  @Override
+  @Transactional(readOnly = true)
+  public Map<Long, ChefBookingStats> findChefBookingStats(List<Long> chefIds) {
+    if (chefIds == null || chefIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<Long, ChefBookingStats> statsByChefId = new HashMap<>();
+    for (Object[] row :
+        this.bookingRepository.countChefBookingStats(chefIds, SUCCESS_BOOKING_STATUSES)) {
+      Long chefId = (Long) row[0];
+      int total = row[1] == null ? 0 : ((Number) row[1]).intValue();
+      int successful = row[2] == null ? 0 : ((Number) row[2]).intValue();
+      statsByChefId.put(chefId, new ChefBookingStats(total, successful));
+    }
+    return statsByChefId;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Map<String, Long> countChefBookingsByStatus(Long chefId) {
+    if (chefId == null) {
+      return Map.of();
+    }
+    List<Object[]> rows = this.bookingRepository.countChefBookingsByStatus(chefId);
+    Map<String, Long> stats = new HashMap<>();
+    for (Object[] row : rows) {
+      String status = (String) row[0];
+      Long count = row[1] == null ? 0L : ((Number) row[1]).longValue();
+      if (status != null) {
+        stats.put(status, count);
+      }
+    }
+    return stats;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BigDecimal sumCompletedBookingAmountInPeriod(
+      Long chefId, Instant startOfMonth, Instant endOfMonth) {
+    if (chefId == null || startOfMonth == null || endOfMonth == null) {
+      return BigDecimal.ZERO;
+    }
+    BigDecimal amount =
+        this.bookingRepository.sumCompletedBookingAmountInPeriod(chefId, startOfMonth, endOfMonth);
+    return amount != null ? amount : BigDecimal.ZERO;
   }
 }

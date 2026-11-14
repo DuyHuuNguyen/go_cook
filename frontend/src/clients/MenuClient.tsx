@@ -15,7 +15,7 @@ export interface CreateMenuRequest {
 }
 
 export async function createMenu(payload: CreateMenuRequest) {
-    const response = await axiosClient.post(`${ENDPOINTS.USER.MENU.POST.V1}`, payload);
+    const response = await axiosClient.post(`${ENDPOINTS.USER.MENU.CREATE.V1}`, payload);
     return response.data;
 }
 

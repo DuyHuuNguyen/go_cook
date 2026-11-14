@@ -11,10 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ChatFacadeImpl implements ChatFacade {
-    private final ChatConversationService chatConversationService;
-    private final ChatConversationAttachmentService chatConversationAttachmentService;
-    private final CloudinaryService cloudinaryService;
-    private final BookingPriceOfferService bookingPriceOfferService;
-
-
+  private final ChatConversationService chatConversationService;
+  private final ChatConversationAttachmentService chatConversationAttachmentService;
+  private final CloudinaryService cloudinaryService;
+  private final BookingPriceOfferService bookingPriceOfferService;
 }

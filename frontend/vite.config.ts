@@ -14,6 +14,11 @@ export default defineConfig(({ command }) => ({
         target: 'http://localhost:8083',
         changeOrigin: true,
       },
+      '/ws-chat': {
+        target: 'http://localhost:8083',
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
   build: {

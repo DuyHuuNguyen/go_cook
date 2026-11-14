@@ -34,12 +34,26 @@ public class ChatController {
   // REST API endpoint for sending messages
   @PostMapping("/api/v1/messages")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Send chat message with optional file attachments", tags = {"Chat APIs"})
+  @Operation(
+      summary = "Send chat message with optional file attachments",
+      tags = {"Chat APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("isAuthenticated()")
   @ResponseBody
   public BaseResponse<ChatMessageResponse> sendMessageViaRest(
       @Valid @RequestBody ChatMessageRequest request) {
     return conversationFacade.sendMessage(request);
+  }
+
+  @PatchMapping("/api/v1/messages/{messageId}/read")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      summary = "Mark a chat message as read",
+      tags = {"Chat APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("isAuthenticated()")
+  @ResponseBody
+  public BaseResponse<ChatMessageResponse> markMessageAsRead(@PathVariable Long messageId) {
+    return conversationFacade.markMessageAsRead(messageId);
   }
 }

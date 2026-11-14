@@ -5,6 +5,7 @@ import com.james.LMS.enums.RoleEnum;
 import com.james.LMS.repository.*;
 import com.james.LMS.service.ChatConversationService;
 import com.james.LMS.service.ChatMessageService;
+import com.james.LMS.service.ChefScheduleService;
 import com.james.LMS.service.UserService;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,6 +29,7 @@ public class DevDataSeeder {
   private final BookingRepository bookingRepository;
   private final ChatConversationService chatConversationService;
   private final ChatMessageService chatMessageService;
+  private final ChefScheduleService chefScheduleService;
   private final PasswordEncoder passwordEncoder;
 
   @Bean
@@ -40,9 +42,7 @@ public class DevDataSeeder {
           roleRepository
               .findRoleByRoleName(RoleEnum.ROLE_USER)
               .orElseGet(
-                  () ->
-                      roleRepository.save(
-                          Role.builder().roleName(RoleEnum.ROLE_USER).build()));
+                  () -> roleRepository.save(Role.builder().roleName(RoleEnum.ROLE_USER).build()));
       Role chefRole =
           roleRepository
               .findRoleByRoleName(RoleEnum.ROLE_CHEF)
@@ -82,6 +82,13 @@ public class DevDataSeeder {
                     user.addRole(chefRole);
                     return userService.save(user);
                   });
+
+      // Check and seed chef schedules for Chef Minh
+      try {
+        chefScheduleService.seedMockSchedules(chef.getId());
+      } catch (Exception e) {
+        log.warn("Failed to seed chef schedules: {}", e.getMessage());
+      }
 
       // Check if conversation already exists
       List<ChatConversation> existing = chatConversationService.findByUserId(customer.getId());

@@ -3,13 +3,10 @@ package com.james.LMS.controller;
 import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.facade.BookingFacade;
 import com.james.LMS.request.BookingSearchRequest;
-import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.request.CreateBookingChefRequest;
-import com.james.LMS.response.BaseResponse;
-import com.james.LMS.response.BookingResponse;
-import com.james.LMS.response.BookingChefRequestResponse;
-import com.james.LMS.response.MatchingChefsResponse;
-import com.james.LMS.response.PaginationResponse;
+import com.james.LMS.request.CreateBookingRequest;
+import com.james.LMS.request.UpdateBookingStatusRequest;
+import com.james.LMS.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -62,11 +59,38 @@ public class BookingController {
 
   @PostMapping("/{bookingId}/requests")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Request a chef for a booking", tags = {"Booking APIs"})
+  @Operation(
+      summary = "Request a chef for a booking",
+      tags = {"Booking APIs"})
   @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
   @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
   public BaseResponse<BookingChefRequestResponse> requestChef(
       @PathVariable Long bookingId, @Valid @RequestBody CreateBookingChefRequest request) {
     return bookingFacade.requestChef(bookingId, request);
+  }
+
+  @GetMapping("/chef/bookings/{lastId}")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+      summary = "Request a chef for a booking",
+      tags = {"Booking APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasAnyRole('CHEF')")
+  public BaseResponse<KeySetPaginationResponse<BookingResponse>> findBookingByChefId(
+      @PathVariable("lastId") Long lastId) {
+    return this.bookingFacade.findBookingByChef(lastId);
+  }
+
+  @PatchMapping("/chef/bookings/{id}/booking-status")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+      summary = "Accept or reject  booking by chef",
+      tags = {"Booking APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasAnyRole('CHEF')")
+  public BaseResponse<Void> updateBookingStatus(
+      @PathVariable("id") Long id, @RequestBody UpdateBookingStatusRequest request) {
+    request.withId(id);
+    return this.bookingFacade.updateBookingStatus(request);
   }
 }

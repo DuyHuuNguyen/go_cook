@@ -7,6 +7,7 @@ import { SellerOrdersPage } from "../pages/seller/SellerOrdersPage";
 import { SellerOrderDetailPage } from "../pages/seller/SellerOrderDetailPage";
 import { SellerRevenuePage } from "../pages/seller/SellerRevenuePage";
 import { SellerSchedulePage } from "../pages/seller/SellerSchedulePage";
+import { SellerScheduleTestPage } from "../pages/seller/SellerScheduleTestPage";
 import { BecomeChefPage } from "../pages/seller/BecomeChefPage";
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { useSyncExternalStore } from "react";
@@ -32,7 +33,11 @@ import AdminResourcePage from "../components/admin/AdminResourcePage";
 import AdminReports from "../pages/admin/AdminReports";
 import AdminSettings from "../pages/admin/AdminSettings";
 import { adminSectionKeys } from "../types/AdminTypes";
+import {CustomerBookingManagement} from "../pages/CustomerBookingManagement.tsx";
 import {ChatPage} from "../pages/ChatPage.tsx";
+import {BookingChefManagement} from "../pages/seller/BookingManagement.tsx";
+import {ExploreChefs} from "../pages/ExporeChefs.tsx";
+import ExploreChefDetailPage from "../pages/ExploreChefDetailPage.tsx";
 
 export const router = createBrowserRouter(
   [
@@ -57,6 +62,9 @@ export const router = createBrowserRouter(
             { path: "order-detail", element: <SellerOrderDetailPage /> },
             { path: "revenue", element: <SellerRevenuePage /> },
             { path: "schedule", element: <SellerSchedulePage /> },
+            { path: "schedule-test", element: <SellerScheduleTestPage /> },
+            { path: "booking-management", element: <BookingChefManagement/>},
+
           ],
         },
         // Preserve main: Home and Profile require authentication.
@@ -74,6 +82,9 @@ export const router = createBrowserRouter(
               element: <MatchingChefPage />,
             },
             { path: "/profile", element: <Profile /> },
+            { path: "/customer-booking",  element: <CustomerBookingManagement/> },
+            { path: "/explore-chefs", element: <ExploreChefs/>},
+            { path: "/explore-chefs/:chefId", element: <ExploreChefDetailPage /> }
           ],
         },
       ],
