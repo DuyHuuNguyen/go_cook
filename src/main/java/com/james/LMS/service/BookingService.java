@@ -3,6 +3,8 @@ package com.james.LMS.service;
 import com.james.LMS.entity.Booking;
 import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.response.MatchingChefResponse;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,4 +29,9 @@ public interface BookingService {
   void save(Booking booking);
 
   Map<Long, ChefBookingStats> findChefBookingStats(List<Long> chefIds);
+
+  Map<String, Long> countChefBookingsByStatus(Long chefId);
+
+  BigDecimal sumCompletedBookingAmountInPeriod(
+      Long chefId, Instant startOfMonth, Instant endOfMonth);
 }

@@ -50,4 +50,24 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
       """)
   List<Object[]> countChefBookingStats(
       @Param("chefIds") List<Long> chefIds, @Param("successStatuses") List<String> successStatuses);
+
+  @Query("""
+      select b.bookingStatus, count(b.id)
+      from Booking b
+      where b.chef.id = :chefId and b.isActive = true
+      group by b.bookingStatus
+      """)
+  List<Object[]> countChefBookingsByStatus(@Param("chefId") Long chefId);
+
+  @Query("""
+      select sum(b.totalAmount)
+      from Booking b
+      where b.chef.id = :chefId and b.isActive = true
+        and b.bookingStatus = 'COMPLETED'
+        and b.scheduledAt >= :startOfMonth and b.scheduledAt < :endOfMonth
+      """)
+  java.math.BigDecimal sumCompletedBookingAmountInPeriod(
+      @Param("chefId") Long chefId,
+      @Param("startOfMonth") java.time.Instant startOfMonth,
+      @Param("endOfMonth") java.time.Instant endOfMonth);
 }

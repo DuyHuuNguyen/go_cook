@@ -241,4 +241,34 @@ public class BookingServiceImpl implements BookingService {
     }
     return statsByChefId;
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Map<String, Long> countChefBookingsByStatus(Long chefId) {
+    if (chefId == null) {
+      return Map.of();
+    }
+    List<Object[]> rows = this.bookingRepository.countChefBookingsByStatus(chefId);
+    Map<String, Long> stats = new HashMap<>();
+    for (Object[] row : rows) {
+      String status = (String) row[0];
+      Long count = row[1] == null ? 0L : ((Number) row[1]).longValue();
+      if (status != null) {
+        stats.put(status, count);
+      }
+    }
+    return stats;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BigDecimal sumCompletedBookingAmountInPeriod(
+      Long chefId, Instant startOfMonth, Instant endOfMonth) {
+    if (chefId == null || startOfMonth == null || endOfMonth == null) {
+      return BigDecimal.ZERO;
+    }
+    BigDecimal amount =
+        this.bookingRepository.sumCompletedBookingAmountInPeriod(chefId, startOfMonth, endOfMonth);
+    return amount != null ? amount : BigDecimal.ZERO;
+  }
 }

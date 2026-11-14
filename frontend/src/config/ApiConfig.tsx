@@ -420,4 +420,9 @@ export const ENDPOINTS = {
         endpoint(SERVICE.USER, VERSION.V1, `/explore-chefs/detail/${chefId}`),
     },
   },
+  CHEF_DASHBOARD: {
+    STATISTICS: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/statistics"),
+    },
+  },
 } as const;
