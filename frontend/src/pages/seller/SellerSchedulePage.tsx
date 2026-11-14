@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router";
 import { SellerWorkspace } from "../../components/seller/SellerWorkspace";
 import { useSellerDemo } from "../../contexts/SellerDemoContext";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
-import { getChefWeeklySchedule } from "../../clients/ChefDashboardClient";
+import { getChefWeeklySchedule, seedMockSchedules } from "../../clients/ChefDashboardClient";
 import type { ChefWeeklyScheduleResponse } from "../../types/ChefScheduleTypes";
 import {
   DEMO_TODAY,
@@ -33,6 +33,19 @@ export function SellerSchedulePage() {
 
   const [weeklySchedule, setWeeklySchedule] =
     useState<ChefWeeklyScheduleResponse | null>(null);
+  const [seeding, setSeeding] = useState<boolean>(false);
+
+  const fetchSchedule = (targetDate?: string) => {
+    getChefWeeklySchedule(targetDate || undefined)
+      .then((data) => {
+        if (data) {
+          setWeeklySchedule(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Không thể tải lịch tuần từ backend:", err);
+      });
+  };
 
   useEffect(() => {
     let active = true;
@@ -50,6 +63,18 @@ export function SellerSchedulePage() {
       active = false;
     };
   }, [paramDate]);
+
+  const handleSeedMock = async () => {
+    setSeeding(true);
+    try {
+      await seedMockSchedules();
+      fetchSchedule(paramDate);
+    } catch (e) {
+      console.error("Lỗi tạo mock data:", e);
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const [start, setStart] = useState("09:00");
   const [end, setEnd] = useState("12:00");
@@ -127,6 +152,14 @@ export function SellerSchedulePage() {
               }
             >
               Tuần sau →
+            </button>
+            <button
+              className="btn secondary sm"
+              onClick={handleSeedMock}
+              disabled={seeding}
+              title="Tạo lịch trình và booking mẫu trong tuần"
+            >
+              {seeding ? "Đang tạo..." : "⚡ Tạo Mock Lịch"}
             </button>
             <Link to="/seller/schedule-test" className="btn sm primary">
               📅 Xem Google Calendar View

@@ -427,5 +427,8 @@ export const ENDPOINTS = {
     WEEKLY_SCHEDULE: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/schedules/weekly"),
     },
+    MOCK_SCHEDULES: {
+      V1: endpoint(SERVICE.USER, VERSION.V1, "/chef/dashboards/schedules/mock-data"),
+    },
   },
 } as const;

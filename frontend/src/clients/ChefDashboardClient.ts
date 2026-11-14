@@ -32,3 +32,12 @@ export const getChefWeeklySchedule = async (
 
   return response.data.data;
 };
+
+export const seedMockSchedules = async (): Promise<string> => {
+  const response = await axiosClient.post<{
+    data: string;
+    success: boolean;
+  }>(ENDPOINTS.CHEF_DASHBOARD.MOCK_SCHEDULES.V1);
+
+  return response.data.data;
+};

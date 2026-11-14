@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { SellerWorkspace } from "../../components/seller/SellerWorkspace";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
-import { getChefWeeklySchedule } from "../../clients/ChefDashboardClient";
+import { getChefWeeklySchedule, seedMockSchedules } from "../../clients/ChefDashboardClient";
 import type {
   ChefScheduleItem,
   ChefWeeklyScheduleResponse,
@@ -72,6 +72,24 @@ export function SellerScheduleTestPage() {
     null,
   );
   const [showJson, setShowJson] = useState<boolean>(false);
+  const [seeding, setSeeding] = useState<boolean>(false);
+  const [seedSuccess, setSeedSuccess] = useState<string | null>(null);
+
+  const handleSeedMockData = async () => {
+    setSeeding(true);
+    setSeedSuccess(null);
+    setError(null);
+    try {
+      const msg = await seedMockSchedules();
+      setSeedSuccess(msg || "Đã tạo mock data lịch trình và booking thành công!");
+      fetchSchedule(dateParam);
+    } catch (err) {
+      console.error("Lỗi tạo mock data:", err);
+      setError("Không thể tạo mock data. Vui lòng thử lại.");
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const fetchSchedule = (targetDate?: string) => {
     setLoading(true);
@@ -201,11 +219,34 @@ export function SellerScheduleTestPage() {
                 }}
               />
             </label>
+            <button
+              className="btn primary sm"
+              onClick={handleSeedMockData}
+              disabled={seeding}
+              title="Tạo các đơn booking và lịch trình mẫu cho cả tuần hiện tại"
+            >
+              {seeding ? "Đang tạo..." : "⚡ Tạo Mock Data Lịch Trình"}
+            </button>
             <Link to="/seller/schedule" className="btn secondary sm">
               Quay lại Lịch phục vụ
             </Link>
           </div>
         </div>
+
+        {seedSuccess && (
+          <div
+            className="notice"
+            style={{
+              marginBottom: 16,
+              backgroundColor: "#e6f4ea",
+              color: "#137333",
+              border: "1px solid #ceead6",
+            }}
+            role="status"
+          >
+            {seedSuccess}
+          </div>
+        )}
 
         {/* Stats summary bar */}
         <div
