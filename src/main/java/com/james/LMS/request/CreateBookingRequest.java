@@ -1,6 +1,5 @@
 package com.james.LMS.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -22,11 +21,9 @@ public class CreateBookingRequest {
   @Size(max = 500)
   private String serviceAddress;
 
-  @NotBlank
-  private String wardCode;
+  @NotBlank private String wardCode;
 
-  @NotBlank
-  private String provinceCode;
+  @NotBlank private String provinceCode;
 
   @Size(max = 500)
   private String customerNote;

@@ -8,12 +8,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.entity.Booking;
 import com.james.LMS.entity.BookingItemDish;
 import com.james.LMS.entity.ChefProfile;
 import com.james.LMS.entity.Dish;
 import com.james.LMS.entity.User;
-import com.james.LMS.config.ChefBookingProperties;
 import com.james.LMS.enums.ChefApplicationStatus;
 import com.james.LMS.enums.ChefScheduleStatus;
 import com.james.LMS.exception.EntityNotFoundException;
@@ -21,12 +22,11 @@ import com.james.LMS.repository.BookingRepository;
 import com.james.LMS.repository.ChefProfileRepository;
 import com.james.LMS.repository.ChefScheduleRepository;
 import com.james.LMS.repository.DishRepository;
+import com.james.LMS.response.MatchingChefResponse;
+import com.james.LMS.response.MatchingChefsResponse;
 import com.james.LMS.service.DishService;
 import com.james.LMS.service.UserService;
 import com.james.LMS.service.impl.BookingServiceImpl;
-import com.james.LMS.response.MatchingChefsResponse;
-import com.james.LMS.response.MatchingChefResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -60,8 +60,7 @@ class MatchingChefServiceTest {
     ChefProfile busy = profile(200L, 13L, "Chef B");
 
     when(bookings.findByIdAndCustomer_IdAndIsActiveTrue(1L, 5L)).thenReturn(Optional.of(booking));
-    when(chefBookingProperties.getPreparationDuration())
-        .thenReturn(java.time.Duration.ofHours(2));
+    when(chefBookingProperties.getPreparationDuration()).thenReturn(java.time.Duration.ofHours(2));
     when(profiles.findMatchingAreaChefs("P1", "W1", ChefApplicationStatus.APPROVED))
         .thenReturn(List.of(available, available, busy));
     when(profiles.findMatchedProfileDishIds(List.of(100L, 100L, 200L), List.of(10L, 20L)))
@@ -99,10 +98,22 @@ class MatchingChefServiceTest {
 
   @Test
   void responseUsesRequestedSuccessAndExperienceFieldNames() throws Exception {
-    String json = new ObjectMapper().writeValueAsString(
-        new MatchingChefsResponse(true, List.of(new MatchingChefResponse(
-            12L, "Chef A", "bio", "5", "avatar", 1, 1,
-            List.of(new MatchingChefResponse.DishItem(10L, "Dish A")), List.of()))));
+    String json =
+        new ObjectMapper()
+            .writeValueAsString(
+                new MatchingChefsResponse(
+                    true,
+                    List.of(
+                        new MatchingChefResponse(
+                            12L,
+                            "Chef A",
+                            "bio",
+                            "5",
+                            "avatar",
+                            1,
+                            1,
+                            List.of(new MatchingChefResponse.DishItem(10L, "Dish A")),
+                            List.of()))));
     assertTrue(json.contains("\"isSuccess\":true"));
     assertTrue(json.contains("\"experience_years\":\"5\""));
     assertTrue(json.contains("\"chefId\":12"));

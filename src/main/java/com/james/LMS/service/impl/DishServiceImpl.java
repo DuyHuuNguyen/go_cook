@@ -1,9 +1,14 @@
 package com.james.LMS.service.impl;
 
+import com.james.LMS.dto.DishDTO;
 import com.james.LMS.entity.Dish;
 import com.james.LMS.repository.DishRepository;
 import com.james.LMS.service.DishService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
@@ -53,5 +58,32 @@ public class DishServiceImpl implements DishService {
   @Override
   public List<Dish> findByIds(List<Long> ids) {
     return this.dishRepository.findByIdInAndIsActiveTrue(ids);
+  }
+
+  @Override
+  public Map<Long, List<DishDTO>> findDishesByChefIds(List<Long> chefIds) {
+    if (chefIds == null || chefIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<Long, Map<Long, DishDTO>> deduplicatedByChef = new HashMap<>();
+    collectDishes(this.dishRepository.findActiveDishesByChefIds(chefIds), deduplicatedByChef);
+    collectDishes(this.dishRepository.findProfileDishesByChefIds(chefIds), deduplicatedByChef);
+
+    Map<Long, List<DishDTO>> result = new HashMap<>();
+    deduplicatedByChef.forEach(
+        (chefId, dishMap) -> result.put(chefId, new ArrayList<>(dishMap.values())));
+    return result;
+  }
+
+  private void collectDishes(
+      List<Object[]> rows, Map<Long, Map<Long, DishDTO>> deduplicatedByChef) {
+    for (Object[] row : rows) {
+      Long chefId = (Long) row[0];
+      Long dishId = (Long) row[1];
+      String dishName = (String) row[2];
+      deduplicatedByChef
+          .computeIfAbsent(chefId, ignored -> new LinkedHashMap<>())
+          .putIfAbsent(dishId, DishDTO.builder().id(dishId).name(dishName).build());
+    }
   }
 }

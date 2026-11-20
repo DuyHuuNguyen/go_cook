@@ -55,8 +55,9 @@ class BookingRequestServiceTest {
   @BeforeEach
   void setUp() {
     properties = new ChefBookingProperties();
-    service = new BookingRequestServiceImpl(
-        requests, bookings, users, profiles, dishes, schedules, properties);
+    service =
+        new BookingRequestServiceImpl(
+            requests, bookings, users, profiles, dishes, schedules, properties);
   }
 
   @Test
@@ -67,12 +68,20 @@ class BookingRequestServiceTest {
     eligible(booking, chef);
     when(profiles.findMatchedProfileDishIds(List.of(7L), List.of(10L, 20L)))
         .thenReturn(List.<Object[]>of(new Object[] {12L, 10L}));
-    when(requests.saveAndFlush(any(BookingRequest.class))).thenAnswer(invocation -> {
-      BookingRequest saved = invocation.getArgument(0);
-      return BookingRequest.builder().id(99L).booking(saved.getBooking()).chef(saved.getChef())
-          .status(saved.getStatus()).expiresAt(saved.getExpiresAt()).build();
-    });
-    when(schedules.save(any(ChefSchedule.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(requests.saveAndFlush(any(BookingRequest.class)))
+        .thenAnswer(
+            invocation -> {
+              BookingRequest saved = invocation.getArgument(0);
+              return BookingRequest.builder()
+                  .id(99L)
+                  .booking(saved.getBooking())
+                  .chef(saved.getChef())
+                  .status(saved.getStatus())
+                  .expiresAt(saved.getExpiresAt())
+                  .build();
+            });
+    when(schedules.save(any(ChefSchedule.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
     when(bookings.save(booking)).thenReturn(booking);
 
     var response = service.create(1L, 12L, 5L);
@@ -87,8 +96,14 @@ class BookingRequestServiceTest {
     verify(schedules).save(captured.capture());
     assertEquals(ChefScheduleStatus.HELD, captured.getValue().getStatus());
     assertEquals(response.expiresAt(), captured.getValue().getHoldExpiresAt());
-    verify(schedules).countBlockingOverlaps(eq(12L), eq(response.scheduleStartAt()),
-        eq(mealAt), any(), eq(ChefScheduleStatus.CONFIRMED), eq(ChefScheduleStatus.HELD));
+    verify(schedules)
+        .countBlockingOverlaps(
+            eq(12L),
+            eq(response.scheduleStartAt()),
+            eq(mealAt),
+            any(),
+            eq(ChefScheduleStatus.CONFIRMED),
+            eq(ChefScheduleStatus.HELD));
   }
 
   @Test
@@ -104,7 +119,8 @@ class BookingRequestServiceTest {
     booking.setBookingStatus(BookingStatus.PENDING_CHEF_ACCEPTANCE.name());
     when(bookings.lockOwnedBooking(1L, 5L)).thenReturn(Optional.of(booking));
 
-    assertEquals("BOOKING_NOT_SELECTABLE",
+    assertEquals(
+        "BOOKING_NOT_SELECTABLE",
         assertThrows(BookingRequestException.class, () -> service.create(1L, 12L, 5L))
             .getErrorCode());
     verify(users, never()).lockScheduleOwner(any());
@@ -116,10 +132,17 @@ class BookingRequestServiceTest {
     eligible(booking, chef());
     when(profiles.findMatchedProfileDishIds(List.of(7L), List.of(10L, 20L)))
         .thenReturn(List.<Object[]>of(new Object[] {12L, 10L}));
-    when(schedules.countBlockingOverlaps(eq(12L), any(), any(), any(),
-        eq(ChefScheduleStatus.CONFIRMED), eq(ChefScheduleStatus.HELD))).thenReturn(1L);
+    when(schedules.countBlockingOverlaps(
+            eq(12L),
+            any(),
+            any(),
+            any(),
+            eq(ChefScheduleStatus.CONFIRMED),
+            eq(ChefScheduleStatus.HELD)))
+        .thenReturn(1L);
 
-    assertEquals("CHEF_SCHEDULE_CONFLICT",
+    assertEquals(
+        "CHEF_SCHEDULE_CONFLICT",
         assertThrows(BookingRequestException.class, () -> service.create(1L, 12L, 5L))
             .getErrorCode());
     verify(requests, never()).saveAndFlush(any());
@@ -135,7 +158,8 @@ class BookingRequestServiceTest {
     when(profiles.findByUserId(12L)).thenReturn(Optional.of(profile()));
     when(profiles.hasActiveChefRole(12L)).thenReturn(true);
 
-    assertEquals("CHEF_AREA_MISMATCH",
+    assertEquals(
+        "CHEF_AREA_MISMATCH",
         assertThrows(BookingRequestException.class, () -> service.create(1L, 12L, 5L))
             .getErrorCode());
     verify(schedules, never()).save(any());
@@ -145,9 +169,14 @@ class BookingRequestServiceTest {
   void expiresRequestAndReleasesHeldSchedule() {
     Booking booking = booking(Instant.now().plus(Duration.ofHours(5)));
     booking.setBookingStatus(BookingStatus.PENDING_CHEF_ACCEPTANCE.name());
-    BookingRequest request = BookingRequest.builder().id(99L).booking(booking).chef(chef())
-        .status(BookingRequestStatus.PENDING)
-        .expiresAt(Instant.now().minusSeconds(1)).build();
+    BookingRequest request =
+        BookingRequest.builder()
+            .id(99L)
+            .booking(booking)
+            .chef(chef())
+            .status(BookingRequestStatus.PENDING)
+            .expiresAt(Instant.now().minusSeconds(1))
+            .build();
     ChefSchedule schedule = ChefSchedule.builder().status(ChefScheduleStatus.HELD).build();
     when(requests.findBookingIdById(99L)).thenReturn(Optional.of(1L));
     when(bookings.lockById(1L)).thenReturn(Optional.of(booking));
@@ -166,13 +195,18 @@ class BookingRequestServiceTest {
   void allowsNewRequestAfterPreviousHoldExpired() {
     Booking booking = booking(Instant.now().plus(Duration.ofHours(5)));
     booking.setBookingStatus(BookingStatus.PENDING_CHEF_ACCEPTANCE.name());
-    BookingRequest oldRequest = BookingRequest.builder().id(80L).booking(booking).chef(chef())
-        .status(BookingRequestStatus.PENDING)
-        .expiresAt(Instant.now().minusSeconds(1)).build();
+    BookingRequest oldRequest =
+        BookingRequest.builder()
+            .id(80L)
+            .booking(booking)
+            .chef(chef())
+            .status(BookingRequestStatus.PENDING)
+            .expiresAt(Instant.now().minusSeconds(1))
+            .build();
     ChefSchedule oldSchedule = ChefSchedule.builder().status(ChefScheduleStatus.HELD).build();
     eligible(booking, chef());
-    when(requests.findFirstByBooking_IdAndIsActiveTrueAndStatusInOrderByIdDesc(
-        eq(1L), any())).thenReturn(Optional.of(oldRequest));
+    when(requests.findFirstByBooking_IdAndIsActiveTrueAndStatusInOrderByIdDesc(eq(1L), any()))
+        .thenReturn(Optional.of(oldRequest));
     when(schedules.findByBooking_IdAndChef_IdAndStatus(1L, 12L, ChefScheduleStatus.HELD))
         .thenReturn(List.of(oldSchedule));
     when(profiles.findMatchedProfileDishIds(List.of(7L), List.of(10L, 20L)))
@@ -197,13 +231,19 @@ class BookingRequestServiceTest {
   }
 
   private static Booking booking(Instant mealAt) {
-    Booking booking = Booking.builder().id(1L).customer(User.builder().id(5L).build())
-        .scheduledAt(mealAt).provinceCode("P1").wardCode("W1")
-        .bookingStatus(BookingStatus.PENDING.name()).build();
-    booking.addDish(BookingItemDish.builder()
-        .dish(Dish.builder().id(10L).build()).dishName("Dish A").build());
-    booking.addDish(BookingItemDish.builder()
-        .dish(Dish.builder().id(20L).build()).dishName("Dish B").build());
+    Booking booking =
+        Booking.builder()
+            .id(1L)
+            .customer(User.builder().id(5L).build())
+            .scheduledAt(mealAt)
+            .provinceCode("P1")
+            .wardCode("W1")
+            .bookingStatus(BookingStatus.PENDING.name())
+            .build();
+    booking.addDish(
+        BookingItemDish.builder().dish(Dish.builder().id(10L).build()).dishName("Dish A").build());
+    booking.addDish(
+        BookingItemDish.builder().dish(Dish.builder().id(20L).build()).dishName("Dish B").build());
     return booking;
   }
 
@@ -212,7 +252,10 @@ class BookingRequestServiceTest {
   }
 
   private static ChefProfile profile() {
-    return ChefProfile.builder().id(7L).user(chef())
-        .reviewStatus(ChefApplicationStatus.APPROVED).build();
+    return ChefProfile.builder()
+        .id(7L)
+        .user(chef())
+        .reviewStatus(ChefApplicationStatus.APPROVED)
+        .build();
   }
 }

@@ -1,5 +1,6 @@
 package com.james.LMS.entity;
 
+import com.james.LMS.enums.BookingStatus;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -63,5 +64,9 @@ public class Booking extends BaseEntity {
   public void addDish(BookingItemDish bookingItemDish) {
     dishes.add(bookingItemDish);
     bookingItemDish.setBooking(this);
+  }
+
+  public void changeStatus(BookingStatus status) {
+    this.bookingStatus = status.toString();
   }
 }

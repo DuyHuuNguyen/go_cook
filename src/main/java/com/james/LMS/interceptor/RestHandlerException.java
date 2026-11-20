@@ -5,9 +5,9 @@ import com.james.LMS.response.BaseResponse;
 import com.james.LMS.response.ExceptionResponse;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,14 +27,15 @@ public class RestHandlerException {
   }
 
   @ExceptionHandler({
-      PessimisticLockingFailureException.class,
-      ObjectOptimisticLockingFailureException.class
+    PessimisticLockingFailureException.class,
+    ObjectOptimisticLockingFailureException.class
   })
   public ResponseEntity<BaseResponse<ExceptionResponse>> handleConcurrentBookingChange(
       RuntimeException exception) {
     return new ResponseEntity<>(
-        BaseResponse.build(new ExceptionResponse(
-            "BOOKING_CONCURRENT_MODIFICATION", "Booking or chef schedule changed concurrently"),
+        BaseResponse.build(
+            new ExceptionResponse(
+                "BOOKING_CONCURRENT_MODIFICATION", "Booking or chef schedule changed concurrently"),
             false),
         HttpStatus.CONFLICT);
   }

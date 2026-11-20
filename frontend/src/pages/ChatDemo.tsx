@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { WS_CHAT_URL } from '../config/ApiConfig';
 
 interface ChatMessage {
   sender: string;
@@ -17,7 +18,8 @@ export default function ChatDemo() {
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8083/ws-chat'),
+      webSocketFactory: () => new SockJS(WS_CHAT_URL),
+      reconnectDelay: 3000,
       onConnect: () => {
         setConnected(true);
         client.subscribe('/topic/messages', (message) => {

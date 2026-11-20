@@ -14,6 +14,11 @@ const links = [
     "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
   ],
   [
+    "/seller/booking-management",
+    "Quản lý bookings",
+    "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
+  ],
+  [
     "/seller/products",
     "Thực đơn của tôi",
     "M3 17h18 M5 17a7 7 0 0 1 14 0 M12 8V4 M4 21h16",
@@ -28,6 +33,11 @@ const links = [
     "/seller/schedule",
     "Lịch phục vụ",
     "M4 5h16v16H4z M8 3v4 M16 3v4 M4 10h16 M8 14h2 M14 14h2",
+  ],
+  [
+    "/seller/schedule-test",
+    "Test Lịch tuần",
+    "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
   ],
 ];
 export function SellerWorkspace({

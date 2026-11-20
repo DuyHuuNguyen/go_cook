@@ -113,3 +113,10 @@ export interface PaginationResponse<T> {
   hasPrevious: boolean;
   empty: boolean;
 }
+
+export interface KeySetPaginationResponse<T> {
+  data: T[];
+  lastId: number;
+  hasNext: boolean;
+}
+

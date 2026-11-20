@@ -39,20 +39,24 @@ public class BookingRequestServiceImpl implements BookingRequestService {
   private final ChefScheduleRepository chefScheduleRepository;
   private final ChefBookingProperties properties;
 
-  private static final List<BookingRequestStatus> HOLDING_STATUSES = List.of(
-      BookingRequestStatus.PENDING,
-      BookingRequestStatus.ACCEPTED,
-      BookingRequestStatus.AWAITING_PAYMENT);
+  private static final List<BookingRequestStatus> HOLDING_STATUSES =
+      List.of(
+          BookingRequestStatus.PENDING,
+          BookingRequestStatus.ACCEPTED,
+          BookingRequestStatus.AWAITING_PAYMENT);
 
   @Override
   @Transactional
   public BookingChefRequestResponse create(Long bookingId, Long chefId, Long customerId) {
 
-    Booking booking = bookingRepository.lockOwnedBooking(bookingId, customerId)
-        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
+    Booking booking =
+        bookingRepository
+            .lockOwnedBooking(bookingId, customerId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
     Instant now = Instant.now();
-    var currentRequest = bookingRequestRepository
-        .findFirstByBooking_IdAndIsActiveTrueAndStatusInOrderByIdDesc(bookingId, HOLDING_STATUSES);
+    var currentRequest =
+        bookingRequestRepository.findFirstByBooking_IdAndIsActiveTrueAndStatusInOrderByIdDesc(
+            bookingId, HOLDING_STATUSES);
     if (currentRequest.isPresent()) {
       BookingRequest existing = currentRequest.get();
       if (existing.getExpiresAt() == null || existing.getExpiresAt().isAfter(now)) {
@@ -62,42 +66,68 @@ public class BookingRequestServiceImpl implements BookingRequestService {
     }
     if (!BookingStatus.PENDING.name().equals(booking.getBookingStatus())
         || booking.getChef() != null) {
-      throw conflict("BOOKING_NOT_SELECTABLE", "Booking cannot select a chef in its current status");
+      throw conflict(
+          "BOOKING_NOT_SELECTABLE", "Booking cannot select a chef in its current status");
     }
 
     if (!properties.getPreparationDuration().isPositive()
         || !properties.holdFor(BookingRequestStatus.PENDING).isPositive()) {
-      throw new BookingRequestException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "BOOKING_TIME_INVALID", "Chef booking durations must be positive");
+      throw new BookingRequestException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "BOOKING_TIME_INVALID",
+          "Chef booking durations must be positive");
     }
 
-    User chef = userRepository.lockScheduleOwner(chefId)
-        .orElseThrow(() -> new BookingRequestException(HttpStatus.UNPROCESSABLE_ENTITY,
-            "CHEF_UNAVAILABLE", "Chef is not active or does not exist"));
-    ChefProfile profile = chefProfileRepository.findByUserId(chefId)
-        .orElseThrow(() -> new BookingRequestException(HttpStatus.UNPROCESSABLE_ENTITY,
-            "CHEF_UNAVAILABLE", "Chef is not approved"));
-    if (!profile.isActive() || profile.getReviewStatus() != ChefApplicationStatus.APPROVED
+    User chef =
+        userRepository
+            .lockScheduleOwner(chefId)
+            .orElseThrow(
+                () ->
+                    new BookingRequestException(
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                        "CHEF_UNAVAILABLE",
+                        "Chef is not active or does not exist"));
+    ChefProfile profile =
+        chefProfileRepository
+            .findByUserId(chefId)
+            .orElseThrow(
+                () ->
+                    new BookingRequestException(
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                        "CHEF_UNAVAILABLE",
+                        "Chef is not approved"));
+    if (!profile.isActive()
+        || profile.getReviewStatus() != ChefApplicationStatus.APPROVED
         || !chefProfileRepository.hasActiveChefRole(chefId)) {
-      throw new BookingRequestException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "CHEF_UNAVAILABLE", "Chef is not eligible to receive bookings");
+      throw new BookingRequestException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "CHEF_UNAVAILABLE",
+          "Chef is not eligible to receive bookings");
     }
     if (booking.getProvinceCode() == null
-        || chefProfileRepository.countMatchingServiceAreas(profile.getId(),
-            booking.getProvinceCode(), booking.getWardCode()) == 0) {
-      throw new BookingRequestException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "CHEF_AREA_MISMATCH", "Chef does not serve the booking area");
+        || chefProfileRepository.countMatchingServiceAreas(
+                profile.getId(), booking.getProvinceCode(), booking.getWardCode())
+            == 0) {
+      throw new BookingRequestException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "CHEF_AREA_MISMATCH",
+          "Chef does not serve the booking area");
     }
 
-    List<Long> dishIds = booking.getDishes().stream()
-        .map(item -> item.getDish().getId()).distinct().toList();
-    boolean canCook = !dishIds.isEmpty() && (
-        !chefProfileRepository.findMatchedProfileDishIds(List.of(profile.getId()), dishIds).isEmpty()
-        || dishRepository.findOwnedDishChefIds(dishIds).stream()
-            .anyMatch(pair -> chefId.equals(pair[0])));
+    List<Long> dishIds =
+        booking.getDishes().stream().map(item -> item.getDish().getId()).distinct().toList();
+    boolean canCook =
+        !dishIds.isEmpty()
+            && (!chefProfileRepository
+                    .findMatchedProfileDishIds(List.of(profile.getId()), dishIds)
+                    .isEmpty()
+                || dishRepository.findOwnedDishChefIds(dishIds).stream()
+                    .anyMatch(pair -> chefId.equals(pair[0])));
     if (!canCook) {
-      throw new BookingRequestException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "CHEF_DISH_MISMATCH", "Chef cannot cook any requested dish");
+      throw new BookingRequestException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "CHEF_DISH_MISMATCH",
+          "Chef cannot cook any requested dish");
     }
 
     // Refresh the clock after waiting on the chef lock.
@@ -105,22 +135,36 @@ public class BookingRequestServiceImpl implements BookingRequestService {
     Instant endAt = booking.getScheduledAt();
     Instant startAt = endAt.minus(properties.getPreparationDuration());
     if (!startAt.isAfter(now)) {
-      throw new BookingRequestException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "BOOKING_TIME_INVALID", "Booking must allow the full chef preparation time");
+      throw new BookingRequestException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "BOOKING_TIME_INVALID",
+          "Booking must allow the full chef preparation time");
     }
 
-    if (chefScheduleRepository.countBlockingOverlaps(chefId, startAt, endAt, now,
-        ChefScheduleStatus.CONFIRMED, ChefScheduleStatus.HELD) > 0) {
+    if (chefScheduleRepository.countBlockingOverlaps(
+            chefId, startAt, endAt, now, ChefScheduleStatus.CONFIRMED, ChefScheduleStatus.HELD)
+        > 0) {
       throw conflict("CHEF_SCHEDULE_CONFLICT", "Chef has a conflicting schedule");
     }
 
     Instant expiresAt = now.plus(properties.holdFor(BookingRequestStatus.PENDING));
-    BookingRequest request = bookingRequestRepository.saveAndFlush(BookingRequest.builder()
-        .booking(booking).chef(chef).status(BookingRequestStatus.PENDING)
-        .expiresAt(expiresAt).build());
-    chefScheduleRepository.save(ChefSchedule.builder()
-        .booking(booking).chef(chef).startAt(startAt).endAt(endAt)
-        .status(ChefScheduleStatus.HELD).holdExpiresAt(expiresAt).build());
+    BookingRequest request =
+        bookingRequestRepository.saveAndFlush(
+            BookingRequest.builder()
+                .booking(booking)
+                .chef(chef)
+                .status(BookingRequestStatus.PENDING)
+                .expiresAt(expiresAt)
+                .build());
+    chefScheduleRepository.save(
+        ChefSchedule.builder()
+            .booking(booking)
+            .chef(chef)
+            .startAt(startAt)
+            .endAt(endAt)
+            .status(ChefScheduleStatus.HELD)
+            .holdExpiresAt(expiresAt)
+            .build());
     booking.setBookingStatus(BookingStatus.PENDING_CHEF_ACCEPTANCE.name());
     bookingRepository.save(booking);
     return BookingChefRequestResponse.from(request, startAt, endAt);
@@ -133,19 +177,24 @@ public class BookingRequestServiceImpl implements BookingRequestService {
     if (bookingId == null) return;
     Booking booking = bookingRepository.lockById(bookingId).orElse(null);
     if (booking == null) return;
-    bookingRequestRepository.findById(requestId).ifPresent(request -> {
-      Instant now = Instant.now();
-      if (HOLDING_STATUSES.contains(request.getStatus())
-          && request.getExpiresAt() != null && !request.getExpiresAt().isAfter(now)) {
-        expire(request, booking);
-      }
-    });
+    bookingRequestRepository
+        .findById(requestId)
+        .ifPresent(
+            request -> {
+              Instant now = Instant.now();
+              if (HOLDING_STATUSES.contains(request.getStatus())
+                  && request.getExpiresAt() != null
+                  && !request.getExpiresAt().isAfter(now)) {
+                expire(request, booking);
+              }
+            });
   }
 
   private void expire(BookingRequest request, Booking booking) {
     request.setStatus(BookingRequestStatus.EXPIRED);
-    for (ChefSchedule schedule : chefScheduleRepository.findByBooking_IdAndChef_IdAndStatus(
-        booking.getId(), request.getChef().getId(), ChefScheduleStatus.HELD)) {
+    for (ChefSchedule schedule :
+        chefScheduleRepository.findByBooking_IdAndChef_IdAndStatus(
+            booking.getId(), request.getChef().getId(), ChefScheduleStatus.HELD)) {
       schedule.setStatus(ChefScheduleStatus.CANCELLED);
       schedule.setHoldExpiresAt(null);
     }

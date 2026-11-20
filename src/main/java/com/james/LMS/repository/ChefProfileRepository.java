@@ -78,4 +78,18 @@ public interface ChefProfileRepository extends JpaRepository<ChefProfile, Long> 
       @Param("profileId") Long profileId,
       @Param("provinceCode") String provinceCode,
       @Param("wardCode") String wardCode);
+
+  @Query("""
+      select area.province.code,
+             coalesce(area.province.fullName, area.province.name),
+             w.code,
+             coalesce(w.fullName, w.name)
+      from ChefServiceArea area
+      left join area.ward w
+      where area.chefProfile.user.id = :chefId
+        and area.isActive = true
+        and area.chefProfile.isActive = true
+      order by area.id asc
+      """)
+  List<Object[]> findActiveServiceAreasByChefUserId(@Param("chefId") Long chefId);
 }
