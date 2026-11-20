@@ -167,6 +167,14 @@ function CustomerBookingChild() {
                       >
                         Tìm đầu bếp phù hợp
                       </Button>
+
+                      <Button
+                          as={Link as any}
+                          variant="outline-success"
+                          size="sm"
+                      >
+                        Thanh toán
+                      </Button>
                     </div>
                   </Card.Body>
                 </Card>

@@ -32,7 +32,7 @@ public class DevDataSeeder {
   private final ChefScheduleService chefScheduleService;
   private final PasswordEncoder passwordEncoder;
 
-  @Bean
+//  @Bean
   CommandLineRunner seedChatData() {
     return args -> {
       log.info("Seeding development chat data...");
