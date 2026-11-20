@@ -2,6 +2,7 @@ package com.james.LMS.repository;
 
 import com.james.LMS.entity.BookingPriceOffer;
 import com.james.LMS.enums.BookingPriceOfferStatus;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,6 @@ public interface BookingPriceOfferRepository extends JpaRepository<BookingPriceO
   Optional<BookingPriceOffer> findLatestByConversationIdAndStatus(
       @Param("conversationId") Long conversationId,
       @Param("status") BookingPriceOfferStatus status);
+
+  List<BookingPriceOffer> findByConversationIdOrderByIdAsc(Long conversationId);
 }

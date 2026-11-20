@@ -7,6 +7,7 @@ import {
   sendMessage,
   ChatMessageResponse,
 } from '../../clients/ChatClient';
+import { WS_CHAT_URL } from '../../config/ApiConfig';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 
@@ -14,18 +15,29 @@ interface ChatContainerProps {
   conversationId: number;
   currentUserId: number;
   currentBookingPrice?: number;
+  partnerName?: string;
+  bookingCode?: string;
+  onIncomingMessage?: (message: ChatMessageResponse) => void;
 }
 
 export const ChatContainer = ({
   conversationId,
   currentUserId,
   currentBookingPrice,
+  partnerName,
+  bookingCode,
+  onIncomingMessage,
 }: ChatContainerProps) => {
   const [messages, setMessages] = useState<ChatMessageResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [connected, setConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<Client | null>(null);
+  const onIncomingMessageRef = useRef(onIncomingMessage);
+
+  useEffect(() => {
+    onIncomingMessageRef.current = onIncomingMessage;
+  }, [onIncomingMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,7 +61,8 @@ export const ChatContainer = ({
   // WebSocket connection for real-time updates
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8083/ws-chat'),
+      webSocketFactory: () => new SockJS(WS_CHAT_URL),
+      reconnectDelay: 3000,
       onConnect: () => {
         setConnected(true);
         // Subscribe to messages topic
@@ -62,6 +75,9 @@ export const ChatContainer = ({
               if (prev.some((m) => m.id === newMessage.id)) return prev;
               return [...prev, newMessage];
             });
+            if (newMessage.senderId !== currentUserId) {
+              onIncomingMessageRef.current?.(newMessage);
+            }
           }
         });
       },
@@ -93,7 +109,20 @@ export const ChatContainer = ({
   return (
     <Container fluid className="d-flex flex-column" style={{ height: '70vh' }}>
       <div className="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
-        <small className="text-muted">Conversation #{conversationId}</small>
+        <div>
+          {partnerName ? (
+            <div className="d-flex align-items-center gap-2">
+              <strong className="text-dark">{partnerName}</strong>
+              {bookingCode && (
+                <span className="badge bg-light text-dark border">
+                  Đơn #{bookingCode}
+                </span>
+              )}
+            </div>
+          ) : (
+            <small className="text-muted">Cuộc trò chuyện #{conversationId}</small>
+          )}
+        </div>
         <div className="d-flex align-items-center gap-3">
           {currentBookingPrice && (
             <div className="text-end">

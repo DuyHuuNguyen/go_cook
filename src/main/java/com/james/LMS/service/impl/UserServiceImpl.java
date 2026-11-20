@@ -1,8 +1,10 @@
 package com.james.LMS.service.impl;
 
+import com.james.LMS.dto.ExploreChefDTO;
 import com.james.LMS.entity.User;
 import com.james.LMS.repository.UserRepository;
 import com.james.LMS.service.UserService;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,5 +42,15 @@ public class UserServiceImpl implements UserService {
   @Override
   public Optional<User> findUserAndFetchRolesById(Long id) {
     return this.userRepository.findUserAndFetchRolesById(id);
+  }
+
+  @Override
+  public List<ExploreChefDTO> findChefByLastId(Long lastId) {
+    return this.userRepository.findChefByLastId(lastId, 20);
+  }
+
+  @Override
+  public Optional<ExploreChefDTO> findApprovedChefDetailByUserId(Long chefId) {
+    return this.userRepository.findApprovedChefDetailByUserId(chefId);
   }
 }

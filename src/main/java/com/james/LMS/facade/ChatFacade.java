@@ -1,4 +1,3 @@
 package com.james.LMS.facade;
 
-public interface ChatFacade {
-}
+public interface ChatFacade {}

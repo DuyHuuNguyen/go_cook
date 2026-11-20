@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { SellerWorkspace } from "../../components/seller/SellerWorkspace";
 import { useSellerDemo } from "../../contexts/SellerDemoContext";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { getChefDashboardStatistics } from "../../clients/ChefDashboardClient";
+import type { ChefDashboardStatistics } from "../../types/ChefDashboardTypes";
 import {
   DEMO_TODAY,
   displayDate,
@@ -15,6 +18,25 @@ import {
 export function SellerDashboardPage() {
   useDocumentTitle("Tổng quan đầu bếp | GO Cook");
   const { orders, slots } = useSellerDemo();
+  const [stats, setStats] = useState<ChefDashboardStatistics | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getChefDashboardStatistics()
+      .then((data) => {
+        if (active && data) {
+          setStats(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch chef dashboard statistics:", err);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const pending = orders.filter((order) => order.status === "PENDING");
   const serving = orders.filter((order) =>
     ["CONFIRMED", "PREPARING", "COOKING"].includes(order.status),
@@ -28,6 +50,16 @@ export function SellerDashboardPage() {
         order.status === "COMPLETED" && order.releasedAt?.startsWith("2026-10"),
     )
     .reduce((sum, order) => sum + order.total * 0.85, 0);
+
+  const displayPendingCount = stats ? stats.pendingOrdersCount : pending.length;
+  const displayServingCount = stats ? stats.servingOrdersCount : serving.length;
+  const displayAwaitingCount =
+    stats ? stats.awaitingAcceptanceCount : awaiting.length;
+  const displayIncome = stats ? money(stats.monthlyIncome) : money(earned);
+  const monthTitle = stats
+    ? `Thu nhập tháng ${stats.currentMonth}`
+    : "Thu nhập tháng 10";
+
   const today = orders
     .filter(
       (order) =>
@@ -46,10 +78,10 @@ export function SellerDashboardPage() {
       </div>
       <div className="chef-metrics">
         {[
-          ["Đơn mới cần nhận", pending.length, "Đã thanh toán online"],
-          ["Đang phục vụ", serving.length, "Đã nhận · chuẩn bị · đang nấu"],
-          ["Chờ nghiệm thu", awaiting.length, "Chờ khách xác nhận hoàn thành"],
-          ["Thu nhập tháng 10", money(earned), "85% từ đơn đã nghiệm thu"],
+          ["Đơn mới cần nhận", displayPendingCount, "Đã thanh toán online"],
+          ["Đang phục vụ", displayServingCount, "Đã nhận · chuẩn bị · đang nấu"],
+          ["Chờ nghiệm thu", displayAwaitingCount, "Chờ khách xác nhận hoàn thành"],
+          [monthTitle, displayIncome, "85% từ đơn đã nghiệm thu"],
         ].map(([title, value, hint], index) => (
           <article className="card chef-metric" key={title}>
             <div className="between">
