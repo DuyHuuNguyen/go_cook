@@ -3,6 +3,7 @@ package com.james.LMS.controller;
 import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.facade.BookingFacade;
 import com.james.LMS.request.BookingSearchRequest;
+import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.request.CreateBookingChefRequest;
 import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.request.UpdateBookingStatusRequest;
@@ -45,6 +46,16 @@ public class BookingController {
   public BaseResponse<PaginationResponse<BookingResponse>> findBookings(
       @Valid @ParameterObject BookingSearchRequest request) {
     return bookingFacade.findBookings(request);
+  }
+
+  @GetMapping("/{bookingId}")
+  @Operation(
+      summary = "Get booking details for checkout",
+      tags = {"Booking APIs"})
+  @SecurityRequirement(name = SecurityConfig.SECURITY_REQUIREMENT)
+  @PreAuthorize("hasAnyRole('USER', 'SYSTEM_ADMIN')")
+  public BaseResponse<BookingDetailResponse> findBookingDetails(@PathVariable Long bookingId) {
+    return bookingFacade.findBookingDetails(bookingId);
   }
 
   @GetMapping("/{bookingId}/matching-chefs")

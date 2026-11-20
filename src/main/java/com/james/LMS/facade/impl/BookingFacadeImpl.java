@@ -6,6 +6,7 @@ import com.james.LMS.enums.ErrorCode;
 import com.james.LMS.exception.EntityNotFoundException;
 import com.james.LMS.facade.BookingFacade;
 import com.james.LMS.request.BookingSearchRequest;
+import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.request.CreateBookingChefRequest;
 import com.james.LMS.request.CreateBookingRequest;
 import com.james.LMS.request.UpdateBookingStatusRequest;
@@ -50,6 +51,13 @@ public class BookingFacadeImpl implements BookingFacade {
                         .and(Sort.by(Sort.Direction.DESC, "id"))))
             .map(BookingResponse::from);
     return BaseResponse.build(PaginationResponse.from(page), true);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BaseResponse<BookingDetailResponse> findBookingDetails(Long bookingId) {
+    Long customerId = SecurityUserDetails.getPrincipal().getId();
+    return BaseResponse.build(bookingService.findBookingDetails(bookingId, customerId), true);
   }
 
   @Override

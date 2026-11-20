@@ -177,6 +177,7 @@ public class BookingRequestServiceImpl implements BookingRequestService {
     if (bookingId == null) return;
     Booking booking = bookingRepository.lockById(bookingId).orElse(null);
     if (booking == null) return;
+    if (BookingStatus.PAID.name().equals(booking.getBookingStatus())) return;
     bookingRequestRepository
         .findById(requestId)
         .ifPresent(

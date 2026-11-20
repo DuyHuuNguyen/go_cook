@@ -14,7 +14,9 @@ import com.james.LMS.repository.BookingRepository;
 import com.james.LMS.repository.ChefProfileRepository;
 import com.james.LMS.repository.ChefScheduleRepository;
 import com.james.LMS.repository.DishRepository;
+import com.james.LMS.repository.PaymentRepository;
 import com.james.LMS.request.CreateBookingRequest;
+import com.james.LMS.response.BookingDetailResponse;
 import com.james.LMS.response.MatchingChefResponse;
 import com.james.LMS.service.BookingService;
 import com.james.LMS.service.DishService;
@@ -48,6 +50,7 @@ public class BookingServiceImpl implements BookingService {
   private final ChefProfileRepository chefProfileRepository;
   private final ChefScheduleRepository chefScheduleRepository;
   private final DishRepository dishRepository;
+  private final PaymentRepository paymentRepository;
   private final ChefBookingProperties chefBookingProperties;
 
   @Override
@@ -110,6 +113,20 @@ public class BookingServiceImpl implements BookingService {
   @Override
   public Optional<Booking> findById(Long id) {
     return bookingRepository.findById(id);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BookingDetailResponse findBookingDetails(Long bookingId, Long customerId) {
+    Booking booking =
+        bookingRepository
+            .findDetailsByIdAndCustomer_IdAndIsActiveTrue(bookingId, customerId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
+    var payment =
+        paymentRepository
+            .findFirstByBooking_IdAndIsActiveTrueOrderByIdDesc(bookingId)
+            .orElse(null);
+    return BookingDetailResponse.from(booking, payment);
   }
 
   @Override

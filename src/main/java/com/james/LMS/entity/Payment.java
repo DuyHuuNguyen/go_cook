@@ -1,34 +1,53 @@
 package com.james.LMS.entity;
 
+import com.james.LMS.enums.PaymentMethod;
+import com.james.LMS.enums.PaymentStatus;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "payments")
+@Table(
+    name = "payments",
+    uniqueConstraints = {
+      @UniqueConstraint(name = "uk_payments_transaction_ref", columnNames = "transaction_ref")
+    })
 @Getter
 @Setter
 @NoArgsConstructor
-@SuperBuilder
 public class Payment extends BaseEntity {
 
-  @Column(name = "payment_method", length = 30)
-  private String paymentMethod;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "booking_id", nullable = false)
+  private Booking booking;
 
-  @Column(name = "transaction_code", length = 150)
-  private String transactionCode;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "payment_method", nullable = false, length = 30)
+  private PaymentMethod paymentMethod;
 
-  @Column(name = "amount", precision = 12, scale = 2)
+  @Column(name = "transaction_ref", nullable = false, unique = true, length = 150)
+  private String transactionRef;
+
+  @Column(name = "amount", nullable = false, precision = 12, scale = 2)
   private BigDecimal amount;
 
-  @Column(name = "status", length = 30)
-  private String status;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false, length = 30)
+  private PaymentStatus status;
 
-  @Column(name = "paid_at")
-  private Instant paidAt;
+  @Column(name = "vnp_transaction_no", length = 100)
+  private String vnpTransactionNo;
+
+  @Column(name = "bank_code", length = 50)
+  private String bankCode;
 
   @Column(name = "provider_response_code", length = 100)
   private String providerResponseCode;
+
+  @Column(name = "paid_at")
+  private OffsetDateTime paidAt;
+
+  @Column(name = "expired_at")
+  private OffsetDateTime expiredAt;
 }

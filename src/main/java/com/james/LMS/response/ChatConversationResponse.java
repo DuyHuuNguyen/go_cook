@@ -1,7 +1,8 @@
 package com.james.LMS.response;
 
-import com.james.LMS.entity.ChatConversationStatus;
+
 import java.math.BigDecimal;
+import com.james.LMS.enums.ChatConversationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

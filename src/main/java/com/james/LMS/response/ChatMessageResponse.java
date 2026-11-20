@@ -1,7 +1,8 @@
 package com.james.LMS.response;
 
-import com.james.LMS.entity.ChatMessageType;
 import java.util.List;
+
+import com.james.LMS.enums.ChatMessageType;
 import lombok.*;
 
 @Data

@@ -35,6 +35,8 @@ public class PublicEndpointsValidatorUtil {
           "/actuator/beans",
           "/api/v1/users/demo",
           "/api/v1/home",
+          "/api/v1/payments/vnpay/ipn",
+          "/api/v1/payments/vnpay/return",
           "/api/v1/users/login",
           "/api/v1/users/sign-up",
           "/api/v1/users/verify-email",

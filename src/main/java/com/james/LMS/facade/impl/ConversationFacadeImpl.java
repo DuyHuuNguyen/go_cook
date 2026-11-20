@@ -8,6 +8,7 @@ import com.james.LMS.entity.ChatMessage;
 import com.james.LMS.entity.ChatMessageAttachment;
 import com.james.LMS.entity.User;
 import com.james.LMS.enums.BookingPriceOfferStatus;
+import com.james.LMS.enums.ChatConversationStatus;
 import com.james.LMS.enums.ErrorCode;
 import com.james.LMS.enums.RoleEnum;
 import com.james.LMS.exception.EntityNotFoundException;
@@ -543,7 +544,7 @@ public class ConversationFacadeImpl implements ConversationFacade {
                 .customer(booking.getCustomer())
                 .chef(booking.getChef())
                 .booking(booking)
-                .status(com.james.LMS.entity.ChatConversationStatus.ACTIVE)
+                .status(ChatConversationStatus.ACTIVE)
                 .lastMessageAt(System.currentTimeMillis())
                 .build();
         conversation = chatConversationService.save(newConv);

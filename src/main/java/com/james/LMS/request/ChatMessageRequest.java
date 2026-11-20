@@ -1,6 +1,7 @@
 package com.james.LMS.request;
 
-import com.james.LMS.entity.ChatMessageType;
+
+import com.james.LMS.enums.ChatMessageType;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.Data;

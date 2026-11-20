@@ -1,6 +1,8 @@
 package com.james.LMS.config;
 
 import com.james.LMS.entity.*;
+import com.james.LMS.enums.ChatConversationStatus;
+import com.james.LMS.enums.ChatMessageType;
 import com.james.LMS.enums.RoleEnum;
 import com.james.LMS.repository.*;
 import com.james.LMS.service.ChatConversationService;

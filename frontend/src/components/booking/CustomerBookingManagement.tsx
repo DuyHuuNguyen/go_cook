@@ -169,9 +169,10 @@ function CustomerBookingChild() {
                       </Button>
 
                       <Button
-                          as={Link as any}
-                          variant="outline-success"
-                          size="sm"
+                        as={Link as any}
+                        to={`/bookings/${booking.id}/checkout`}
+                        variant="outline-success"
+                        size="sm"
                       >
                         Thanh toán
                       </Button>

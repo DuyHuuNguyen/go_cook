@@ -1,4 +1,4 @@
-package com.james.LMS.entity;
+package com.james.LMS.enums;
 
 public enum ChatMessageType {
   TEXT,

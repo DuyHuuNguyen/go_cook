@@ -21,6 +21,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
   @EntityGraph(attributePaths = {"dishes", "dishes.dish"})
   Optional<Booking> findByIdAndCustomer_IdAndIsActiveTrue(Long id, Long customerId);
 
+  @EntityGraph(attributePaths = {"dishes", "dishes.dish", "chef", "chef.chefProfile"})
+  Optional<Booking> findDetailsByIdAndCustomer_IdAndIsActiveTrue(Long id, Long customerId);
+
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query(
       "select b from Booking b where b.id = :id and b.customer.id = :customerId and b.isActive = true")
