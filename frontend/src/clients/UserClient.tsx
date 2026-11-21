@@ -9,6 +9,13 @@ export async function login(email: string, password: string) {
   return response.data;
 }
 
+export async function loginWithGoogle(idToken: string) {
+  const response = await axiosClient.post(ENDPOINTS.USER.LOGIN.GOOGLE, {
+    idToken,
+  });
+  return response.data;
+}
+
 export async function signup(
   username: string,
   email: string,

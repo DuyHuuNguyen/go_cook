@@ -103,6 +103,7 @@ export const ENDPOINTS = {
     LOGIN: {
       V1: endpoint(SERVICE.USER, VERSION.V1, "/users/login"),
       V2: endpoint(SERVICE.USER, VERSION.V2, "/users/login"),
+      GOOGLE: endpoint(SERVICE.USER, VERSION.V2, "/users/login/google"),
     },
 
     SIGN_UP: {

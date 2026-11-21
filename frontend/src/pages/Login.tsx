@@ -1,5 +1,5 @@
 import { Alert, Button, Card, Container, Form, Spinner } from "react-bootstrap";
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useApp } from "../contexts/AppContext.tsx";
 import { useAuth } from "../hooks/UseAuth.tsx";
@@ -9,10 +9,91 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [gisLoaded, setGisLoaded] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, loading, error, clearError } = useAuth();
+  const { login, loginWithGoogle, loading, error, clearError } = useAuth();
   const { notify } = useApp();
+
+  const GOOGLE_CLIENT_ID =
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    "your-google-client-id.apps.googleusercontent.com";
+
+  useEffect(() => {
+    const scriptId = "google-gsi-client";
+    const initGsi = () => {
+      if ((window as any).google?.accounts?.id) {
+        setGisLoaded(true);
+        (window as any).google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+        });
+
+        const btnContainer = document.getElementById("google-signin-btn-container");
+        if (btnContainer) {
+          btnContainer.innerHTML = "";
+          (window as any).google.accounts.id.renderButton(btnContainer, {
+            theme: "outline",
+            size: "large",
+            width: 350,
+            text: "signin_with",
+            shape: "rectangular",
+          });
+        }
+      }
+    };
+
+    if (document.getElementById(scriptId)) {
+      initGsi();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      initGsi();
+    };
+    document.body.appendChild(script);
+  }, [GOOGLE_CLIENT_ID]);
+
+  async function handleGoogleCredentialResponse(response: { credential?: string }) {
+    if (response?.credential) {
+      const success = await loginWithGoogle(response.credential);
+      if (success) {
+        notify("Đăng nhập với Google thành công", {
+          title: "Đăng nhập",
+          variant: "success",
+        });
+        navigate("/");
+      }
+    }
+  }
+
+  const handleCustomGoogleClick = () => {
+    if ((window as any).google?.accounts?.id) {
+      (window as any).google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          const btn = document.querySelector("#google-signin-btn-container div[role=button]") as HTMLElement;
+          if (btn) {
+            btn.click();
+          } else {
+            notify("Vui lòng cấu hình Google Client ID trong file .env để hoàn tất đăng nhập Google.", {
+              title: "Google Login",
+              variant: "warning",
+            });
+          }
+        }
+      });
+    } else {
+      notify("Đang kết nối dịch vụ Google Sign-In, vui lòng thử lại.", {
+        title: "Google Login",
+        variant: "info",
+      });
+    }
+  };
 
   // move to context.
   async function handleSubmitLogin(e: FormEvent<HTMLFormElement>) {
@@ -85,7 +166,6 @@ function Login() {
                   type="button"
                   className="password-toggle-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  // disabled={loading}
                   aria-label="Toggle password visibility"
                 >
                   <i
@@ -116,14 +196,61 @@ function Login() {
               )}
             </Button>
           </Form>
+
+          {/* Divider */}
+          <div className="d-flex align-items-center my-3">
+            <hr className="flex-grow-1 my-0" />
+            <span className="mx-2 text-muted small fw-semibold">HOẶC</span>
+            <hr className="flex-grow-1 my-0" />
+          </div>
+
+           {/*Google Sign In Area */}
+          <div
+              id="google-signin-btn-container"
+              className="w-100 d-flex justify-content-center mb-2 d-none"
+              style={{ minHeight: "40px" }}
+          ></div>
+
+          <Button
+            variant="outline-secondary"
+            type="button"
+            className="w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+            onClick={handleCustomGoogleClick}
+            disabled={loading}
+            style={{
+              backgroundColor: "#ffffff",
+              borderColor: "#dadce0",
+              color: "#3c4043",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.43 7.35 24 12 24z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.27 2.57 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+              />
+            </svg>
+
+            <span className="fw-medium">Đăng nhập với Google bug</span>
+          </Button>
+
           <Button
             variant="link"
             onClick={() => {
-              // clearError();
               navigate("/password");
             }}
             className="mt-2 px-0 text-muted text-decoration-none text-center"
-            // disabled={loading}
           >
             Forgot password?
           </Button>
@@ -134,10 +261,8 @@ function Login() {
               variant="link"
               className="p-0"
               onClick={() => {
-                // clearError();
                 navigate("/signup");
               }}
-              // disabled={loading}
             >
               Sign up
             </Button>

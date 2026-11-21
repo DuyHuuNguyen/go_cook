@@ -3,6 +3,7 @@ package com.james.LMS.controller;
 import com.james.LMS.config.SecurityConfig;
 import com.james.LMS.facade.UserFacadeV2;
 import com.james.LMS.request.BecomeChefRequest;
+import com.james.LMS.request.GoogleLoginRequest;
 import com.james.LMS.request.LoginRequest;
 import com.james.LMS.request.RefreshTokenRequest;
 import com.james.LMS.response.BaseResponse;
@@ -32,6 +33,16 @@ public class UserControllerV2 {
   public BaseResponse<Void> login(
       @Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
     return this.userFacade.login(loginRequest, response);
+  }
+
+  @PostMapping({"/login/google", "/google-login"})
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+      summary = "Login with Google ID Token",
+      tags = {"User v2 APIs"})
+  public BaseResponse<Void> loginWithGoogle(
+      @Valid @RequestBody GoogleLoginRequest request, HttpServletResponse response) {
+    return this.userFacade.loginWithGoogle(request, response);
   }
 
   @PostMapping("/refresh-token")

@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useReducer } from "react";
 import {
   login as loginApi,
+  loginWithGoogle as loginWithGoogleApi,
   signup as signupApi,
 } from "../clients/UserClient.tsx";
 import { validEmail, validPassword } from "../validations/ValidationUtils.tsx";
@@ -95,6 +96,31 @@ export function useAuth() {
     }
   };
 
+  const loginWithGoogle = async (idToken: string): Promise<boolean> => {
+    dispatch({ type: "START_LOADING" });
+    try {
+      const data = (await loginWithGoogleApi(idToken)) as AuthApiResponse;
+      if (!data.success) {
+        authStore.setAuthStatus("unauthorized");
+        dispatch({ type: "AUTH_ERROR", payload: "Google login failed" });
+        return false;
+      }
+
+      authStore.setAuthStatus("authorized");
+      dispatch({ type: "AUTH_SUCCESS" });
+      return true;
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.data?.message || error.response?.data?.message
+        : null;
+      dispatch({
+        type: "AUTH_ERROR",
+        payload: message || "Google login failed. Please try again.",
+      });
+      return false;
+    }
+  };
+
   const signup = async (
     username: string,
     email: string,
@@ -155,6 +181,7 @@ export function useAuth() {
 
   return {
     login,
+    loginWithGoogle,
     signup,
     clearError,
     loading: status.loading,

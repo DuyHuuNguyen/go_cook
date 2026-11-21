@@ -1,6 +1,7 @@
 package com.james.LMS.facade;
 
 import com.james.LMS.request.BecomeChefRequest;
+import com.james.LMS.request.GoogleLoginRequest;
 import com.james.LMS.request.LoginRequest;
 import com.james.LMS.request.RefreshTokenRequest;
 import com.james.LMS.response.BaseResponse;
@@ -9,6 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface UserFacadeV2 {
 
   BaseResponse<Void> login(LoginRequest loginRequest, HttpServletResponse response);
+
+  BaseResponse<Void> loginWithGoogle(
+      GoogleLoginRequest googleLoginRequest, HttpServletResponse response);
 
   BaseResponse<Void> refreshToken(
       RefreshTokenRequest refreshTokenRequest, HttpServletResponse response);
